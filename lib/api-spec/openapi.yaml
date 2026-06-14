@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Minha Adega - Personal Wine Cellar Management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: wines
+    description: Wine management
+  - name: consumption
+    description: Consumption history
+  - name: dashboard
+    description: Dashboard statistics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +32,530 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/user:
+    get:
+      operationId: getAuthUser
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Authenticated user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /wines:
+    get:
+      operationId: listWines
+      tags: [wines]
+      summary: List all wines in cellar
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+        - name: region
+          in: query
+          schema:
+            type: string
+        - name: grape
+          in: query
+          schema:
+            type: string
+        - name: vintage
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: minQuantity
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of wines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wine"
+    post:
+      operationId: createWine
+      tags: [wines]
+      summary: Add a wine to the cellar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WineInput"
+      responses:
+        "201":
+          description: Created wine
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wine"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /wines/drink-soon:
+    get:
+      operationId: getWinesDrinkSoon
+      tags: [wines]
+      summary: Get wines approaching or past their ideal drink window
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Wines to drink soon
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WineDrinkSoon"
+
+  /wines/{id}:
+    get:
+      operationId: getWine
+      tags: [wines]
+      summary: Get wine details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Wine details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wine"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateWine
+      tags: [wines]
+      summary: Update wine details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WineUpdate"
+      responses:
+        "200":
+          description: Updated wine
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wine"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteWine
+      tags: [wines]
+      summary: Remove wine from cellar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /wines/{id}/consume:
+    post:
+      operationId: consumeWine
+      tags: [wines]
+      summary: Mark a bottle as consumed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsumptionInput"
+      responses:
+        "201":
+          description: Consumption record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consumption"
+        "400":
+          description: Validation error or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Wine not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /wines/{id}/label:
+    post:
+      operationId: uploadWineLabel
+      tags: [wines]
+      summary: Upload or update label photo URL (AI-ready endpoint)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LabelUpload"
+      responses:
+        "200":
+          description: Wine with updated label
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wine"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /consumption:
+    get:
+      operationId: listConsumption
+      tags: [consumption]
+      summary: List all consumption history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Consumption history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Consumption"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get cellar dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        profileImage:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+
+    Wine:
+      type: object
+      required: [id, name, producer, quantity, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        producer:
+          type: string
+        country:
+          type: ["string", "null"]
+        region:
+          type: ["string", "null"]
+        grape:
+          type: ["string", "null"]
+        vintage:
+          type: ["integer", "null"]
+        pricePaid:
+          type: ["number", "null"]
+        quantity:
+          type: integer
+        cellarLocation:
+          type: ["string", "null"]
+        drinkUntil:
+          type: ["string", "null"]
+          description: Date string YYYY-MM-DD
+        labelPhotoUrl:
+          type: ["string", "null"]
+          description: URL for label photo — AI integration point for automatic field extraction
+        notes:
+          type: ["string", "null"]
+        userId:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    WineInput:
+      type: object
+      required: [name, producer, quantity]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        producer:
+          type: string
+          minLength: 1
+        country:
+          type: string
+        region:
+          type: string
+        grape:
+          type: string
+        vintage:
+          type: integer
+        pricePaid:
+          type: number
+        quantity:
+          type: integer
+          minimum: 0
+        cellarLocation:
+          type: string
+        drinkUntil:
+          type: string
+          description: Date string YYYY-MM-DD
+        labelPhotoUrl:
+          type: string
+        notes:
+          type: string
+
+    WineUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        producer:
+          type: string
+        country:
+          type: string
+        region:
+          type: string
+        grape:
+          type: string
+        vintage:
+          type: integer
+        pricePaid:
+          type: number
+        quantity:
+          type: integer
+          minimum: 0
+        cellarLocation:
+          type: string
+        drinkUntil:
+          type: string
+        labelPhotoUrl:
+          type: string
+        notes:
+          type: string
+
+    WineDrinkSoon:
+      type: object
+      required: [id, name, producer, quantity, urgency]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        producer:
+          type: string
+        country:
+          type: ["string", "null"]
+        vintage:
+          type: ["integer", "null"]
+        quantity:
+          type: integer
+        drinkUntil:
+          type: ["string", "null"]
+        labelPhotoUrl:
+          type: ["string", "null"]
+        daysUntilDeadline:
+          type: ["integer", "null"]
+        urgency:
+          type: string
+          enum: [overdue, critical, soon, ok]
+
+    ConsumptionInput:
+      type: object
+      required: [consumedAt]
+      properties:
+        consumedAt:
+          type: string
+          description: Date string YYYY-MM-DD
+        personalNote:
+          type: string
+        occasion:
+          type: string
+        wouldBuyAgain:
+          type: boolean
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+
+    Consumption:
+      type: object
+      required: [id, wineId, consumedAt, createdAt]
+      properties:
+        id:
+          type: integer
+        wineId:
+          type: integer
+        wineName:
+          type: ["string", "null"]
+        wineProducer:
+          type: ["string", "null"]
+        wineVintage:
+          type: ["integer", "null"]
+        labelPhotoUrl:
+          type: ["string", "null"]
+        consumedAt:
+          type: string
+        personalNote:
+          type: ["string", "null"]
+        occasion:
+          type: ["string", "null"]
+        wouldBuyAgain:
+          type: ["boolean", "null"]
+        quantity:
+          type: integer
+        userId:
+          type: string
+        createdAt:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalBottles, totalWines, estimatedValue, recentConsumptions]
+      properties:
+        totalBottles:
+          type: integer
+        totalWines:
+          type: integer
+        estimatedValue:
+          type: number
+        winesDrinkSoonCount:
+          type: integer
+        recentConsumptions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Consumption"
+        topCountries:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountryStat"
+
+    CountryStat:
+      type: object
+      required: [country, count]
+      properties:
+        country:
+          type: string
+        count:
+          type: integer
+
+    LabelUpload:
+      type: object
+      required: [labelPhotoUrl]
+      properties:
+        labelPhotoUrl:
+          type: string
+          description: URL of the label photo — reserved for AI label reading integration
