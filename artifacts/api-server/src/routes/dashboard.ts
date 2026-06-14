@@ -27,7 +27,7 @@ router.get("/dashboard/stats", async (req, res) => {
     .select({ count: count() })
     .from(winesTable)
     .where(
-      sql`${winesTable.userId} = ${userId} AND ${winesTable.drink_until} IS NOT NULL AND ${winesTable.drink_until} <= CURRENT_DATE + INTERVAL '180 days' AND ${winesTable.quantity} > 0`
+      sql`${winesTable.userId} = ${userId} AND ${winesTable.drinkUntil} IS NOT NULL AND ${winesTable.drinkUntil} <= CURRENT_DATE + INTERVAL '180 days' AND ${winesTable.quantity} > 0`
     );
 
   // Recent consumptions (last 5) with wine info
