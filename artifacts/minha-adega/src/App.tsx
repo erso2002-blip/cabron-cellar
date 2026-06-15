@@ -4,10 +4,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
+import { useState, useEffect } from "react";
 
 import { Shell } from "@/components/layout/Shell";
 import { LoadingSpinner } from "@/components/ui/loading";
 import Login from "@/pages/Login";
+import InviteGate from "@/pages/InviteGate";
 import Dashboard from "@/pages/Dashboard";
 import StockList from "@/pages/StockList";
 import WineDetail from "@/pages/WineDetail";
@@ -16,6 +18,16 @@ import History from "@/pages/History";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
+
+// Check if the invite cookie is valid by probing a protected endpoint
+async function checkInviteAccess(): Promise<boolean> {
+  try {
+    const resp = await fetch("/api/healthz", { credentials: "include" });
+    return resp.status !== 403;
+  } catch {
+    return false;
+  }
+}
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,6 +66,30 @@ function Router() {
 }
 
 function App() {
+  const [inviteGranted, setInviteGranted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkInviteAccess().then(setInviteGranted);
+  }, []);
+
+  if (inviteGranted === null) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-background">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!inviteGranted) {
+    return (
+      <>
+        <Toaster />
+        <Sonner />
+        <InviteGate onGranted={() => setInviteGranted(true)} />
+      </>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
