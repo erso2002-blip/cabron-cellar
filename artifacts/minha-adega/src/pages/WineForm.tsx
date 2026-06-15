@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 
 const formSchema = z.object({
@@ -73,6 +73,9 @@ export default function WineForm() {
   const createMutation = useCreateWine();
   const updateMutation = useUpdateWine();
 
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [drinkUntilHint, setDrinkUntilHint] = useState<string | null>(null);
+
   function handleLabelExtracted(data: LabelData) {
     if (data.name) form.setValue("name", data.name, { shouldValidate: true });
     if (data.producer) form.setValue("producer", data.producer, { shouldValidate: true });
@@ -80,6 +83,40 @@ export default function WineForm() {
     if (data.grape) form.setValue("grape", data.grape);
     if (data.country) form.setValue("country", data.country);
     if (data.region) form.setValue("region", data.region);
+  }
+
+  async function handleSuggestDrinkUntil() {
+    const values = form.getValues();
+    if (!values.name && !values.grape && !values.country) {
+      toast.warning("Preencha ao menos nome, uva ou país para receber uma sugestão");
+      return;
+    }
+    setIsSuggesting(true);
+    setDrinkUntilHint(null);
+    try {
+      const resp = await fetch("/api/wines/suggest-drink-until", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name || undefined,
+          producer: values.producer || undefined,
+          grape: values.grape || undefined,
+          vintage: values.vintage || undefined,
+          country: values.country || undefined,
+          region: values.region || undefined,
+        }),
+      });
+      if (!resp.ok) throw new Error("Falha na sugestão");
+      const data = (await resp.json()) as { suggestedDate: string; reason: string };
+      form.setValue("drinkUntil", data.suggestedDate);
+      setDrinkUntilHint(data.reason);
+      toast.success("Sugestão aplicada!");
+    } catch {
+      toast.error("Não foi possível gerar uma sugestão agora");
+    } finally {
+      setIsSuggesting(false);
+    }
   }
 
   const form = useForm<FormValues>({
@@ -325,11 +362,33 @@ export default function WineForm() {
                   name="drinkUntil"
                   render={({ field }) => (
                     <FormItem className="md:col-span-3">
-                      <FormLabel>Beber até (Data ideal limite)</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Beber até (Data ideal limite)</FormLabel>
+                        <button
+                          type="button"
+                          onClick={handleSuggestDrinkUntil}
+                          disabled={isSuggesting}
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isSuggesting ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3 w-3" />
+                          )}
+                          {isSuggesting ? "Consultando sommelier…" : "Sugerir com IA"}
+                        </button>
+                      </div>
                       <FormControl>
                         <Input type="date" {...field} value={field.value || ""} />
                       </FormControl>
-                      <FormDescription>Quando este vinho começará a perder qualidade?</FormDescription>
+                      {drinkUntilHint ? (
+                        <p className="text-xs text-primary/80 italic flex gap-1">
+                          <Sparkles className="h-3 w-3 mt-0.5 shrink-0" />
+                          {drinkUntilHint}
+                        </p>
+                      ) : (
+                        <FormDescription>Quando este vinho começará a perder qualidade?</FormDescription>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
