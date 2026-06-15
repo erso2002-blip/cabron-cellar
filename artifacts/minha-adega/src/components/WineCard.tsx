@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Wine as WineType } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wine, MapPin, Calendar } from "lucide-react";
+import { Wine, MapPin, Calendar, Warehouse } from "lucide-react";
 
 interface WineCardProps {
   wine: WineType;
@@ -45,6 +45,12 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
                   <span className="px-2 py-0.5 bg-background border border-border rounded-full">{wine.grape}</span>
                 )}
               </div>
+              {wine.cellarLocation && (
+                <div className="flex items-center gap-1 mt-1.5 text-xs text-primary/70 font-medium">
+                  <Warehouse className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{wine.cellarLocation}</span>
+                </div>
+              )}
             </div>
             
             <div className="flex-shrink-0 text-right">
@@ -89,6 +95,12 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
               <span className="bg-background border border-border px-2 py-1 rounded truncate max-w-[100px]">{wine.grape}</span>
             )}
           </div>
+          {wine.cellarLocation && (
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary/70 font-medium">
+              <Warehouse className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{wine.cellarLocation}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>
