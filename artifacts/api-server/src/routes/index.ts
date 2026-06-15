@@ -6,6 +6,7 @@ import consumptionRouter from "./consumption";
 import dashboardRouter from "./dashboard";
 import labelAnalyzerRouter from "./label-analyzer";
 import suggestDrinkUntilRouter from "./suggest-drink-until";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(consumptionRouter);
 router.use(dashboardRouter);
 router.use(labelAnalyzerRouter);
 router.use(suggestDrinkUntilRouter);
+router.use(storageRouter);
 
 export default router;

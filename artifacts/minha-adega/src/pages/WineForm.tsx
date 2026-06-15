@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
-import { ArrowLeft, Save, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Loader2, X } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 
 const formSchema = z.object({
@@ -83,6 +83,11 @@ export default function WineForm() {
     if (data.grape) form.setValue("grape", data.grape);
     if (data.country) form.setValue("country", data.country);
     if (data.region) form.setValue("region", data.region);
+  }
+
+  function handlePhotoUploaded(url: string) {
+    form.setValue("labelPhotoUrl", url);
+    toast.success("Foto do rótulo salva!");
   }
 
   async function handleSuggestDrinkUntil() {
@@ -218,7 +223,10 @@ export default function WineForm() {
 
       {!isEditing && (
         <div className="mb-6">
-          <LabelScanner onExtracted={handleLabelExtracted} />
+          <LabelScanner
+            onExtracted={handleLabelExtracted}
+            onPhotoUploaded={handlePhotoUploaded}
+          />
         </div>
       )}
 
@@ -404,15 +412,37 @@ export default function WineForm() {
                   name="labelPhotoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        Foto do rótulo (URL)
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormDescription className="text-primary/80 italic text-xs">
-                        Integração com leitura automática de rótulo em breve.
-                      </FormDescription>
+                      <FormLabel>Foto do rótulo</FormLabel>
+                      <div className="flex gap-4 items-start">
+                        {field.value && (
+                          <div className="relative shrink-0">
+                            <img
+                              src={field.value}
+                              alt="Foto do rótulo"
+                              className="w-16 h-20 object-cover rounded border shadow-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => field.onChange("")}
+                              className="absolute -top-2 -right-2 bg-background border rounded-full p-0.5 shadow-sm hover:bg-muted"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <FormControl>
+                            <Input
+                              placeholder="https://... (use o scanner acima para preencher automaticamente)"
+                              {...field}
+                              value={field.value || ""}
+                            />
+                          </FormControl>
+                          <FormDescription className="mt-1">
+                            Use o scanner de rótulo acima para salvar a foto automaticamente, ou cole uma URL.
+                          </FormDescription>
+                        </div>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
