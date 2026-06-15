@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useClerk, useUser } from "@clerk/react";
 import { 
   Wine, 
   LayoutDashboard, 
   History, 
   PlusCircle, 
-  LogOut, 
   Menu 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,17 +24,6 @@ const navItems = [
 export function Shell({ children }: ShellProps) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
-  const { signOut } = useClerk();
-  const { user } = useUser();
-
-  const userLabel =
-    user?.fullName ||
-    user?.primaryEmailAddress?.emailAddress ||
-    "Minha conta";
-
-  function handleExit() {
-    signOut({ redirectUrl: import.meta.env.BASE_URL });
-  }
 
   const NavLinks = () => (
     <>
@@ -53,24 +40,6 @@ export function Shell({ children }: ShellProps) {
           </Button>
         </Link>
       ))}
-      <div className="mt-auto pt-2 border-t border-border">
-        <p
-          className="px-3 py-2 text-xs text-muted-foreground truncate"
-          title={userLabel}
-          data-testid="text-user"
-        >
-          {userLabel}
-        </p>
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-destructive"
-          onClick={handleExit}
-          data-testid="nav-logout"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sair
-        </Button>
-      </div>
     </>
   );
 
