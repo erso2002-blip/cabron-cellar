@@ -1,3 +1,3 @@
 - [Auth user shape](auth-user-shape.md) — SessionData.user must use AuthUser fields (name, profileImage), not DB fields (firstName, lastName, profileImageUrl)
-- [Wine insights pricing](wine-insights-pricing.md) — market price = origin retail price converted to USD; resolve origin currency from country in code, never trust the LLM
+- [Wine insights pricing](wine-insights-pricing.md) — market-price feature REMOVED (LLM prices not trustworthy); insights now = harmonization + temp + decanting only
 - [Storage endpoint auth](storage-auth.md) — /storage/uploads/request-url and /storage/objects/* must require auth in the per-user model (template ships them open)

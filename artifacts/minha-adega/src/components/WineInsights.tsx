@@ -1,31 +1,16 @@
 import { useState } from "react";
-import { Sparkles, Loader2, Utensils, TrendingUp, Thermometer, Wind, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Loader2, Utensils, Thermometer, Wind, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Wine } from "@workspace/api-client-react";
 
-interface PriceRange {
-  min: number;
-  max: number;
-  currency: string;
-  currencySymbol: string;
-  market: string;
-}
-
 interface Insights {
   harmonization: Array<{ food: string; note: string }>;
-  price: PriceRange;
-  priceNote: string;
   servingTemp: string;
   decanting: string;
 }
 
 interface Props {
   wine: Wine;
-}
-
-function formatPrice(range: PriceRange) {
-  const fmt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
-  return `${range.currencySymbol} ${fmt.format(range.min)} – ${range.currencySymbol} ${fmt.format(range.max)}`;
 }
 
 const FOOD_EMOJIS: Record<string, string> = {
@@ -88,7 +73,7 @@ export function WineInsights({ wine }: Props) {
             Insights do Sommelier
           </span>
           <span className="text-xs text-muted-foreground">
-            — harmonização, temperatura e preços
+            — harmonização, temperatura e decantação
           </span>
         </div>
         {loading ? (
@@ -133,30 +118,6 @@ export function WineInsights({ wine }: Props) {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Preço */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Preço Médio na Origem
-              </h4>
-            </div>
-            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
-              <div className="text-xs text-primary/70 uppercase tracking-wider mb-1">
-                {insights.price.market} · em dólar
-              </div>
-              <div className="text-xl font-mono font-bold text-primary">
-                {formatPrice(insights.price)}
-              </div>
-              <div className="text-xs text-primary/60 mt-1">
-                {insights.price.currency}
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2 italic">
-              * {insights.priceNote}
-            </p>
           </div>
 
           {/* Serviço */}
