@@ -4,6 +4,7 @@ import authRouter from "./auth";
 import winesRouter from "./wines";
 import consumptionRouter from "./consumption";
 import dashboardRouter from "./dashboard";
+import labelAnalyzerRouter from "./label-analyzer";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(authRouter);
 router.use(winesRouter);
 router.use(consumptionRouter);
 router.use(dashboardRouter);
+router.use(labelAnalyzerRouter);
 
 export default router;

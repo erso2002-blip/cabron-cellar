@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
 import { ArrowLeft, Save } from "lucide-react";
+import LabelScanner from "@/components/LabelScanner";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -44,6 +45,16 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+interface LabelData {
+  name: string | null;
+  producer: string | null;
+  vintage: number | null;
+  grape: string | null;
+  country: string | null;
+  region: string | null;
+  alcoholContent: string | null;
+}
+
 export default function WineForm() {
   const params = useParams();
   const [, setLocation] = useLocation();
@@ -61,6 +72,15 @@ export default function WineForm() {
 
   const createMutation = useCreateWine();
   const updateMutation = useUpdateWine();
+
+  function handleLabelExtracted(data: LabelData) {
+    if (data.name) form.setValue("name", data.name, { shouldValidate: true });
+    if (data.producer) form.setValue("producer", data.producer, { shouldValidate: true });
+    if (data.vintage) form.setValue("vintage", data.vintage, { shouldValidate: true });
+    if (data.grape) form.setValue("grape", data.grape);
+    if (data.country) form.setValue("country", data.country);
+    if (data.region) form.setValue("region", data.region);
+  }
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -158,6 +178,12 @@ export default function WineForm() {
           </h2>
         </div>
       </div>
+
+      {!isEditing && (
+        <div className="mb-6">
+          <LabelScanner onExtracted={handleLabelExtracted} />
+        </div>
+      )}
 
       <div className="bg-card border shadow-sm rounded-xl p-6 md:p-8">
         <Form {...form}>

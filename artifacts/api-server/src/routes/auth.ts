@@ -1,6 +1,5 @@
 import * as oidc from "openid-client";
 import { Router, type IRouter, type Request, type Response } from "express";
-import { z } from "zod/v4";
 import { db, usersTable } from "@workspace/db";
 import {
   clearSession,
@@ -84,8 +83,8 @@ router.get("/auth/user", (req: Request, res: Response) => {
   const user = req.user!;
   return res.json({
     id: user.id,
-    name: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "User",
-    profileImage: user.profileImageUrl,
+    name: user.name,
+    profileImage: user.profileImage,
     email: user.email,
   });
 });
@@ -170,10 +169,9 @@ router.get("/callback", async (req: Request, res: Response) => {
   const sessionData: SessionData = {
     user: {
       id: dbUser.id,
+      name: [dbUser.firstName, dbUser.lastName].filter(Boolean).join(" ") || dbUser.email || "User",
       email: dbUser.email,
-      firstName: dbUser.firstName,
-      lastName: dbUser.lastName,
-      profileImageUrl: dbUser.profileImageUrl,
+      profileImage: dbUser.profileImageUrl,
     },
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token,

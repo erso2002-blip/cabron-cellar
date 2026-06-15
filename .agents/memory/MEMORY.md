@@ -1,0 +1,1 @@
+- [Auth user shape](auth-user-shape.md) — SessionData.user must use AuthUser fields (name, profileImage), not DB fields (firstName, lastName, profileImageUrl)
