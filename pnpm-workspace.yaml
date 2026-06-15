@@ -32,6 +32,12 @@ minimumReleaseAgeExclude:
   # These are published by Replit and trusted — the supply-chain attack vector
   # this setting guards against does not apply to our own packages.
   - '@replit/*'
+  # Temporary launch unblocker: Radix UI published a coordinated package release
+  # on 2026-06-15, and the committed lockfile resolved those versions.
+  - '@radix-ui/*'
+  # Temporary launch unblockers for transitive dependencies resolved on 2026-06-15.
+  - body-parser
+  - fast-xml-parser
   - stripe-replit-sync
 
 packages:
