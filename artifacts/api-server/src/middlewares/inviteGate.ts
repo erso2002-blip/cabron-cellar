@@ -51,17 +51,18 @@ export function inviteGateMiddleware(
 }
 
 export function setInviteCookie(req: Request, res: Response) {
-  const inviteCode = process.env.INVITE_CODE;
+  const inviteCode = (process.env.INVITE_CODE ?? "").trim();
   if (!inviteCode) return res.json({ ok: true });
 
-  const sessionSecret = process.env.SESSION_SECRET || inviteCode;
-  const provided = (req.body as { code?: string }).code ?? "";
+  const sessionSecret = (process.env.SESSION_SECRET ?? inviteCode).trim();
+  const provided = ((req.body as { code?: string }).code ?? "").trim();
 
-  // Constant-time compare
-  const expected = Buffer.from(inviteCode);
-  const actual = Buffer.from(provided);
+  // Constant-time compare (pad to same length to avoid length oracle)
+  const expected = Buffer.from(inviteCode, "utf8");
+  const actual = Buffer.alloc(expected.length);
+  Buffer.from(provided, "utf8").copy(actual);
   const match =
-    expected.length === actual.length &&
+    provided.length === inviteCode.length &&
     crypto.timingSafeEqual(expected, actual);
 
   if (!match) {
