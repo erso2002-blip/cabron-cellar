@@ -1,18 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Minha Adega</title>
-    <meta name="description" content="Minha Adega — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="Gestão de adega pessoal de vinhos — cadastro, estoque, recomendações e histórico." />
     <meta name="robots" content="index, follow" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#6B0F1A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Minha Adega" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Splash screens iOS (gerados a partir do ícone) -->
+    <meta name="apple-touch-fullscreen" content="yes" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content="Minha Adega" />
-    <meta property="og:description" content="Minha Adega — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="Gestão de adega pessoal de vinhos." />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Minha Adega" />
-    <meta name="twitter:description" content="Minha Adega — built on Replit. Update this description to reflect the app." />
+    <meta property="og:image" content="/icons/icon-512.png" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
