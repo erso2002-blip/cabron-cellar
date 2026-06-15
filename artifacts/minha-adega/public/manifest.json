@@ -1,7 +1,7 @@
 {
-  "name": "Minha Adega",
-  "short_name": "Adega",
-  "description": "Gestão de adega pessoal de vinhos",
+  "name": "Cabron Cellar",
+  "short_name": "Cellar",
+  "description": "Personal wine cellar management — catalog, stock, pairings and tasting history",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -33,16 +33,16 @@
   "screenshots": [],
   "shortcuts": [
     {
-      "name": "Adicionar Vinho",
-      "short_name": "Adicionar",
-      "description": "Cadastrar um novo vinho na adega",
+      "name": "Add Wine",
+      "short_name": "Add",
+      "description": "Add a new wine to the cellar",
       "url": "/wines/new",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Meu Estoque",
-      "short_name": "Estoque",
-      "description": "Ver vinhos em estoque",
+      "name": "My Cellar",
+      "short_name": "Cellar",
+      "description": "Browse wine stock",
       "url": "/wines",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }

@@ -12,8 +12,8 @@ export default function Login() {
         <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-6">
           <Wine className="w-8 h-8 text-primary-foreground" />
         </div>
-        <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Minha Adega</h1>
-        <p className="text-muted-foreground mb-8 text-lg font-serif italic">Seu acervo pessoal de vinhos.</p>
+        <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Cabron Cellar</h1>
+        <p className="text-muted-foreground mb-8 text-lg font-serif italic">Your personal wine cellar.</p>
         
         <Button 
           size="lg" 

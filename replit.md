@@ -1,6 +1,6 @@
-# Minha Adega
+# Cabron Cellar
 
-Gestão de adega pessoal de vinhos — cadastro, estoque, recomendações de consumo e histórico.
+Personal wine cellar management — catalog, stock, AI pairings, consumption history and insights.
 
 ## Run & Operate
 

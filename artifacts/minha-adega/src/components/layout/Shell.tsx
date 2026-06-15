@@ -62,7 +62,7 @@ export function Shell({ children }: ShellProps) {
         <div className="mb-8 px-4">
           <h1 className="text-2xl font-serif font-bold text-primary flex items-center gap-2">
             <Wine className="h-6 w-6" />
-            Minha Adega
+            Cabron Cellar
           </h1>
         </div>
         <nav className="flex-1 flex flex-col">
@@ -75,7 +75,7 @@ export function Shell({ children }: ShellProps) {
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
           <h1 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
             <Wine className="h-5 w-5" />
-            Minha Adega
+            Cabron Cellar
           </h1>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
