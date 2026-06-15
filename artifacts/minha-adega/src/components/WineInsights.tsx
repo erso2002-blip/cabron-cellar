@@ -13,16 +13,10 @@ interface PriceRange {
 
 interface Insights {
   harmonization: Array<{ food: string; note: string }>;
-  priceOrigin: PriceRange | null;
-  priceLocal: PriceRange;
+  price: PriceRange;
   priceNote: string;
   servingTemp: string;
   decanting: string;
-  exchangeRate?: {
-    from: string;
-    fromSymbol: string;
-    rate: number;
-  } | null;
 }
 
 interface Props {
@@ -141,50 +135,26 @@ export function WineInsights({ wine }: Props) {
             </div>
           </div>
 
-          {/* Preços */}
+          {/* Preço */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="h-4 w-4 text-primary" />
               <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Preço Médio no Mercado
+                Preço Médio na Origem
               </h4>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {insights.priceOrigin && (
-                <div className="p-4 rounded-lg border border-border bg-secondary/30">
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                    {insights.priceOrigin.market}
-                  </div>
-                  <div className="text-xl font-mono font-bold text-foreground">
-                    {formatPrice(insights.priceOrigin)}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {insights.priceOrigin.currency}
-                  </div>
-                </div>
-              )}
-              <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
-                <div className="text-xs text-primary/70 uppercase tracking-wider mb-1">
-                  {insights.priceLocal.market}
-                </div>
-                <div className="text-xl font-mono font-bold text-primary">
-                  {formatPrice(insights.priceLocal)}
-                </div>
-                <div className="text-xs text-primary/60 mt-1">
-                  {insights.priceLocal.currency}
-                </div>
+            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+              <div className="text-xs text-primary/70 uppercase tracking-wider mb-1">
+                {insights.price.market} · em dólar
+              </div>
+              <div className="text-xl font-mono font-bold text-primary">
+                {formatPrice(insights.price)}
+              </div>
+              <div className="text-xs text-primary/60 mt-1">
+                {insights.price.currency}
               </div>
             </div>
-            {insights.exchangeRate && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Câmbio atual: {insights.exchangeRate.fromSymbol} 1 ={" "}
-                {new Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(insights.exchangeRate.rate)}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground mt-1 italic">
+            <p className="text-xs text-muted-foreground mt-2 italic">
               * {insights.priceNote}
             </p>
           </div>
