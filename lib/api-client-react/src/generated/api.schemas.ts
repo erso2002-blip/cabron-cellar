@@ -40,6 +40,21 @@ export interface Wine {
   /** @nullable */
   cellarLocation?: string | null;
   /**
+     * Local físico (ex. casa, escritório)
+     * @nullable
+     */
+  locationPlace?: string | null;
+  /**
+     * Nome da adega / armário
+     * @nullable
+     */
+  cellarName?: string | null;
+  /**
+     * Prateleira / posição
+     * @nullable
+     */
+  shelf?: string | null;
+  /**
      * Date string YYYY-MM-DD
      * @nullable
      */
@@ -69,6 +84,9 @@ export interface WineInput {
   /** @minimum 0 */
   quantity: number;
   cellarLocation?: string;
+  locationPlace?: string;
+  cellarName?: string;
+  shelf?: string;
   /** Date string YYYY-MM-DD */
   drinkUntil?: string;
   labelPhotoUrl?: string;
@@ -87,6 +105,9 @@ export interface WineUpdate {
   /** @minimum 0 */
   quantity?: number;
   cellarLocation?: string;
+  locationPlace?: string;
+  cellarName?: string;
+  shelf?: string;
   drinkUntil?: string;
   labelPhotoUrl?: string;
   notes?: string;

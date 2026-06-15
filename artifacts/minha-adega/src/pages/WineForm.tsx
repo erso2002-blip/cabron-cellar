@@ -38,6 +38,9 @@ const formSchema = z.object({
   pricePaid: z.coerce.number().optional().nullable(),
   quantity: z.coerce.number().min(0, "Quantidade inválida"),
   cellarLocation: z.string().optional(),
+  locationPlace: z.string().optional(),
+  cellarName: z.string().optional(),
+  shelf: z.string().optional(),
   drinkUntil: z.string().optional().nullable(),
   labelPhotoUrl: z.string().optional().nullable(),
   notes: z.string().optional(),
@@ -136,6 +139,9 @@ export default function WineForm() {
       pricePaid: null,
       quantity: 1,
       cellarLocation: "",
+      locationPlace: "",
+      cellarName: "",
+      shelf: "",
       drinkUntil: null,
       labelPhotoUrl: "",
       notes: "",
@@ -154,6 +160,9 @@ export default function WineForm() {
         pricePaid: wine.pricePaid || null,
         quantity: wine.quantity,
         cellarLocation: wine.cellarLocation || "",
+        locationPlace: wine.locationPlace || "",
+        cellarName: wine.cellarName || "",
+        shelf: wine.shelf || "",
         drinkUntil: wine.drinkUntil || null,
         labelPhotoUrl: wine.labelPhotoUrl || "",
         notes: wine.notes || "",
@@ -354,19 +363,6 @@ export default function WineForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="cellarLocation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Localização na Adega</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Prateleira 2A" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="drinkUntil"
                   render={({ field }) => (
                     <FormItem className="md:col-span-3">
@@ -397,6 +393,51 @@ export default function WineForm() {
                       ) : (
                         <FormDescription>Quando este vinho começará a perder qualidade?</FormDescription>
                       )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-2">
+              <h3 className="font-serif text-lg font-bold border-b pb-2">Localização</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField
+                  control={form.control}
+                  name="locationPlace"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Local</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Casa, Escritório" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cellarName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adega</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Adega Principal" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="shelf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prateleira</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Prateleira 2A" {...field} value={field.value || ""} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

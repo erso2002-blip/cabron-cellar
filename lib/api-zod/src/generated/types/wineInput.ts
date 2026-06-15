@@ -19,6 +19,9 @@ export interface WineInput {
   /** @minimum 0 */
   quantity: number;
   cellarLocation?: string;
+  locationPlace?: string;
+  cellarName?: string;
+  shelf?: string;
   /** Date string YYYY-MM-DD */
   drinkUntil?: string;
   labelPhotoUrl?: string;

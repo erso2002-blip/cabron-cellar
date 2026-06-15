@@ -170,14 +170,20 @@ export default function WineDetail() {
               </div>
             )}
 
-            {wine.cellarLocation && (
-              <div className="space-y-1">
-                <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
-                  <Thermometer className="w-3.5 h-3.5" /> Localização
+            {(() => {
+              const location =
+                [wine.locationPlace, wine.cellarName, wine.shelf]
+                  .filter(Boolean)
+                  .join(" · ") || wine.cellarLocation;
+              return location ? (
+                <div className="space-y-1">
+                  <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
+                    <Thermometer className="w-3.5 h-3.5" /> Localização
+                  </div>
+                  <div className="font-medium font-mono bg-secondary/50 px-2 py-0.5 rounded inline-block">{location}</div>
                 </div>
-                <div className="font-medium font-mono bg-secondary/50 px-2 py-0.5 rounded inline-block">{wine.cellarLocation}</div>
-              </div>
-            )}
+              ) : null;
+            })()}
 
             {wine.drinkUntil && (
               <div className="space-y-1">

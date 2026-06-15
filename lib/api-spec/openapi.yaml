@@ -427,6 +427,15 @@ components:
           type: integer
         cellarLocation:
           type: ["string", "null"]
+        locationPlace:
+          type: ["string", "null"]
+          description: Local físico (ex. casa, escritório)
+        cellarName:
+          type: ["string", "null"]
+          description: Nome da adega / armário
+        shelf:
+          type: ["string", "null"]
+          description: Prateleira / posição
         drinkUntil:
           type: ["string", "null"]
           description: Date string YYYY-MM-DD
@@ -467,6 +476,12 @@ components:
           minimum: 0
         cellarLocation:
           type: string
+        locationPlace:
+          type: string
+        cellarName:
+          type: string
+        shelf:
+          type: string
         drinkUntil:
           type: string
           description: Date string YYYY-MM-DD
@@ -497,6 +512,12 @@ components:
           type: integer
           minimum: 0
         cellarLocation:
+          type: string
+        locationPlace:
+          type: string
+        cellarName:
+          type: string
+        shelf:
           type: string
         drinkUntil:
           type: string

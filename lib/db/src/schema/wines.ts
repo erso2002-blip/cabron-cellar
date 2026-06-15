@@ -22,6 +22,9 @@ export const winesTable = pgTable("wines", {
   pricePaid: numeric("price_paid", { precision: 10, scale: 2 }),
   quantity: integer("quantity").notNull().default(1),
   cellarLocation: text("cellar_location"),
+  locationPlace: text("location_place"),
+  cellarName: text("cellar_name"),
+  shelf: text("shelf"),
   drinkUntil: date("drink_until", { mode: "string" }),
   // AI-ready field: will be the source for automatic label reading in future integration
   labelPhotoUrl: text("label_photo_url"),

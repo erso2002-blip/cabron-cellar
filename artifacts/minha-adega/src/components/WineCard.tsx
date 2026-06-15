@@ -10,6 +10,11 @@ interface WineCardProps {
 
 export function WineCard({ wine, viewMode }: WineCardProps) {
   const isList = viewMode === "list";
+
+  const location =
+    [wine.locationPlace, wine.cellarName, wine.shelf]
+      .filter(Boolean)
+      .join(" · ") || wine.cellarLocation;
   
   if (isList) {
     return (
@@ -45,10 +50,10 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
                   <span className="px-2 py-0.5 bg-background border border-border rounded-full">{wine.grape}</span>
                 )}
               </div>
-              {wine.cellarLocation && (
+              {location && (
                 <div className="flex items-center gap-1 mt-1.5 text-xs text-primary/70 font-medium">
                   <Warehouse className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate">{wine.cellarLocation}</span>
+                  <span className="truncate">{location}</span>
                 </div>
               )}
             </div>
@@ -95,10 +100,10 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
               <span className="bg-background border border-border px-2 py-1 rounded truncate max-w-[100px]">{wine.grape}</span>
             )}
           </div>
-          {wine.cellarLocation && (
+          {location && (
             <div className="flex items-center gap-1 mt-2 text-xs text-primary/70 font-medium">
               <Warehouse className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{wine.cellarLocation}</span>
+              <span className="truncate">{location}</span>
             </div>
           )}
         </CardContent>

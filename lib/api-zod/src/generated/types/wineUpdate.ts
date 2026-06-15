@@ -18,6 +18,9 @@ export interface WineUpdate {
   /** @minimum 0 */
   quantity?: number;
   cellarLocation?: string;
+  locationPlace?: string;
+  cellarName?: string;
+  shelf?: string;
   drinkUntil?: string;
   labelPhotoUrl?: string;
   notes?: string;

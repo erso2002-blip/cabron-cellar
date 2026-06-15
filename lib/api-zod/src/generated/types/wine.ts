@@ -24,6 +24,21 @@ export interface Wine {
   /** @nullable */
   cellarLocation?: string | null;
   /**
+     * Local físico (ex. casa, escritório)
+     * @nullable
+     */
+  locationPlace?: string | null;
+  /**
+     * Nome da adega / armário
+     * @nullable
+     */
+  cellarName?: string | null;
+  /**
+     * Prateleira / posição
+     * @nullable
+     */
+  shelf?: string | null;
+  /**
      * Date string YYYY-MM-DD
      * @nullable
      */
