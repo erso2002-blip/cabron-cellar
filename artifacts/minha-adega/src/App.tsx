@@ -282,7 +282,7 @@ async function checkInviteAccess(): Promise<boolean> {
     const resp = await fetch(`${import.meta.env.BASE_URL}api/healthz`, {
       credentials: "include",
     });
-    return resp.status !== 403;
+    return resp.ok;
   } catch {
     return false;
   }

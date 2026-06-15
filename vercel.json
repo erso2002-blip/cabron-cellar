@@ -1,0 +1,12 @@
+{
+  "framework": "vite",
+  "installCommand": "corepack enable && pnpm install --frozen-lockfile",
+  "buildCommand": "corepack enable && pnpm --filter @workspace/minha-adega build",
+  "outputDirectory": "artifacts/minha-adega/dist/public",
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
