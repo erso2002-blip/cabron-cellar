@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@workspace/replit-auth-web";
 import { 
   Wine, 
   LayoutDashboard, 
@@ -25,8 +24,18 @@ const navItems = [
 
 export function Shell({ children }: ShellProps) {
   const [location] = useLocation();
-  const { logout, user } = useAuth();
   const [open, setOpen] = useState(false);
+
+  async function handleExit() {
+    try {
+      await fetch("/api/invite/revoke", {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      window.location.reload();
+    }
+  }
 
   const NavLinks = () => (
     <>
@@ -46,7 +55,7 @@ export function Shell({ children }: ShellProps) {
       <Button 
         variant="ghost" 
         className="w-full justify-start mt-auto text-muted-foreground hover:text-destructive" 
-        onClick={logout}
+        onClick={handleExit}
         data-testid="nav-logout"
       >
         <LogOut className="mr-2 h-4 w-4" />

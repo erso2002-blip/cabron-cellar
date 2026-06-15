@@ -79,3 +79,10 @@ export function setInviteCookie(req: Request, res: Response) {
   });
   return res.json({ ok: true });
 }
+
+export function clearInviteCookie(_req: Request, res: Response) {
+  res.clearCookie(INVITE_COOKIE, { path: "/" });
+  // Also clear any legacy Replit OAuth session cookie so re-entry starts clean.
+  res.clearCookie("sid", { path: "/" });
+  return res.json({ ok: true });
+}
