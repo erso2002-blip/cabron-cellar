@@ -18,6 +18,11 @@ interface Insights {
   priceNote: string;
   servingTemp: string;
   decanting: string;
+  exchangeRate?: {
+    from: string;
+    fromSymbol: string;
+    rate: number;
+  } | null;
 }
 
 interface Props {
@@ -170,7 +175,16 @@ export function WineInsights({ wine }: Props) {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 italic">
+            {insights.exchangeRate && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Câmbio atual: {insights.exchangeRate.fromSymbol} 1 ={" "}
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(insights.exchangeRate.rate)}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1 italic">
               * {insights.priceNote}
             </p>
           </div>

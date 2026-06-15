@@ -89,12 +89,58 @@ Rules:
       return res.status(422).json({ error: "Could not generate insights" });
     }
 
+    // Convert origin price to BRL using a real, current exchange rate so the
+    // câmbio between the two values is consistent (the model estimates each
+    // independently otherwise, producing nonsensical implied rates).
+    if (parsed.priceOrigin && parsed.priceOrigin.currency !== "BRL") {
+      const rate = await getExchangeRate(parsed.priceOrigin.currency, req);
+      if (rate) {
+        parsed.priceLocal = {
+          min: Math.round(parsed.priceOrigin.min * rate),
+          max: Math.round(parsed.priceOrigin.max * rate),
+          currency: "BRL",
+          currencySymbol: "R$",
+          market: "Equivalente em Real",
+        };
+        parsed.exchangeRate = {
+          from: parsed.priceOrigin.currency,
+          fromSymbol: parsed.priceOrigin.currencySymbol,
+          rate,
+        };
+      }
+    }
+
     return res.json(parsed);
   } catch (err) {
     req.log.error({ err }, "OpenAI wine insights error");
     return res.status(500).json({ error: "Insights generation failed" });
   }
 });
+
+// Fetch current FX rate from origin currency to BRL (free API, no key required)
+async function getExchangeRate(
+  from: string,
+  req: { log: { warn: (obj: unknown, msg?: string) => void } },
+): Promise<number | null> {
+  const code = (from ?? "").trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(code)) return null;
+  if (code === "BRL") return 1;
+  try {
+    const resp = await fetch(`https://open.er-api.com/v6/latest/${code}`, {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as {
+      result?: string;
+      rates?: Record<string, number>;
+    };
+    const rate = data?.rates?.BRL;
+    return data.result === "success" && typeof rate === "number" ? rate : null;
+  } catch (err) {
+    req.log.warn({ err, from: code }, "FX rate fetch failed");
+    return null;
+  }
+}
 
 interface PriceRange {
   min: number;
@@ -111,6 +157,11 @@ interface WineInsights {
   priceNote: string;
   servingTemp: string;
   decanting: string;
+  exchangeRate?: {
+    from: string;
+    fromSymbol: string;
+    rate: number;
+  } | null;
 }
 
 export default router;

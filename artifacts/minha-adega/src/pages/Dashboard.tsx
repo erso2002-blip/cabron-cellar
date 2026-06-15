@@ -1,8 +1,9 @@
 import { useGetDashboardStats, useGetWinesDrinkSoon } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { PageSkeleton } from "@/components/ui/loading";
 import { Link } from "wouter";
-import { Wine, TrendingUp, AlertTriangle, Clock, MapPin } from "lucide-react";
+import { Wine, TrendingUp, AlertTriangle, Clock, MapPin, Plus } from "lucide-react";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
 
 export default function Dashboard() {
@@ -17,11 +18,17 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-4">
         <div>
           <h2 className="text-3xl font-serif font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground mt-1 font-serif italic">Uma visão geral do seu acervo.</p>
         </div>
+        <Link href="/wines/new">
+          <Button size="lg" className="shrink-0">
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar Garrafa
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
