@@ -7,6 +7,7 @@ import dashboardRouter from "./dashboard";
 import labelAnalyzerRouter from "./label-analyzer";
 import suggestDrinkUntilRouter from "./suggest-drink-until";
 import storageRouter from "./storage";
+import wineInsightsRouter from "./wine-insights";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(dashboardRouter);
 router.use(labelAnalyzerRouter);
 router.use(suggestDrinkUntilRouter);
 router.use(storageRouter);
+router.use(wineInsightsRouter);
 
 export default router;

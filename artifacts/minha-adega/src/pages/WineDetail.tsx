@@ -33,6 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ConsumeModal } from "@/components/ConsumeModal";
+import { WineInsights } from "@/components/WineInsights";
 
 export default function WineDetail() {
   const params = useParams();
@@ -198,6 +199,8 @@ export default function WineDetail() {
               </p>
             </div>
           )}
+
+          <WineInsights wine={wine} />
         </div>
       </div>
     </div>
