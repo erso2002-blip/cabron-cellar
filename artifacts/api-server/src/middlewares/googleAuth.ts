@@ -18,6 +18,10 @@ const googleClientId =
 
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 
+export function isGoogleSsoConfigured() {
+  return Boolean(googleClient && googleClientId);
+}
+
 function getBearerToken(req: Request) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) return null;
@@ -144,7 +148,7 @@ export async function googleAuthMiddleware(
 export function getGoogleSsoConfig() {
   return {
     provider: "google",
-    configured: Boolean(googleClient && googleClientId),
+    configured: isGoogleSsoConfigured(),
     clientId: process.env.VITE_GOOGLE_CLIENT_ID ?? googleClientId,
   };
 }

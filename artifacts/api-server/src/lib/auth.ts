@@ -1,5 +1,13 @@
 import type { Request } from "express";
 import type { PublicUser } from "../types/express.js";
+import { isGoogleSsoConfigured } from "../middlewares/googleAuth.js";
+
+const LEGACY_PUBLIC_USER: PublicUser = {
+  id: "public-cabron-cellar",
+  name: "MyCellar",
+  email: null,
+  profileImage: null,
+};
 
 type PublicAuthRequest = Request & {
   user?: PublicUser;
@@ -17,7 +25,7 @@ export function attachPublicUser(req: Request, user: PublicUser) {
 export function getAuthenticatedUser(req: Request): PublicUser | null {
   const authReq = req as PublicAuthRequest;
   if (!authReq.isAuthenticated?.() || !authReq.user) {
-    return null;
+    return isGoogleSsoConfigured() ? null : LEGACY_PUBLIC_USER;
   }
 
   return authReq.user;

@@ -26,7 +26,8 @@ const navItems = [
 export function Shell({ children }: ShellProps) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { config, user, signOut } = useAuth();
+  const ssoEnabled = config?.configured ?? false;
 
   const NavLinks = () => (
     <>
@@ -60,13 +61,17 @@ export function Shell({ children }: ShellProps) {
           <NavLinks />
         </nav>
         <div className="space-y-3 px-4 text-xs text-muted-foreground">
-          <div>
-            <div className="truncate font-medium text-foreground">{user?.name}</div>
-            <div className="truncate">{user?.email}</div>
-          </div>
-          <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
-            Sair
-          </Button>
+          {ssoEnabled ? (
+            <>
+              <div>
+                <div className="truncate font-medium text-foreground">{user?.name}</div>
+                <div className="truncate">{user?.email}</div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
+                Sair
+              </Button>
+            </>
+          ) : null}
           <div>v{APP_VERSION}</div>
         </div>
       </aside>
@@ -90,13 +95,17 @@ export function Shell({ children }: ShellProps) {
                 <NavLinks />
               </nav>
               <div className="space-y-3 text-xs text-muted-foreground">
-                <div>
-                  <div className="truncate font-medium text-foreground">{user?.name}</div>
-                  <div className="truncate">{user?.email}</div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
-                  Sair
-                </Button>
+                {ssoEnabled ? (
+                  <>
+                    <div>
+                      <div className="truncate font-medium text-foreground">{user?.name}</div>
+                      <div className="truncate">{user?.email}</div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
+                      Sair
+                    </Button>
+                  </>
+                ) : null}
                 <div>v{APP_VERSION}</div>
               </div>
             </SheetContent>

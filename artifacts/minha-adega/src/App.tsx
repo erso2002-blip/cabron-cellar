@@ -18,9 +18,24 @@ import NotFound from "@/pages/not-found";
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function PublicApp() {
-  const { user, loading } = useAuth();
+  const { config, user, loading } = useAuth();
 
   if (loading) return <LoginScreen />;
+  if (config && !config.configured) {
+    return (
+      <Shell>
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/wines" component={StockList} />
+          <Route path="/wines/new" component={WineForm} />
+          <Route path="/wines/:id/edit" component={WineForm} />
+          <Route path="/wines/:id" component={WineDetail} />
+          <Route path="/history" component={History} />
+          <Route component={NotFound} />
+        </Switch>
+      </Shell>
+    );
+  }
   if (!user) return <LoginScreen />;
 
   return (
