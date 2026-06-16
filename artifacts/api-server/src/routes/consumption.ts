@@ -2,15 +2,17 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { consumptionTable, winesTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
 // GET /consumption
 router.get("/consumption", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const limit = parseInt((req.query.limit as string) || "20");
   const offset = parseInt((req.query.offset as string) || "0");
 

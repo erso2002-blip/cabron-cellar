@@ -3,17 +3,19 @@ import OpenAI from "openai";
 import { db } from "@workspace/db";
 import { winesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // POST /wines/:id/insights
 router.post("/wines/:id/insights", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const userId = req.user!.id;
+  const userId = user.id;
   const id = parseInt(req.params.id);
 
   const [wine] = await db

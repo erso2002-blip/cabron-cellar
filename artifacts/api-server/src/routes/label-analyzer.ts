@@ -1,5 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ interface LabelData {
 
 // POST /wines/analyze-label
 router.post("/wines/analyze-label", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 

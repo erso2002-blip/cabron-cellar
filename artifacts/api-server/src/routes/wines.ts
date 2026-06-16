@@ -8,15 +8,17 @@ import {
   ConsumeWineBody,
   UploadWineLabelBody,
 } from "@workspace/api-zod";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
 // GET /wines
 router.get("/wines", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const { search, country, region, grape, vintage, minQuantity } = req.query as Record<string, string>;
 
   const conditions = [eq(winesTable.userId, userId)];
@@ -52,10 +54,11 @@ router.get("/wines", async (req, res) => {
 
 // POST /wines
 router.post("/wines", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
 
   const parsed = CreateWineBody.safeParse(req.body);
   if (!parsed.success) {
@@ -80,10 +83,11 @@ router.post("/wines", async (req, res) => {
 
 // GET /wines/drink-soon — must be before /wines/:id
 router.get("/wines/drink-soon", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const limit = parseInt((req.query.limit as string) || "10");
 
   const wines = await db
@@ -130,10 +134,11 @@ router.get("/wines/drink-soon", async (req, res) => {
 
 // GET /wines/:id
 router.get("/wines/:id", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const id = parseInt(req.params.id);
 
   const [wine] = await db
@@ -151,10 +156,11 @@ router.get("/wines/:id", async (req, res) => {
 
 // PATCH /wines/:id
 router.patch("/wines/:id", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const id = parseInt(req.params.id);
 
   const parsed = UpdateWineBody.safeParse(req.body);
@@ -184,10 +190,11 @@ router.patch("/wines/:id", async (req, res) => {
 
 // DELETE /wines/:id
 router.delete("/wines/:id", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const id = parseInt(req.params.id);
 
   const [wine] = await db
@@ -202,10 +209,11 @@ router.delete("/wines/:id", async (req, res) => {
 
 // POST /wines/:id/consume
 router.post("/wines/:id/consume", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const wineId = parseInt(req.params.id);
 
   const parsed = ConsumeWineBody.safeParse(req.body);
@@ -254,10 +262,11 @@ router.post("/wines/:id/consume", async (req, res) => {
 
 // POST /wines/:id/label
 router.post("/wines/:id/label", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
   const id = parseInt(req.params.id);
 
   const parsed = UploadWineLabelBody.safeParse(req.body);

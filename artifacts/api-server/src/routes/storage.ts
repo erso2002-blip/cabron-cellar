@@ -4,6 +4,7 @@ import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
+import { getAuthenticatedUser } from "../lib/auth.js";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage.js";
 
 const router: IRouter = Router();
@@ -17,7 +18,7 @@ const objectStorageService = new ObjectStorageService();
  * Then uploads the file directly to the returned presigned URL.
  */
 router.post("/storage/uploads/request-url", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  if (!getAuthenticatedUser(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -95,7 +96,7 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
   // paths are unguessable random UUIDs and each user only ever receives their
   // own wines' labelPhotoUrl, so authentication is sufficient to keep one
   // user's uploads out of another's reach.
-  if (!req.isAuthenticated()) {
+  if (!getAuthenticatedUser(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

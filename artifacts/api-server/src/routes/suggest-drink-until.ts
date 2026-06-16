@@ -1,5 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const openai = new OpenAI({
 
 // POST /wines/suggest-drink-until
 router.post("/wines/suggest-drink-until", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 

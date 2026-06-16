@@ -2,15 +2,17 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { winesTable, consumptionTable } from "@workspace/db";
 import { eq, sum, count, sql, desc } from "drizzle-orm";
+import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
 // GET /dashboard/stats
 router.get("/dashboard/stats", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const userId = req.user!.id;
+  const userId = user.id;
 
   // Total bottles and wines
   const [totals] = await db

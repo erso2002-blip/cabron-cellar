@@ -1,5 +1,6 @@
 import { type Request, type Response } from "express";
 import type { PublicUser } from "../types/express.js";
+import { attachPublicUser } from "../lib/auth.js";
 
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
@@ -13,10 +14,7 @@ export function publicUserMiddleware(
   _res: Response,
   next: () => void,
 ) {
-  req.user = PUBLIC_USER;
-  req.isAuthenticated = function () {
-    return this.user != null;
-  };
+  attachPublicUser(req, PUBLIC_USER);
 
   next();
 }
