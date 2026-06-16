@@ -7,7 +7,7 @@ const router = Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // POST /wines/:id/insights
-router.post("/wines/:id/insights", async (req, res) => {
+router.post("/wines/:id/insights", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });

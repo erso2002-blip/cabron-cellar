@@ -10,8 +10,12 @@ import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
 
+function routeParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
 // GET /wines
-router.get("/wines", async (req, res) => {
+router.get("/wines", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -51,7 +55,7 @@ router.get("/wines", async (req, res) => {
 });
 
 // POST /wines
-router.post("/wines", async (req, res) => {
+router.post("/wines", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -80,7 +84,7 @@ router.post("/wines", async (req, res) => {
 });
 
 // GET /wines/drink-soon — must be before /wines/:id
-router.get("/wines/drink-soon", async (req, res) => {
+router.get("/wines/drink-soon", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -131,13 +135,13 @@ router.get("/wines/drink-soon", async (req, res) => {
 });
 
 // GET /wines/:id
-router.get("/wines/:id", async (req, res) => {
+router.get("/wines/:id", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(req.params.id);
+  const id = parseInt(routeParam(req.params.id));
 
   const [wine] = await db
     .select()
@@ -153,13 +157,13 @@ router.get("/wines/:id", async (req, res) => {
 });
 
 // PATCH /wines/:id
-router.patch("/wines/:id", async (req, res) => {
+router.patch("/wines/:id", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(req.params.id);
+  const id = parseInt(routeParam(req.params.id));
 
   const parsed = UpdateWineBody.safeParse(req.body);
   if (!parsed.success) {
@@ -187,13 +191,13 @@ router.patch("/wines/:id", async (req, res) => {
 });
 
 // DELETE /wines/:id
-router.delete("/wines/:id", async (req, res) => {
+router.delete("/wines/:id", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(req.params.id);
+  const id = parseInt(routeParam(req.params.id));
 
   const [wine] = await db
     .delete(winesTable)
@@ -206,13 +210,13 @@ router.delete("/wines/:id", async (req, res) => {
 });
 
 // POST /wines/:id/consume
-router.post("/wines/:id/consume", async (req, res) => {
+router.post("/wines/:id/consume", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const wineId = parseInt(req.params.id);
+  const wineId = parseInt(routeParam(req.params.id));
 
   const parsed = ConsumeWineBody.safeParse(req.body);
   if (!parsed.success) {
@@ -259,13 +263,13 @@ router.post("/wines/:id/consume", async (req, res) => {
 });
 
 // POST /wines/:id/label
-router.post("/wines/:id/label", async (req, res) => {
+router.post("/wines/:id/label", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(req.params.id);
+  const id = parseInt(routeParam(req.params.id));
 
   const parsed = UploadWineLabelBody.safeParse(req.body);
   if (!parsed.success) {

@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router } from "express";
 import { Readable } from "stream";
 import {
   RequestUploadUrlBody,
@@ -7,7 +7,7 @@ import {
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage.js";
 
-const router: IRouter = Router();
+const router = Router();
 const objectStorageService = new ObjectStorageService();
 
 /**
@@ -17,7 +17,7 @@ const objectStorageService = new ObjectStorageService();
  * The client sends JSON metadata (name, size, contentType) — NOT the file.
  * Then uploads the file directly to the returned presigned URL.
  */
-router.post("/storage/uploads/request-url", async (req: Request, res: Response) => {
+router.post("/storage/uploads/request-url", async (req: any, res: any) => {
   if (!getAuthenticatedUser(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
@@ -55,7 +55,7 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response) 
  * These are unconditionally public — no authentication or ACL checks.
  * IMPORTANT: Always provide this endpoint when object storage is set up.
  */
-router.get("/storage/public-objects/*filePath", async (req: Request, res: Response) => {
+router.get("/storage/public-objects/*filePath", async (req: any, res: any) => {
   try {
     const raw = req.params.filePath;
     const filePath = Array.isArray(raw) ? raw.join("/") : raw;
@@ -65,7 +65,7 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
       return;
     }
 
-    const response = await objectStorageService.downloadObject(file);
+    const response: any = await objectStorageService.downloadObject(file);
 
     res.status(response.status);
     response.headers.forEach((value: string, key: string) =>
@@ -91,7 +91,7 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
  * These are served from a separate path from /public-objects and can optionally
  * be protected with authentication or ACL checks based on the use case.
  */
-router.get("/storage/objects/*path", async (req: Request, res: Response) => {
+router.get("/storage/objects/*path", async (req: any, res: any) => {
   // Private objects (e.g. wine label photos) require a signed-in user. Object
   // paths are unguessable random UUIDs and each user only ever receives their
   // own wines' labelPhotoUrl, so authentication is sufficient to keep one
@@ -107,7 +107,7 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
     const objectPath = `/objects/${wildcardPath}`;
     const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
 
-    const response = await objectStorageService.downloadObject(objectFile);
+    const response: any = await objectStorageService.downloadObject(objectFile);
 
     res.status(response.status);
     response.headers.forEach((value: string, key: string) =>

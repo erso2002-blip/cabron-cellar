@@ -9,7 +9,7 @@ const openai = new OpenAI({
 });
 
 // POST /wines/suggest-drink-until
-router.post("/wines/suggest-drink-until", async (req, res) => {
+router.post("/wines/suggest-drink-until", async (req: any, res: any) => {
   if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }

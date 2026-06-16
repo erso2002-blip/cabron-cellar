@@ -19,7 +19,7 @@ interface LabelData {
 }
 
 // POST /wines/analyze-label
-router.post("/wines/analyze-label", async (req, res) => {
+router.post("/wines/analyze-label", async (req: any, res: any) => {
   if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }

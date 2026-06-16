@@ -87,7 +87,7 @@ export class ObjectStorageService {
     return null;
   }
 
-  async downloadObject(file: File, cacheTtlSec: number = 3600): Promise<Response> {
+  async downloadObject(file: File, cacheTtlSec: number = 3600): Promise<any> {
     const [metadata] = await file.getMetadata();
     const aclPolicy = await getObjectAclPolicy(file);
     const isPublic = aclPolicy?.visibility === "public";
@@ -244,7 +244,7 @@ async function signObjectURL({
     method,
     expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
   };
-  const response = await fetch(
+  const response: any = await fetch(
     `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
     {
       method: "POST",

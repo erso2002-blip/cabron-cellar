@@ -5,7 +5,7 @@ import { getAuthenticatedUser } from "../lib/auth.js";
 const router = Router();
 
 // GET /consumption
-router.get("/consumption", async (req, res) => {
+router.get("/consumption", async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
