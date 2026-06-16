@@ -4,7 +4,7 @@ import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
-import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
+import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage.js";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -67,7 +67,9 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
     const response = await objectStorageService.downloadObject(file);
 
     res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
+    response.headers.forEach((value: string, key: string) =>
+      res.setHeader(key, value),
+    );
 
     if (response.body) {
       const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
@@ -107,7 +109,9 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
     const response = await objectStorageService.downloadObject(objectFile);
 
     res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
+    response.headers.forEach((value: string, key: string) =>
+      res.setHeader(key, value),
+    );
 
     if (response.body) {
       const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);

@@ -1,12 +1,12 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import winesRouter from "./wines";
-import consumptionRouter from "./consumption";
-import dashboardRouter from "./dashboard";
-import labelAnalyzerRouter from "./label-analyzer";
-import suggestDrinkUntilRouter from "./suggest-drink-until";
-import storageRouter from "./storage";
-import wineInsightsRouter from "./wine-insights";
+import healthRouter from "./health.js";
+import winesRouter from "./wines.js";
+import consumptionRouter from "./consumption.js";
+import dashboardRouter from "./dashboard.js";
+import labelAnalyzerRouter from "./label-analyzer.js";
+import suggestDrinkUntilRouter from "./suggest-drink-until.js";
+import storageRouter from "./storage.js";
+import wineInsightsRouter from "./wine-insights.js";
 
 const router: IRouter = Router();
 
