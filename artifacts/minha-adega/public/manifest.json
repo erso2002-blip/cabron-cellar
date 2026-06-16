@@ -1,5 +1,5 @@
 {
-  "name": "My Cellar",
+  "name": "MyCellar",
   "short_name": "MyCellar",
   "description": "Personal wine cellar management — catalog, stock, pairings and tasting history",
   "start_url": "/",
@@ -40,7 +40,7 @@
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "My Cellar",
+      "name": "MyCellar",
       "short_name": "Cellar",
       "description": "Browse wine stock",
       "url": "/wines",

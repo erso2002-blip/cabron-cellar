@@ -235,23 +235,47 @@ router.post("/wines/:id/consume", async (req: any, res: any) => {
     return res.status(400).json({ error: "Insufficient stock" });
   }
 
-  const [consumption] = await db
-    .insert(consumptionTable)
-    .values({
-      wineId,
-      userId,
-      consumedAt: parsed.data.consumedAt,
-      personalNote: parsed.data.personalNote,
-      occasion: parsed.data.occasion,
-      wouldBuyAgain: parsed.data.wouldBuyAgain,
-      quantity: qty,
-    })
-    .returning();
+  const consumption = await db.transaction(async (tx) => {
+    const [updatedWine] = await tx
+      .update(winesTable)
+      .set({ quantity: sql`${winesTable.quantity} - ${qty}` })
+      .where(
+        and(
+          eq(winesTable.id, wineId),
+          eq(winesTable.userId, userId),
+          sql`${winesTable.quantity} >= ${qty}`
+        )
+      )
+      .returning();
 
-  await db
-    .update(winesTable)
-    .set({ quantity: wine.quantity - qty })
-    .where(eq(winesTable.id, wineId));
+    if (!updatedWine) {
+      throw new Error("Insufficient stock");
+    }
+
+    const [record] = await tx
+      .insert(consumptionTable)
+      .values({
+        wineId,
+        userId,
+        consumedAt: parsed.data.consumedAt,
+        personalNote: parsed.data.personalNote,
+        occasion: parsed.data.occasion,
+        wouldBuyAgain: parsed.data.wouldBuyAgain,
+        quantity: qty,
+      })
+      .returning();
+
+    return record;
+  }).catch((error) => {
+    if (error instanceof Error && error.message === "Insufficient stock") {
+      return null;
+    }
+    throw error;
+  });
+
+  if (!consumption) {
+    return res.status(400).json({ error: "Insufficient stock" });
+  }
 
   return res.status(201).json({
     ...consumption,

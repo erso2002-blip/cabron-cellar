@@ -4,7 +4,7 @@ import { attachPublicUser } from "../lib/auth.js";
 
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
-  name: "My Cellar",
+  name: "MyCellar",
   email: null,
   profileImage: null,
 };

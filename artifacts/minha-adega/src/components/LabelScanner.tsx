@@ -18,6 +18,47 @@ interface Props {
   onPhotoUploaded?: (url: string) => void;
 }
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Could not load image"));
+    image.src = src;
+  });
+}
+
+async function compactImage(file: File): Promise<{ dataUrl: string; mimeType: string }> {
+  const originalDataUrl = await readFileAsDataUrl(file);
+
+  try {
+    const image = await loadImage(originalDataUrl);
+    const maxDimension = 1400;
+    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) return { dataUrl: originalDataUrl, mimeType: file.type };
+
+    context.drawImage(image, 0, 0, width, height);
+    return { dataUrl: canvas.toDataURL("image/jpeg", 0.82), mimeType: "image/jpeg" };
+  } catch {
+    return { dataUrl: originalDataUrl, mimeType: file.type };
+  }
+}
+
 async function uploadPhotoToStorage(file: File): Promise<string | null> {
   try {
     const resp = await fetch("/api/storage/uploads/request-url", {
@@ -69,14 +110,12 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const dataUrl = e.target?.result as string;
+    try {
+      const { dataUrl, mimeType } = await compactImage(file);
       setPreview(dataUrl);
       setExtracted(null);
 
       const base64 = dataUrl.split(",")[1];
-      const mimeType = file.type;
 
       // Run AI analysis and photo upload in parallel
       setIsAnalyzing(true);
@@ -126,9 +165,14 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
       // Handle photo upload result
       if (uploadedUrl.status === "fulfilled" && uploadedUrl.value && onPhotoUploaded) {
         onPhotoUploaded(uploadedUrl.value);
+      } else if (onPhotoUploaded) {
+        onPhotoUploaded(dataUrl);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      toast.error("Não foi possível ler a imagem selecionada");
+      setIsAnalyzing(false);
+      setIsUploading(false);
+    }
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
