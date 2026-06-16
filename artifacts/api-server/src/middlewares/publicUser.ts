@@ -7,6 +7,13 @@ type PublicUser = {
   profileImage: string | null;
 };
 
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: PublicUser;
+    isAuthenticated(): boolean;
+  }
+}
+
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
   name: "Cabron Cellar",
@@ -14,30 +21,15 @@ const PUBLIC_USER: PublicUser = {
   profileImage: null,
 };
 
-declare global {
-  namespace Express {
-    interface User extends PublicUser {}
-
-    interface Request {
-      isAuthenticated(): this is AuthedRequest;
-      user?: User | undefined;
-    }
-
-    export interface AuthedRequest {
-      user: User;
-    }
-  }
-}
-
 export function publicUserMiddleware(
   req: Request,
   _res: Response,
   next: NextFunction,
 ) {
   req.user = PUBLIC_USER;
-  req.isAuthenticated = function (this: Request) {
+  req.isAuthenticated = function () {
     return this.user != null;
-  } as Request["isAuthenticated"];
+  };
 
   next();
 }
