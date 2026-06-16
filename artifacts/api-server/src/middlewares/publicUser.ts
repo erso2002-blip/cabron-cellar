@@ -1,5 +1,12 @@
 import { type Request, type Response, type NextFunction } from "express";
 
+type PublicUser = {
+  id: string;
+  name: string;
+  email: string | null;
+  profileImage: string | null;
+};
+
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
   name: "Cabron Cellar",
@@ -9,11 +16,10 @@ const PUBLIC_USER: PublicUser = {
 
 declare global {
   namespace Express {
-    interface User extends AuthUser {}
+    interface User extends PublicUser {}
 
     interface Request {
       isAuthenticated(): this is AuthedRequest;
-
       user?: User | undefined;
     }
 
