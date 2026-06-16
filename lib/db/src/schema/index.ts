@@ -1,3 +1,3 @@
-export * from "./auth";
-export * from "./wines";
-export * from "./consumption";
+export * from "./auth.js";
+export * from "./wines.js";
+export * from "./consumption.js";

@@ -1,16 +1,5 @@
 import { type Request, type Response } from "express";
-
-type PublicUser = {
-  id: string;
-  name: string;
-  email: string | null;
-  profileImage: string | null;
-};
-
-type PublicRequest = Request & {
-  user?: PublicUser;
-  isAuthenticated?: () => boolean;
-};
+import type { PublicUser } from "../types/express.js";
 
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
@@ -24,11 +13,9 @@ export function publicUserMiddleware(
   _res: Response,
   next: () => void,
 ) {
-  const publicReq = req as PublicRequest;
-
-  publicReq.user = PUBLIC_USER;
-  publicReq.isAuthenticated = function () {
-    return publicReq.user != null;
+  req.user = PUBLIC_USER;
+  req.isAuthenticated = function () {
+    return this.user != null;
   };
 
   next();

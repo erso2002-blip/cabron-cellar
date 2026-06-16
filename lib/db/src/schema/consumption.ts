@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
-import { winesTable } from "./wines";
+import { winesTable } from "./wines.js";
 
 export const consumptionTable = pgTable("consumption", {
   id: serial("id").primaryKey(),
