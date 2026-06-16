@@ -1,7 +1,6 @@
 import { type Request, type Response, type NextFunction } from "express";
-import type { AuthUser } from "@workspace/api-zod";
 
-const PUBLIC_USER: AuthUser = {
+const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
   name: "Cabron Cellar",
   email: null,
