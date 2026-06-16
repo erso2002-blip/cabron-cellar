@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { APP_VERSION } from "@/config/app";
+import { useAuth } from "@/lib/auth";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const navItems = [
 export function Shell({ children }: ShellProps) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const NavLinks = () => (
     <>
@@ -57,8 +59,15 @@ export function Shell({ children }: ShellProps) {
         <nav className="flex-1 flex flex-col">
           <NavLinks />
         </nav>
-        <div className="px-4 text-xs text-muted-foreground">
-          v{APP_VERSION}
+        <div className="space-y-3 px-4 text-xs text-muted-foreground">
+          <div>
+            <div className="truncate font-medium text-foreground">{user?.name}</div>
+            <div className="truncate">{user?.email}</div>
+          </div>
+          <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
+            Sair
+          </Button>
+          <div>v{APP_VERSION}</div>
         </div>
       </aside>
 
@@ -80,8 +89,15 @@ export function Shell({ children }: ShellProps) {
               <nav className="flex-1 flex flex-col">
                 <NavLinks />
               </nav>
-              <div className="text-xs text-muted-foreground">
-                v{APP_VERSION}
+              <div className="space-y-3 text-xs text-muted-foreground">
+                <div>
+                  <div className="truncate font-medium text-foreground">{user?.name}</div>
+                  <div className="truncate">{user?.email}</div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
+                  Sair
+                </Button>
+                <div>v{APP_VERSION}</div>
               </div>
             </SheetContent>
           </Sheet>

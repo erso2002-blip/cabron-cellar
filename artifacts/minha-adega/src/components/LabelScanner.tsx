@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Camera, Upload, Loader2, Sparkles, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { authFetch } from "@/lib/auth";
 
 interface LabelData {
   name: string | null;
@@ -61,7 +62,7 @@ async function compactImage(file: File): Promise<{ dataUrl: string; mimeType: st
 
 async function uploadPhotoToStorage(file: File): Promise<string | null> {
   try {
-    const resp = await fetch("/api/storage/uploads/request-url", {
+    const resp = await authFetch("/api/storage/uploads/request-url", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -122,7 +123,7 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
       setIsUploading(true);
 
       const [analysisResult, uploadedUrl] = await Promise.allSettled([
-        fetch("/api/wines/analyze-label", {
+        authFetch("/api/wines/analyze-label", {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

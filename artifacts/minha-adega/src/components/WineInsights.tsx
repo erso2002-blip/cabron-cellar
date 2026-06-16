@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sparkles, Loader2, Utensils, Thermometer, Wind, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Wine } from "@workspace/api-client-react";
+import { authFetch } from "@/lib/auth";
 
 interface Insights {
   harmonization: Array<{ food: string; note: string }>;
@@ -44,7 +45,7 @@ export function WineInsights({ wine }: Props) {
     setError(null);
     setOpen(true);
     try {
-      const resp = await fetch(`/api/wines/${wine.id}/insights`, {
+      const resp = await authFetch(`/api/wines/${wine.id}/insights`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

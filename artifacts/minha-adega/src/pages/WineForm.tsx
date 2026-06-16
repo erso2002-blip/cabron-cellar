@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
 import { ArrowLeft, Save, Sparkles, Loader2, X } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
+import { authFetch } from "@/lib/auth";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -102,7 +103,7 @@ export default function WineForm() {
     setIsSuggesting(true);
     setDrinkUntilHint(null);
     try {
-      const resp = await fetch("/api/wines/suggest-drink-until", {
+      const resp = await authFetch("/api/wines/suggest-drink-until", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

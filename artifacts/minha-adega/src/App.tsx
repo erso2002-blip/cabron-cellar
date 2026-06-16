@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import { queryClient } from "@/lib/queryClient";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { LoginScreen } from "@/components/auth/LoginScreen";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +18,11 @@ import NotFound from "@/pages/not-found";
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function PublicApp() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <LoginScreen />;
+  if (!user) return <LoginScreen />;
+
   return (
     <Shell>
       <Switch>
@@ -36,7 +43,9 @@ function App() {
     <WouterRouter base={basePath}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <PublicApp />
+          <AuthProvider>
+            <PublicApp />
+          </AuthProvider>
           <Toaster />
           <Sonner />
         </TooltipProvider>

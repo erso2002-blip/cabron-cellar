@@ -1,5 +1,6 @@
 import { Router } from "express";
 import healthRouter from "./health.js";
+import authRouter from "./auth.js";
 import winesRouter from "./wines.js";
 import consumptionRouter from "./consumption.js";
 import dashboardRouter from "./dashboard.js";
@@ -11,6 +12,7 @@ import wineInsightsRouter from "./wine-insights.js";
 const router = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
 router.use(winesRouter);
 router.use(consumptionRouter);
 router.use(dashboardRouter);

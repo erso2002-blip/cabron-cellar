@@ -5,7 +5,7 @@ import { pinoHttp } from "pino-http";
 import "./types/express.js";
 import router from "./routes/index.js";
 import { logger } from "./lib/logger.js";
-import { publicUserMiddleware } from "./middlewares/publicUser.js";
+import { googleAuthMiddleware } from "./middlewares/googleAuth.js";
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-app.use("/api", publicUserMiddleware);
+app.use("/api", googleAuthMiddleware);
 app.use("/api", router);
 
 export default app;
