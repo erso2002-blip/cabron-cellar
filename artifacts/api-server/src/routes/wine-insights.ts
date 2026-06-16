@@ -1,8 +1,6 @@
 import { Router } from "express";
 import OpenAI from "openai";
-import { db } from "@workspace/db";
-import { winesTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { and, db, eq, winesTable } from "@workspace/db";
 import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();

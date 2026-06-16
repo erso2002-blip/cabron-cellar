@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { winesTable, consumptionTable } from "@workspace/db";
-import { eq, and, ilike, or, sql, desc } from "drizzle-orm";
+import { and, consumptionTable, db, desc, eq, ilike, or, sql, winesTable } from "@workspace/db";
 import {
   CreateWineBody,
   UpdateWineBody,

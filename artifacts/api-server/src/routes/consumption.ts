@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
-import { consumptionTable, winesTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { consumptionTable, db, desc, eq, winesTable } from "@workspace/db";
 import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
