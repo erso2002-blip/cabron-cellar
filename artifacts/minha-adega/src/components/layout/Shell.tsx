@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { APP_VERSION } from "@/config/app";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -56,6 +57,9 @@ export function Shell({ children }: ShellProps) {
         <nav className="flex-1 flex flex-col">
           <NavLinks />
         </nav>
+        <div className="px-4 text-xs text-muted-foreground">
+          v{APP_VERSION}
+        </div>
       </aside>
 
       {/* Mobile Header & Nav */}
@@ -73,7 +77,12 @@ export function Shell({ children }: ShellProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-64 pt-10 flex flex-col">
-              <NavLinks />
+              <nav className="flex-1 flex flex-col">
+                <NavLinks />
+              </nav>
+              <div className="text-xs text-muted-foreground">
+                v{APP_VERSION}
+              </div>
             </SheetContent>
           </Sheet>
         </header>
