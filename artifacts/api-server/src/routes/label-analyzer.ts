@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getOpenAIClient } from "../lib/openai.js";
+import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
+const MAX_IMAGE_BASE64_LENGTH = 6_500_000;
 
 interface LabelData {
   name: string | null;
@@ -15,7 +17,7 @@ interface LabelData {
 }
 
 // POST /wines/analyze-label
-router.post("/wines/analyze-label", async (req: any, res: any) => {
+router.post("/wines/analyze-label", rateLimit({ keyPrefix: "label-ai", windowMs: 60_000, max: 8 }), async (req: any, res: any) => {
   if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -29,7 +31,11 @@ router.post("/wines/analyze-label", async (req: any, res: any) => {
     return res.status(400).json({ error: "imageBase64 and mimeType are required" });
   }
 
-  const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  if (imageBase64.length > MAX_IMAGE_BASE64_LENGTH) {
+    return res.status(413).json({ error: "Image is too large" });
+  }
+
+  const allowedMimes = ["image/jpeg", "image/png", "image/webp"];
   if (!allowedMimes.includes(mimeType)) {
     return res.status(400).json({ error: "Unsupported image type" });
   }

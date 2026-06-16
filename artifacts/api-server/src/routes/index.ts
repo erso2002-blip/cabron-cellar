@@ -18,7 +18,7 @@ router.use(consumptionRouter);
 router.use(dashboardRouter);
 router.use(labelAnalyzerRouter);
 router.use(suggestDrinkUntilRouter);
-router.use(storageRouter);
 router.use(wineInsightsRouter);
+router.use(storageRouter);
 
 export default router;

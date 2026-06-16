@@ -9,6 +9,8 @@ import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage.
 
 const router = Router();
 const objectStorageService = new ObjectStorageService();
+const MAX_UPLOAD_BYTES = 7_000_000;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 /**
  * POST /storage/uploads/request-url
@@ -31,6 +33,10 @@ router.post("/storage/uploads/request-url", async (req: any, res: any) => {
 
   try {
     const { name, size, contentType } = parsed.data;
+    if (name.length > 180 || size > MAX_UPLOAD_BYTES || !ALLOWED_IMAGE_TYPES.has(contentType)) {
+      res.status(400).json({ error: "Invalid upload metadata" });
+      return;
+    }
 
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
     const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);

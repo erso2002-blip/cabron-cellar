@@ -9,9 +9,60 @@ import {
 import { getAuthenticatedUser } from "../lib/auth.js";
 
 const router = Router();
+const MAX_LABEL_PHOTO_URL_LENGTH = 6_800_000;
+
+const STRING_LIMITS: Record<string, number> = {
+  name: 160,
+  producer: 160,
+  country: 80,
+  region: 120,
+  grape: 160,
+  cellarLocation: 120,
+  locationPlace: 120,
+  cellarName: 120,
+  shelf: 80,
+  notes: 2_000,
+  labelPhotoUrl: MAX_LABEL_PHOTO_URL_LENGTH,
+};
 
 function routeParam(value: string | string[] | undefined): string {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
+function invalidId(value: number) {
+  return !Number.isInteger(value) || value <= 0;
+}
+
+function parsePositiveInteger(value: string) {
+  if (!/^\d+$/.test(value)) return NaN;
+  return Number(value);
+}
+
+function invalidWinePayload(data: Record<string, unknown>) {
+  for (const [field, max] of Object.entries(STRING_LIMITS)) {
+    const value = data[field];
+    if (typeof value === "string" && value.length > max) {
+      return true;
+    }
+  }
+
+  if ("quantity" in data && (!Number.isInteger(data.quantity) || (data.quantity as number) < 0)) {
+    return true;
+  }
+
+  if ("vintage" in data && data.vintage != null) {
+    const vintage = data.vintage as number;
+    const maxVintage = new Date().getFullYear() + 1;
+    if (!Number.isInteger(vintage) || vintage < 1800 || vintage > maxVintage) {
+      return true;
+    }
+  }
+
+  if ("pricePaid" in data && data.pricePaid != null && (data.pricePaid as number) < 0) {
+    return true;
+  }
+
+  return false;
 }
 
 // GET /wines
@@ -22,6 +73,9 @@ router.get("/wines", async (req: any, res: any) => {
   }
   const userId = user.id;
   const { search, country, region, grape, vintage, minQuantity } = req.query as Record<string, string>;
+  if ([search, country, region, grape].some((value) => value && value.length > 160)) {
+    return res.status(400).json({ error: "Invalid query" });
+  }
 
   const conditions = [eq(winesTable.userId, userId)];
 
@@ -37,8 +91,18 @@ router.get("/wines", async (req: any, res: any) => {
   if (country) conditions.push(ilike(winesTable.country, `%${country}%`));
   if (region) conditions.push(ilike(winesTable.region, `%${region}%`));
   if (grape) conditions.push(ilike(winesTable.grape, `%${grape}%`));
-  if (vintage) conditions.push(eq(winesTable.vintage, parseInt(vintage)));
-  if (minQuantity) conditions.push(sql`${winesTable.quantity} >= ${parseInt(minQuantity)}`);
+  if (vintage) {
+    const parsedVintage = parsePositiveInteger(vintage);
+    if (invalidId(parsedVintage)) return res.status(400).json({ error: "Invalid query" });
+    conditions.push(eq(winesTable.vintage, parsedVintage));
+  }
+  if (minQuantity) {
+    const parsedMinQuantity = parsePositiveInteger(minQuantity);
+    if (!Number.isInteger(parsedMinQuantity) || parsedMinQuantity < 0) {
+      return res.status(400).json({ error: "Invalid query" });
+    }
+    conditions.push(sql`${winesTable.quantity} >= ${parsedMinQuantity}`);
+  }
 
   const wines = await db
     .select()
@@ -66,6 +130,9 @@ router.post("/wines", async (req: any, res: any) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Validation error" });
   }
+  if (invalidWinePayload(parsed.data)) {
+    return res.status(400).json({ error: "Validation error" });
+  }
 
   const { pricePaid, ...rest } = parsed.data;
   const [wine] = await db
@@ -90,7 +157,10 @@ router.get("/wines/drink-soon", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const limit = parseInt((req.query.limit as string) || "10");
+  const limit = parsePositiveInteger((req.query.limit as string) || "10");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    return res.status(400).json({ error: "Invalid query" });
+  }
 
   const wines = await db
     .select()
@@ -141,7 +211,8 @@ router.get("/wines/:id", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(routeParam(req.params.id));
+  const id = parsePositiveInteger(routeParam(req.params.id));
+  if (invalidId(id)) return res.status(400).json({ error: "Invalid wine id" });
 
   const [wine] = await db
     .select()
@@ -163,10 +234,14 @@ router.patch("/wines/:id", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(routeParam(req.params.id));
+  const id = parsePositiveInteger(routeParam(req.params.id));
+  if (invalidId(id)) return res.status(400).json({ error: "Invalid wine id" });
 
   const parsed = UpdateWineBody.safeParse(req.body);
   if (!parsed.success) {
+    return res.status(400).json({ error: "Validation error" });
+  }
+  if (invalidWinePayload(parsed.data)) {
     return res.status(400).json({ error: "Validation error" });
   }
 
@@ -197,7 +272,8 @@ router.delete("/wines/:id", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(routeParam(req.params.id));
+  const id = parsePositiveInteger(routeParam(req.params.id));
+  if (invalidId(id)) return res.status(400).json({ error: "Invalid wine id" });
 
   const [wine] = await db
     .delete(winesTable)
@@ -216,7 +292,8 @@ router.post("/wines/:id/consume", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const wineId = parseInt(routeParam(req.params.id));
+  const wineId = parsePositiveInteger(routeParam(req.params.id));
+  if (invalidId(wineId)) return res.status(400).json({ error: "Invalid wine id" });
 
   const parsed = ConsumeWineBody.safeParse(req.body);
   if (!parsed.success) {
@@ -231,6 +308,9 @@ router.post("/wines/:id/consume", async (req: any, res: any) => {
   if (!wine) return res.status(404).json({ error: "Wine not found" });
 
   const qty = parsed.data.quantity ?? 1;
+  if (!Number.isInteger(qty) || qty < 1 || qty > 100) {
+    return res.status(400).json({ error: "Invalid quantity" });
+  }
   if (wine.quantity < qty) {
     return res.status(400).json({ error: "Insufficient stock" });
   }
@@ -293,10 +373,14 @@ router.post("/wines/:id/label", async (req: any, res: any) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   const userId = user.id;
-  const id = parseInt(routeParam(req.params.id));
+  const id = parsePositiveInteger(routeParam(req.params.id));
+  if (invalidId(id)) return res.status(400).json({ error: "Invalid wine id" });
 
   const parsed = UploadWineLabelBody.safeParse(req.body);
   if (!parsed.success) {
+    return res.status(400).json({ error: "Validation error" });
+  }
+  if (parsed.data.labelPhotoUrl.length > MAX_LABEL_PHOTO_URL_LENGTH) {
     return res.status(400).json({ error: "Validation error" });
   }
 

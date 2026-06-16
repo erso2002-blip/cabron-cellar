@@ -65,6 +65,15 @@ async function migrateLegacyCellarIfNeeded(userId: string) {
   });
 }
 
+function canImportLegacyCellar(email: string) {
+  const allowedEmails = (process.env.LEGACY_CELLAR_IMPORT_EMAILS ?? "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  return allowedEmails.includes(email.toLowerCase());
+}
+
 async function verifyGoogleUser(token: string): Promise<PublicUser> {
   if (!googleClient || !googleClientId) {
     throw new Error("Google SSO is not configured");
@@ -107,7 +116,9 @@ async function verifyGoogleUser(token: string): Promise<PublicUser> {
       },
     });
 
-  await migrateLegacyCellarIfNeeded(user.id);
+  if (canImportLegacyCellar(payload.email)) {
+    await migrateLegacyCellarIfNeeded(user.id);
+  }
 
   return user;
 }

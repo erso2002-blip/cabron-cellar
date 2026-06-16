@@ -2,11 +2,12 @@ import { Router } from "express";
 import { and, db, eq, winesTable } from "@workspace/db";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getOpenAIClient } from "../lib/openai.js";
+import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
 
 // POST /wines/:id/insights
-router.post("/wines/:id/insights", async (req: any, res: any) => {
+router.post("/wines/:id/insights", rateLimit({ keyPrefix: "insights-ai", windowMs: 60_000, max: 12 }), async (req: any, res: any) => {
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });

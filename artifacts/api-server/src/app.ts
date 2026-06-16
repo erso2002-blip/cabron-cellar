@@ -6,8 +6,10 @@ import "./types/express.js";
 import router from "./routes/index.js";
 import { logger } from "./lib/logger.js";
 import { googleAuthMiddleware } from "./middlewares/googleAuth.js";
+import { corsOrigin, securityHeaders } from "./middlewares/security.js";
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(
   pinoHttp({
@@ -29,10 +31,11 @@ app.use(
   }),
 );
 
-app.use(cors({ credentials: true, origin: true }));
+app.use(securityHeaders);
+app.use(cors({ credentials: false, origin: corsOrigin }));
 app.use(cookieParser());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "7mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.use("/api", googleAuthMiddleware);
 app.use("/api", router);

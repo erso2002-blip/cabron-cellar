@@ -1,11 +1,17 @@
 import { Router } from "express";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getOpenAIClient } from "../lib/openai.js";
+import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
+const MAX_INPUT_LENGTH = 180;
+
+function bounded(value: unknown) {
+  return typeof value !== "string" || value.length <= MAX_INPUT_LENGTH;
+}
 
 // POST /wines/suggest-drink-until
-router.post("/wines/suggest-drink-until", async (req: any, res: any) => {
+router.post("/wines/suggest-drink-until", rateLimit({ keyPrefix: "drink-ai", windowMs: 60_000, max: 12 }), async (req: any, res: any) => {
   if (!getAuthenticatedUser(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -21,6 +27,10 @@ router.post("/wines/suggest-drink-until", async (req: any, res: any) => {
 
   if (!name && !grape && !country) {
     return res.status(400).json({ error: "Provide at least name, grape or country" });
+  }
+
+  if (![name, producer, grape, country, region].every(bounded)) {
+    return res.status(400).json({ error: "Input is too long" });
   }
 
   const wineDescription = [

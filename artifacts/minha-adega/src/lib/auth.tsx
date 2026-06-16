@@ -23,7 +23,7 @@ const AuthContext = createContext<AuthState | null>(null);
 
 function readStoredToken() {
   try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -32,9 +32,9 @@ function readStoredToken() {
 function storeToken(token: string | null) {
   try {
     if (token) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
     } else {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     }
   } catch {
     // Browser storage can be unavailable in restricted contexts.

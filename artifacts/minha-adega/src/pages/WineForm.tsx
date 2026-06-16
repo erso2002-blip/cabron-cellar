@@ -30,21 +30,21 @@ import LabelScanner from "@/components/LabelScanner";
 import { authFetch } from "@/lib/auth";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  producer: z.string().min(1, "Produtor é obrigatório"),
-  country: z.string().optional(),
-  region: z.string().optional(),
-  grape: z.string().optional(),
+  name: z.string().min(1, "Nome é obrigatório").max(160),
+  producer: z.string().min(1, "Produtor é obrigatório").max(160),
+  country: z.string().max(80).optional(),
+  region: z.string().max(120).optional(),
+  grape: z.string().max(160).optional(),
   vintage: z.coerce.number().optional().nullable(),
   pricePaid: z.coerce.number().optional().nullable(),
   quantity: z.coerce.number().min(0, "Quantidade inválida"),
-  cellarLocation: z.string().optional(),
-  locationPlace: z.string().optional(),
-  cellarName: z.string().optional(),
-  shelf: z.string().optional(),
+  cellarLocation: z.string().max(120).optional(),
+  locationPlace: z.string().max(120).optional(),
+  cellarName: z.string().max(120).optional(),
+  shelf: z.string().max(80).optional(),
   drinkUntil: z.string().optional().nullable(),
-  labelPhotoUrl: z.string().optional().nullable(),
-  notes: z.string().optional(),
+  labelPhotoUrl: z.string().max(6_800_000).optional().nullable(),
+  notes: z.string().max(2_000).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
