@@ -1,4 +1,4 @@
-import { type Request, type Response, type NextFunction } from "express";
+import { type Request, type Response } from "express";
 
 type PublicUser = {
   id: string;
@@ -7,12 +7,10 @@ type PublicUser = {
   profileImage: string | null;
 };
 
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: PublicUser;
-    isAuthenticated(): boolean;
-  }
-}
+type PublicRequest = Request & {
+  user?: PublicUser;
+  isAuthenticated?: () => boolean;
+};
 
 const PUBLIC_USER: PublicUser = {
   id: "public-cabron-cellar",
@@ -24,11 +22,13 @@ const PUBLIC_USER: PublicUser = {
 export function publicUserMiddleware(
   req: Request,
   _res: Response,
-  next: NextFunction,
+  next: () => void,
 ) {
-  req.user = PUBLIC_USER;
-  req.isAuthenticated = function () {
-    return this.user != null;
+  const publicReq = req as PublicRequest;
+
+  publicReq.user = PUBLIC_USER;
+  publicReq.isAuthenticated = function () {
+    return publicReq.user != null;
   };
 
   next();
