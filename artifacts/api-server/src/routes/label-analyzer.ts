@@ -1,12 +1,8 @@
 import { Router } from "express";
-import OpenAI from "openai";
 import { getAuthenticatedUser } from "../lib/auth.js";
+import { getOpenAIClient } from "../lib/openai.js";
 
 const router = Router();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 interface LabelData {
   name: string | null;
@@ -39,6 +35,11 @@ router.post("/wines/analyze-label", async (req: any, res: any) => {
   }
 
   try {
+    const openai = getOpenAIClient();
+    if (!openai) {
+      return res.status(503).json({ error: "AI service is not configured" });
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       max_tokens: 500,
