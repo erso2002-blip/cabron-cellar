@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router } from "express";
 import healthRouter from "./health.js";
 import winesRouter from "./wines.js";
 import consumptionRouter from "./consumption.js";
@@ -8,7 +8,7 @@ import suggestDrinkUntilRouter from "./suggest-drink-until.js";
 import storageRouter from "./storage.js";
 import wineInsightsRouter from "./wine-insights.js";
 
-const router: IRouter = Router();
+const router = Router();
 
 router.use(healthRouter);
 router.use(winesRouter);
