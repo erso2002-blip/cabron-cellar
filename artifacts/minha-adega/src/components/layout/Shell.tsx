@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { PwaInstallButton } from "@/components/PwaInstallButton";
 import { APP_VERSION } from "@/config/app";
 import { useAuth } from "@/lib/auth";
 
@@ -64,6 +65,7 @@ export function Shell({ children }: ShellProps) {
           <NavLinks />
         </nav>
         <div className="space-y-3 px-4 text-xs text-muted-foreground">
+          <PwaInstallButton compact />
           {ssoEnabled ? (
             <>
               <div>
@@ -101,6 +103,7 @@ export function Shell({ children }: ShellProps) {
                 <NavLinks />
               </nav>
               <div className="space-y-3 text-xs text-muted-foreground">
+                <PwaInstallButton compact />
                 {ssoEnabled ? (
                   <>
                     <div>
