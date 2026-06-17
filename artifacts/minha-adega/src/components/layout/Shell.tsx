@@ -52,10 +52,13 @@ export function Shell({ children }: ShellProps) {
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 border-r bg-card px-4 py-6 md:flex md:flex-col">
         <div className="mb-8 px-4">
-          <h1 className="text-2xl font-serif font-bold text-primary flex items-center gap-2">
-            <Wine className="h-6 w-6" />
-            MyCellar
-          </h1>
+          <Link href="/" aria-label="MyCellar">
+            <img
+              src="/logo.svg"
+              alt="MyCellar"
+              className="h-12 w-auto max-w-[176px]"
+            />
+          </Link>
         </div>
         <nav className="flex-1 flex flex-col">
           <NavLinks />
@@ -79,10 +82,13 @@ export function Shell({ children }: ShellProps) {
       {/* Mobile Header & Nav */}
       <div className="flex flex-1 flex-col">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
-          <h1 className="text-lg font-serif font-bold text-primary flex items-center gap-2">
-            <Wine className="h-5 w-5" />
-            MyCellar
-          </h1>
+          <Link href="/" aria-label="MyCellar">
+            <img
+              src="/logo.svg"
+              alt="MyCellar"
+              className="h-9 w-auto max-w-[136px]"
+            />
+          </Link>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="mobile-menu-trigger">

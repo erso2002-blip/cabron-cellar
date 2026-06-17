@@ -1,5 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <path d="M13 5h22l-1.7 13.2A9.3 9.3 0 0 1 24 26a9.3 9.3 0 0 1-9.3-7.8L13 5Z" fill="#66101F"/>
-  <path d="M24 26v13" stroke="#66101F" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M16 39h16" stroke="#66101F" stroke-width="2.6" stroke-linecap="round"/>
+<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">MyCellar logo</title>
+  <desc id="desc">Modern elegant MyCellar logo with a wine glass and cellar arch monogram.</desc>
+  <rect width="1200" height="360" fill="#FBF8F3"/>
+  <g transform="translate(92 52)">
+    <circle cx="128" cy="128" r="126" fill="#2A1215"/>
+    <circle cx="128" cy="128" r="116" stroke="#C6A15B" stroke-width="4"/>
+    <path d="M64 142C64 82 91 48 128 48C165 48 192 82 192 142C192 181 167 210 128 210C89 210 64 181 64 142Z" fill="#FBF8F3"/>
+    <path d="M80 142C80 93 99 66 128 66C157 66 176 93 176 142C176 171 157 193 128 193C99 193 80 171 80 142Z" fill="#7A1724"/>
+    <path d="M88 120C101 127 118 131 137 131C151 131 164 129 175 124C172 88 154 66 128 66C105 66 89 85 88 120Z" fill="#C6A15B"/>
+    <path d="M128 210V244" stroke="#FBF8F3" stroke-width="14" stroke-linecap="round"/>
+    <path d="M94 248H162" stroke="#FBF8F3" stroke-width="14" stroke-linecap="round"/>
+    <path d="M58 224C58 172 89 142 128 142C167 142 198 172 198 224" stroke="#C6A15B" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(390 92)">
+    <text x="0" y="92" fill="#2A1215" font-family="Inter, Avenir Next, Helvetica Neue, Arial, sans-serif" font-size="92" font-weight="700" letter-spacing="0">MyCellar</text>
+    <rect x="4" y="124" width="372" height="3" rx="1.5" fill="#C6A15B"/>
+    <text x="0" y="170" fill="#6C5450" font-family="Inter, Avenir Next, Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="500" letter-spacing="5">ADEGA INTELIGENTE</text>
+  </g>
 </svg>

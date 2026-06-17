@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { Wine } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 declare global {
@@ -78,12 +77,13 @@ export function LoginScreen() {
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
       <section className="w-full max-w-sm rounded-lg border bg-card p-6 shadow-sm">
-        <div className="mb-6 flex items-center gap-3 text-primary">
-          <Wine className="h-7 w-7" />
-          <div>
-            <h1 className="font-serif text-2xl font-bold">MyCellar</h1>
-            <p className="text-sm text-muted-foreground">Acesse sua adega</p>
-          </div>
+        <div className="mb-6">
+          <img
+            src="/logo.svg"
+            alt="MyCellar"
+            className="mb-3 h-14 w-auto max-w-[220px]"
+          />
+          <p className="text-sm text-muted-foreground">Acesse sua adega</p>
         </div>
 
         {loading ? (
