@@ -86,7 +86,9 @@ router.get("/wines", async (req: any, res: any) => {
         ilike(winesTable.name, `%${search}%`),
         ilike(winesTable.producer, `%${search}%`),
         ilike(winesTable.wineryWebsiteUrl, `%${search}%`),
-        ilike(winesTable.grape, `%${search}%`)
+        ilike(winesTable.grape, `%${search}%`),
+        ilike(winesTable.country, `%${search}%`),
+        ilike(winesTable.region, `%${search}%`)
       )!
     );
   }

@@ -63,7 +63,7 @@ export default function StockList() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Buscar por nome, produtor, uva..."
+              placeholder="Buscar por nome, produtor, uva, país ou região..."
               className="pl-9 w-full bg-background"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
