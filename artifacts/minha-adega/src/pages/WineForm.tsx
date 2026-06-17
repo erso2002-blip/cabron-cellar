@@ -32,6 +32,15 @@ import { authFetch } from "@/lib/auth";
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(160),
   producer: z.string().min(1, "Produtor é obrigatório").max(160),
+  wineryWebsiteUrl: z
+    .string()
+    .trim()
+    .max(300)
+    .optional()
+    .nullable()
+    .refine((value) => !value || /^https?:\/\//i.test(value), {
+      message: "Informe uma URL começando com https://",
+    }),
   country: z.string().max(80).optional(),
   region: z.string().max(120).optional(),
   grape: z.string().max(160).optional(),
@@ -133,6 +142,7 @@ export default function WineForm() {
     defaultValues: {
       name: "",
       producer: "",
+      wineryWebsiteUrl: "",
       country: "",
       region: "",
       grape: "",
@@ -154,6 +164,7 @@ export default function WineForm() {
       form.reset({
         name: wine.name,
         producer: wine.producer,
+        wineryWebsiteUrl: wine.wineryWebsiteUrl || "",
         country: wine.country || "",
         region: wine.region || "",
         grape: wine.grape || "",
@@ -177,6 +188,7 @@ export default function WineForm() {
       ...data,
       vintage: data.vintage || undefined,
       pricePaid: data.pricePaid || undefined,
+      wineryWebsiteUrl: data.wineryWebsiteUrl || undefined,
       drinkUntil: data.drinkUntil || undefined,
       labelPhotoUrl: data.labelPhotoUrl || undefined,
     };
@@ -268,6 +280,20 @@ export default function WineForm() {
                       <FormControl>
                         <Input placeholder="Ex: Catena Zapata" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="wineryWebsiteUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site da vitícola</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://www.viticola.com" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormDescription>Referência oficial do produtor para consulta futura.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

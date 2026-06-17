@@ -1,17 +1,19 @@
 import { type Request, type Response } from "express";
 import { OAuth2Client } from "google-auth-library";
 import {
-  consumptionTable,
   db,
-  eq,
-  sql,
   usersTable,
-  winesTable,
 } from "@workspace/db";
 import { attachPublicUser } from "../lib/auth.js";
+import {
+  isEmailSessionToken,
+  verifyEmailSessionToken,
+} from "../lib/emailAuth.js";
+import {
+  canImportLegacyCellar,
+  migrateLegacyCellarIfNeeded,
+} from "../lib/legacyCellar.js";
 import type { PublicUser } from "../types/express.js";
-
-const LEGACY_PUBLIC_USER_ID = "public-cabron-cellar";
 
 const googleClientId =
   process.env.GOOGLE_CLIENT_ID ?? process.env.VITE_GOOGLE_CLIENT_ID ?? null;
@@ -46,36 +48,6 @@ function displayName(payload: {
   if (composedName) return composedName;
 
   return payload.email ?? "Google user";
-}
-
-async function migrateLegacyCellarIfNeeded(userId: string) {
-  const [{ count: ownWinesCount }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(winesTable)
-    .where(eq(winesTable.userId, userId));
-
-  if (ownWinesCount > 0) return;
-
-  await db.transaction(async (tx) => {
-    await tx
-      .update(winesTable)
-      .set({ userId, updatedAt: new Date() })
-      .where(eq(winesTable.userId, LEGACY_PUBLIC_USER_ID));
-
-    await tx
-      .update(consumptionTable)
-      .set({ userId })
-      .where(eq(consumptionTable.userId, LEGACY_PUBLIC_USER_ID));
-  });
-}
-
-function canImportLegacyCellar(email: string) {
-  const allowedEmails = (process.env.LEGACY_CELLAR_IMPORT_EMAILS ?? "")
-    .split(",")
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
-
-  return allowedEmails.includes(email.toLowerCase());
 }
 
 async function verifyGoogleUser(token: string): Promise<PublicUser> {
@@ -136,6 +108,14 @@ export async function googleAuthMiddleware(
   if (!token) return next();
 
   try {
+    if (isEmailSessionToken(token)) {
+      const user = await verifyEmailSessionToken(token);
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+      attachPublicUser(req, user);
+      return next();
+    }
+
     const user = await verifyGoogleUser(token);
     attachPublicUser(req, user);
     return next();

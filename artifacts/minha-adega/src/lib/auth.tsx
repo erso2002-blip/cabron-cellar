@@ -2,11 +2,15 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { setAuthTokenGetter, type AuthUser } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
 
-const TOKEN_STORAGE_KEY = "mycellar.googleIdToken";
+const TOKEN_STORAGE_KEY = "mycellar.authToken";
+const LEGACY_GOOGLE_TOKEN_STORAGE_KEY = "mycellar.googleIdToken";
 
 type AuthConfig = {
   configured: boolean;
   clientId: string | null;
+  emailLogin?: {
+    configured: boolean;
+  };
 };
 
 type AuthState = {
@@ -16,6 +20,8 @@ type AuthState = {
   loading: boolean;
   error: string | null;
   signIn: (token: string) => Promise<void>;
+  requestEmailCode: (email: string) => Promise<void>;
+  verifyEmailCode: (email: string, code: string) => Promise<void>;
   signOut: () => void;
 };
 
@@ -23,7 +29,10 @@ const AuthContext = createContext<AuthState | null>(null);
 
 function readStoredToken() {
   try {
-    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    return (
+      sessionStorage.getItem(TOKEN_STORAGE_KEY) ??
+      sessionStorage.getItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY)
+    );
   } catch {
     return null;
   }
@@ -33,8 +42,10 @@ function storeToken(token: string | null) {
   try {
     if (token) {
       sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+      sessionStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
     } else {
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
     }
   } catch {
     // Browser storage can be unavailable in restricted contexts.
@@ -52,16 +63,16 @@ async function fetchUser(token: string): Promise<AuthUser> {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  if (!response.ok) throw new Error("Sessão Google inválida ou expirada");
+  if (!response.ok) throw new Error("Sessão inválida ou expirada");
   return response.json();
 }
 
-export function getGoogleIdToken() {
+export function getAuthToken() {
   return readStoredToken();
 }
 
 export function authFetch(input: RequestInfo | URL, init: RequestInit = {}) {
-  const token = getGoogleIdToken();
+  const token = getAuthToken();
   const headers = new Headers(init.headers);
   if (token && !headers.has("authorization")) {
     headers.set("authorization", `Bearer ${token}`);
@@ -78,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setAuthTokenGetter(() => getGoogleIdToken());
+    setAuthTokenGetter(() => getAuthToken());
     return () => setAuthTokenGetter(null);
   }, []);
 
@@ -148,6 +159,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setToken(null);
           setUser(null);
           setError(nextError instanceof Error ? nextError.message : "Falha no login");
+        } finally {
+          setLoading(false);
+        }
+      },
+      async requestEmailCode(email: string) {
+        setLoading(true);
+        setError(null);
+
+        try {
+          const response = await fetch("/api/auth/email/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Não foi possível enviar o código por e-mail");
+          }
+        } catch (nextError) {
+          setError(
+            nextError instanceof Error
+              ? nextError.message
+              : "Não foi possível enviar o código por e-mail",
+          );
+          throw nextError;
+        } finally {
+          setLoading(false);
+        }
+      },
+      async verifyEmailCode(email: string, code: string) {
+        setLoading(true);
+        setError(null);
+
+        try {
+          const response = await fetch("/api/auth/email/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, code }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Código inválido ou expirado");
+          }
+
+          const data = await response.json();
+          storeToken(data.token);
+          setToken(data.token);
+          setUser(data.user);
+          queryClient.clear();
+        } catch (nextError) {
+          storeToken(null);
+          setToken(null);
+          setUser(null);
+          setError(
+            nextError instanceof Error ? nextError.message : "Falha no login",
+          );
+          throw nextError;
         } finally {
           setLoading(false);
         }

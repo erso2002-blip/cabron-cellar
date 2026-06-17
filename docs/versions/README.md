@@ -13,8 +13,8 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Current Versions
 
-- `v0.1.0`: current production version.
-- `v0.1.1`: candidate with winery website field, pending production deploy and database column.
+- `v0.1.0`: last stable production version before waitlist and email login.
+- `v0.2.0`: candidate with waitlist, winery website field, and email login code.
 
 ## Rollback Procedure
 
@@ -24,4 +24,3 @@ This folder tracks release versions, production status, rollback references, and
 4. Use Git revert/tag redeploy when the issue is code-level.
 5. For database changes, verify whether the schema change is backward-compatible before rollback.
 6. Record the incident and action in the affected version file.
-

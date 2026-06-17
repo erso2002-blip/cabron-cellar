@@ -14,6 +14,7 @@ const MAX_LABEL_PHOTO_URL_LENGTH = 6_800_000;
 const STRING_LIMITS: Record<string, number> = {
   name: 160,
   producer: 160,
+  wineryWebsiteUrl: 300,
   country: 80,
   region: 120,
   grape: 160,
@@ -84,6 +85,7 @@ router.get("/wines", async (req: any, res: any) => {
       or(
         ilike(winesTable.name, `%${search}%`),
         ilike(winesTable.producer, `%${search}%`),
+        ilike(winesTable.wineryWebsiteUrl, `%${search}%`),
         ilike(winesTable.grape, `%${search}%`)
       )!
     );

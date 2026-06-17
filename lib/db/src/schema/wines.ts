@@ -15,6 +15,7 @@ export const winesTable = pgTable("wines", {
   userId: text("user_id").notNull(),
   name: text("name").notNull(),
   producer: text("producer").notNull(),
+  wineryWebsiteUrl: text("winery_website_url"),
   country: text("country"),
   region: text("region"),
   grape: text("grape"),

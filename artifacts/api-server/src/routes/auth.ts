@@ -1,11 +1,24 @@
 import { Router } from "express";
 import { getAuthenticatedUser } from "../lib/auth.js";
+import {
+  isEmailLoginDeliveryConfigured,
+} from "../lib/emailDelivery.js";
+import {
+  requestEmailLoginCode,
+  verifyEmailLoginCode,
+} from "../lib/emailAuth.js";
 import { getGoogleSsoConfig } from "../middlewares/googleAuth.js";
+import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
 
 router.get("/auth/config", (_req: any, res: any) => {
-  res.json(getGoogleSsoConfig());
+  res.json({
+    ...getGoogleSsoConfig(),
+    emailLogin: {
+      configured: isEmailLoginDeliveryConfigured(),
+    },
+  });
 });
 
 router.get("/auth/user", (req: any, res: any) => {
@@ -16,5 +29,41 @@ router.get("/auth/user", (req: any, res: any) => {
 
   return res.json(user);
 });
+
+router.post(
+  "/auth/email/request",
+  rateLimit({ keyPrefix: "email-login-request", windowMs: 15 * 60_000, max: 5 }),
+  async (req: any, res: any) => {
+    try {
+      const result = await requestEmailLoginCode(req.body?.email);
+      if (!result.ok) {
+        return res.status(result.status).json({ error: result.error });
+      }
+
+      return res.json({ ok: true });
+    } catch (err) {
+      req.log?.error({ err }, "Failed to send email login code");
+      return res.status(503).json({ error: "Email login is not configured" });
+    }
+  },
+);
+
+router.post(
+  "/auth/email/verify",
+  rateLimit({ keyPrefix: "email-login-verify", windowMs: 15 * 60_000, max: 10 }),
+  async (req: any, res: any) => {
+    try {
+      const result = await verifyEmailLoginCode(req.body?.email, req.body?.code);
+      if (!result.ok) {
+        return res.status(result.status).json({ error: result.error });
+      }
+
+      return res.json({ token: result.token, user: result.user });
+    } catch (err) {
+      req.log?.error({ err }, "Failed to verify email login code");
+      return res.status(500).json({ error: "Could not verify login code" });
+    }
+  },
+);
 
 export default router;

@@ -13,12 +13,23 @@ import StockList from "@/pages/StockList";
 import WineDetail from "@/pages/WineDetail";
 import WineForm from "@/pages/WineForm";
 import History from "@/pages/History";
+import Waitlist from "@/pages/Waitlist";
 import NotFound from "@/pages/not-found";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function PublicApp() {
   const { config, user, loading } = useAuth();
+
+  const publicRoutes = (
+    <Switch>
+      <Route path="/waitlist" component={Waitlist} />
+    </Switch>
+  );
+
+  if (window.location.pathname.replace(basePath, "") === "/waitlist") {
+    return publicRoutes;
+  }
 
   if (loading) return <LoginScreen />;
   if (config && !config.configured) {

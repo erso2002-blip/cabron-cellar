@@ -19,7 +19,8 @@ import {
   DollarSign, 
   Thermometer, 
   Tag,
-  Clock
+  Clock,
+  ExternalLink
 } from "lucide-react";
 import {
   AlertDialog,
@@ -140,6 +141,17 @@ export default function WineDetail() {
             <p className="text-xl text-muted-foreground font-serif italic">
               {wine.producer}
             </p>
+            {wine.wineryWebsiteUrl && (
+              <a
+                href={wine.wineryWebsiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+              >
+                Site da vitícola
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 py-6 border-y border-border/50">

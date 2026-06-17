@@ -8,10 +8,12 @@ import labelAnalyzerRouter from "./label-analyzer.js";
 import suggestDrinkUntilRouter from "./suggest-drink-until.js";
 import storageRouter from "./storage.js";
 import wineInsightsRouter from "./wine-insights.js";
+import waitlistRouter from "./waitlist.js";
 
 const router = Router();
 
 router.use(healthRouter);
+router.use(waitlistRouter);
 router.use(authRouter);
 router.use(winesRouter);
 router.use(consumptionRouter);

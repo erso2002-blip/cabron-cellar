@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: MyCellar - Personal Wine Cellar Management API
 servers:
   - url: /api
@@ -413,6 +413,10 @@ components:
           type: string
         producer:
           type: string
+        wineryWebsiteUrl:
+          type: ["string", "null"]
+          format: uri
+          description: Site oficial da vitícola/produtor
         country:
           type: ["string", "null"]
         region:
@@ -461,6 +465,10 @@ components:
         producer:
           type: string
           minLength: 1
+        wineryWebsiteUrl:
+          type: string
+          format: uri
+          description: Site oficial da vitícola/produtor
         country:
           type: string
         region:
@@ -498,6 +506,10 @@ components:
           minLength: 1
         producer:
           type: string
+        wineryWebsiteUrl:
+          type: string
+          format: uri
+          description: Site oficial da vitícola/produtor
         country:
           type: string
         region:

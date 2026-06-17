@@ -1,5 +1,7 @@
-import { useEffect, useRef } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 declare global {
   interface Window {
@@ -38,8 +40,19 @@ function loadGoogleScript() {
 }
 
 export function LoginScreen() {
-  const { config, error, loading, signIn } = useAuth();
+  const {
+    config,
+    error,
+    loading,
+    requestEmailCode,
+    signIn,
+    verifyEmailCode,
+  } = useAuth();
   const buttonRef = useRef<HTMLDivElement | null>(null);
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [emailMessage, setEmailMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!config?.configured || !config.clientId || !buttonRef.current) return;
@@ -74,6 +87,22 @@ export function LoginScreen() {
     };
   }, [config, signIn]);
 
+  async function handleRequestCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setEmailMessage(null);
+    await requestEmailCode(email);
+    setCodeSent(true);
+    setEmailMessage("Código enviado. Verifique seu e-mail.");
+  }
+
+  async function handleVerifyCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setEmailMessage(null);
+    await verifyEmailCode(email, code);
+  }
+
+  const emailLoginConfigured = config?.emailLogin?.configured;
+
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
       <section className="w-full max-w-sm rounded-lg border bg-card p-6 shadow-sm">
@@ -86,16 +115,74 @@ export function LoginScreen() {
           <p className="text-sm text-muted-foreground">Acesse sua adega</p>
         </div>
 
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando login...</p>
-        ) : !config?.configured ? (
-          <p className="text-sm text-destructive">
-            Login Google ainda não configurado no ambiente de produção.
-          </p>
-        ) : (
-          <div className="min-h-10" ref={buttonRef} />
-        )}
+        <div className="space-y-5">
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Carregando login...</p>
+          ) : config?.configured ? (
+            <div className="min-h-10" ref={buttonRef} />
+          ) : null}
 
+          {config?.configured && emailLoginConfigured ? (
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase text-muted-foreground">ou</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          ) : null}
+
+          {emailLoginConfigured ? (
+            codeSent ? (
+              <form className="space-y-3" onSubmit={handleVerifyCode}>
+                <Input
+                  inputMode="numeric"
+                  maxLength={6}
+                  onChange={(event) =>
+                    setCode(event.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                  placeholder="Código de 6 dígitos"
+                  required
+                  value={code}
+                />
+                <Button className="w-full" disabled={loading || code.length !== 6}>
+                  Entrar com código
+                </Button>
+                <button
+                  className="w-full text-sm text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    setCodeSent(false);
+                    setCode("");
+                    setEmailMessage(null);
+                  }}
+                  type="button"
+                >
+                  Usar outro e-mail
+                </button>
+              </form>
+            ) : (
+              <form className="space-y-3" onSubmit={handleRequestCode}>
+                <Input
+                  autoComplete="email"
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  type="email"
+                  value={email}
+                />
+                <Button className="w-full" disabled={loading}>
+                  Receber código por e-mail
+                </Button>
+              </form>
+            )
+          ) : !config?.configured && !loading ? (
+            <p className="text-sm text-destructive">
+              Login por e-mail ainda não configurado no ambiente de produção.
+            </p>
+          ) : null}
+        </div>
+
+        {emailMessage ? (
+          <p className="mt-4 text-sm text-muted-foreground">{emailMessage}</p>
+        ) : null}
         {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
       </section>
     </main>
