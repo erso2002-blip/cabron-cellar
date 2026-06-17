@@ -14,7 +14,7 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.3`: release candidate with PWA install CTA in the app menu.
+- `v0.2.3`: current production version with PWA install CTA in the app menu.
 - `v0.2.2`: production version with cellar filter in `Sua Adega`.
 - `v0.2.1`: production version with restore-consumption, label-name fallback, and official-winery-site guard.
 - `v0.2.0`: production version with waitlist, winery website field, and email login code scaffold.
