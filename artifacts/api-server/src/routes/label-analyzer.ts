@@ -14,6 +14,7 @@ interface LabelData {
   country: string | null;
   region: string | null;
   alcoholContent: string | null;
+  wineryWebsiteUrl: string | null;
 }
 
 // POST /wines/analyze-label
@@ -67,9 +68,10 @@ Fields:
 - country: country of origin (string or null)
 - region: wine region/appellation (string or null)
 - alcoholContent: alcohol percentage e.g. "13.5%" (string or null)
+- wineryWebsiteUrl: official winery/producer website URL (string or null). Use only the producer's official website domain. Never return a retailer, marketplace, importer, review site, tourism listing, social network, or shopping URL. If you are not confident it is official, return null.
 
 Example response:
-{"name":"Reserva Malbec","producer":"Catena Zapata","vintage":2019,"grape":"Malbec","country":"Argentina","region":"Mendoza","alcoholContent":"14.5%"}`,
+{"name":"Reserva Malbec","producer":"Catena Zapata","vintage":2019,"grape":"Malbec","country":"Argentina","region":"Mendoza","alcoholContent":"14.5%","wineryWebsiteUrl":"https://catenazapata.com"}`,
             },
             {
               type: "image_url",
@@ -101,6 +103,10 @@ Example response:
       country: parsed.country ?? null,
       region: parsed.region ?? null,
       alcoholContent: parsed.alcoholContent ?? null,
+      wineryWebsiteUrl:
+        typeof parsed.wineryWebsiteUrl === "string" && /^https?:\/\//i.test(parsed.wineryWebsiteUrl)
+          ? parsed.wineryWebsiteUrl
+          : null,
     });
   } catch (err) {
     req.log.error({ err }, "OpenAI label analysis error");

@@ -66,6 +66,7 @@ interface LabelData {
   country: string | null;
   region: string | null;
   alcoholContent: string | null;
+  wineryWebsiteUrl: string | null;
 }
 
 export default function WineForm() {
@@ -89,9 +90,18 @@ export default function WineForm() {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [drinkUntilHint, setDrinkUntilHint] = useState<string | null>(null);
 
+  function buildFallbackWineName(data: LabelData) {
+    const parts = [data.producer, data.grape, data.vintage ? String(data.vintage) : null]
+      .map((part) => part?.trim())
+      .filter(Boolean);
+    return parts.length >= 2 ? parts.join(" ") : null;
+  }
+
   function handleLabelExtracted(data: LabelData) {
-    if (data.name) form.setValue("name", data.name, { shouldValidate: true });
+    const name = data.name?.trim() || buildFallbackWineName(data);
+    if (name) form.setValue("name", name, { shouldValidate: true });
     if (data.producer) form.setValue("producer", data.producer, { shouldValidate: true });
+    if (data.wineryWebsiteUrl) form.setValue("wineryWebsiteUrl", data.wineryWebsiteUrl, { shouldValidate: true });
     if (data.vintage) form.setValue("vintage", data.vintage, { shouldValidate: true });
     if (data.grape) form.setValue("grape", data.grape);
     if (data.country) form.setValue("country", data.country);

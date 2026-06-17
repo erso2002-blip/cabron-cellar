@@ -1,11 +1,37 @@
 import { useListConsumption } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/loading";
-import { GlassWater, Calendar, Star, MessageSquare } from "lucide-react";
+import { GlassWater, Calendar, Star, MessageSquare, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { authFetch } from "@/lib/auth";
+import { toast } from "sonner";
 
 export default function History() {
   const { data: history, isLoading } = useListConsumption({ limit: 50 });
+  const queryClient = useQueryClient();
+
+  async function restoreConsumption(id: number) {
+    try {
+      const resp = await authFetch(`/api/consumption/${id}/restore`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (!resp.ok) throw new Error("Restore failed");
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/consumption"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/wines"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] }),
+      ]);
+
+      toast.success("Garrafa voltou para a adega.");
+    } catch {
+      toast.error("Não foi possível desfazer este consumo.");
+    }
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -65,6 +91,18 @@ export default function History() {
                       <p className="text-foreground/90 font-serif leading-relaxed">{record.personalNote}</p>
                     </div>
                   )}
+
+                  <div className="mt-4 pt-3 border-t flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => restoreConsumption(record.id)}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 mr-2" />
+                      Voltar para adega
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>

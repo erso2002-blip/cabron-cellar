@@ -12,6 +12,7 @@ interface LabelData {
   country: string | null;
   region: string | null;
   alcoholContent: string | null;
+  wineryWebsiteUrl: string | null;
 }
 
 interface Props {
@@ -202,6 +203,7 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
     country: "País",
     region: "Região",
     alcoholContent: "Teor alcoólico",
+    wineryWebsiteUrl: "Site oficial",
   };
 
   const isBusy = isAnalyzing || isUploading;
