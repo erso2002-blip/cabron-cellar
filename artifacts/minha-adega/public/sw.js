@@ -1,7 +1,6 @@
-const CACHE_NAME = "minha-adega-v1";
+const CACHE_NAME = "minha-adega-v2";
 
 const PRECACHE_URLS = [
-  "/",
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -45,12 +44,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For navigation requests (SPA): serve cached shell, fall back to network
+  // For navigation requests (SPA): prefer fresh HTML to avoid stale bundles after deploys.
   if (request.mode === "navigate") {
     event.respondWith(
-      caches
-        .match("/")
-        .then((cached) => cached || fetch(request))
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/", clone));
+          }
+          return response;
+        })
         .catch(() => caches.match("/"))
     );
     return;
