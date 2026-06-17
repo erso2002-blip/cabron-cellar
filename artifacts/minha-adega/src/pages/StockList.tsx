@@ -1,21 +1,46 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useListWines, getListWinesQueryKey } from "@workspace/api-client-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, PlusCircle, LayoutGrid, List as ListIcon } from "lucide-react";
 import { WineCard } from "@/components/WineCard";
 
+const ALL_CELLARS_VALUE = "__all_cellars__";
+
 export default function StockList() {
   const [search, setSearch] = useState("");
+  const [cellarFilter, setCellarFilter] = useState(ALL_CELLARS_VALUE);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const listParams = search ? { search } : undefined;
   
   const { data: wines, isLoading } = useListWines(
-    { search: search || undefined }, 
-    { query: { queryKey: getListWinesQueryKey({ search: search || undefined }) } }
+    listParams,
+    { query: { queryKey: getListWinesQueryKey(listParams) } }
   );
+
+  const { data: allWines } = useListWines(
+    undefined,
+    { query: { queryKey: getListWinesQueryKey() } }
+  );
+
+  const cellarOptions = useMemo(() => {
+    const names = (allWines ?? [])
+      .map((wine) => wine.cellarName?.trim())
+      .filter((name): name is string => Boolean(name));
+
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [allWines]);
+
+  const visibleWines = useMemo(() => {
+    if (cellarFilter === ALL_CELLARS_VALUE) return wines ?? [];
+
+    return (wines ?? []).filter((wine) => wine.cellarName?.trim() === cellarFilter);
+  }, [cellarFilter, wines]);
+
+  const hasActiveFilter = Boolean(search || cellarFilter !== ALL_CELLARS_VALUE);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -32,28 +57,43 @@ export default function StockList() {
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card p-4 rounded-lg shadow-sm border">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar por nome, produtor, uva..."
-            className="pl-9 w-full bg-background"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            data-testid="input-search-wines"
-          />
+      <div className="flex flex-col lg:flex-row gap-4 justify-between items-center bg-card p-4 rounded-lg shadow-sm border">
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:flex-1">
+          <div className="relative w-full sm:max-w-96">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar por nome, produtor, uva..."
+              className="pl-9 w-full bg-background"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              data-testid="input-search-wines"
+            />
+          </div>
+          <Select value={cellarFilter} onValueChange={setCellarFilter}>
+            <SelectTrigger className="w-full sm:w-56 bg-background" data-testid="select-cellar-filter">
+              <SelectValue placeholder="Filtrar por adega" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_CELLARS_VALUE}>Todas as adegas</SelectItem>
+              {cellarOptions.map((cellarName) => (
+                <SelectItem key={cellarName} value={cellarName}>
+                  {cellarName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-          <Button 
-            variant={viewMode === "grid" ? "secondary" : "ghost"} 
+        <div className="flex items-center space-x-2 w-full lg:w-auto justify-end">
+          <Button
+            variant={viewMode === "grid" ? "secondary" : "ghost"}
             size="icon"
             onClick={() => setViewMode("grid")}
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
-          <Button 
-            variant={viewMode === "list" ? "secondary" : "ghost"} 
+          <Button
+            variant={viewMode === "list" ? "secondary" : "ghost"}
             size="icon"
             onClick={() => setViewMode("list")}
           >
@@ -64,18 +104,18 @@ export default function StockList() {
 
       {isLoading ? (
         <PageSkeleton />
-      ) : !wines?.length ? (
+      ) : !visibleWines.length ? (
         <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-border rounded-xl bg-card">
           <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
             <Search className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="text-xl font-serif font-bold text-foreground">Nenhum vinho encontrado</h3>
           <p className="text-muted-foreground mt-2 max-w-md">
-            {search 
-              ? "Não encontramos nenhum vinho correspondente à sua busca. Tente termos diferentes."
+            {hasActiveFilter
+              ? "Não encontramos nenhum vinho correspondente aos filtros selecionados."
               : "Sua adega está vazia. Adicione sua primeira garrafa para começar a colecionar."}
           </p>
-          {!search && (
+          {!hasActiveFilter && (
             <Link href="/wines/new" className="mt-6">
               <Button>Adicionar Primeira Garrafa</Button>
             </Link>
@@ -87,7 +127,7 @@ export default function StockList() {
             ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
             : "flex flex-col gap-4"
         }>
-          {wines.map(wine => (
+          {visibleWines.map(wine => (
             <WineCard key={wine.id} wine={wine} viewMode={viewMode} />
           ))}
         </div>

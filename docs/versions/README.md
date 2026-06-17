@@ -4,7 +4,7 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Rules
 
-- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`.
+- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`.
 - Small fixes or low-risk additions increment the patch number.
 - Larger user-facing features increment the minor number.
 - Every production release must have a version file in this folder.
@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.1`: current production version with restore-consumption, label-name fallback, and official-winery-site guard.
+- `v0.2.2`: current production version with cellar filter in `Sua Adega`.
+- `v0.2.1`: production version with restore-consumption, label-name fallback, and official-winery-site guard.
 - `v0.2.0`: production version with waitlist, winery website field, and email login code scaffold.
 
 ## Rollback Procedure
