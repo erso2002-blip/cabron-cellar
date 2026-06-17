@@ -14,7 +14,7 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.0`: candidate with waitlist, winery website field, and email login code.
+- `v0.2.0`: current production version with waitlist, winery website field, and email login code scaffold.
 
 ## Rollback Procedure
 
