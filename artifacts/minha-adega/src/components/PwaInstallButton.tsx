@@ -16,12 +16,10 @@ function isStandaloneMode() {
   );
 }
 
-function isIosSafari() {
+function isIosBrowser() {
   const ua = window.navigator.userAgent;
   const isIos = /iPad|iPhone|iPod/.test(ua) || (ua.includes("Macintosh") && navigator.maxTouchPoints > 1);
-  const isWebKit = /WebKit/.test(ua);
-  const isOtherIosBrowser = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
-  return isIos && isWebKit && !isOtherIosBrowser;
+  return isIos;
 }
 
 interface PwaInstallButtonProps {
@@ -38,7 +36,9 @@ export function PwaInstallButton({ className, compact = false, onAction }: PwaIn
 
   useEffect(() => {
     setIsInstalled(isStandaloneMode());
-    setCanShowIosHelp(isIosSafari());
+    const iosBrowser = isIosBrowser();
+    setCanShowIosHelp(iosBrowser);
+    setShowIosHelp(iosBrowser);
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -103,7 +103,7 @@ export function PwaInstallButton({ className, compact = false, onAction }: PwaIn
       </Button>
       {showIosHelp ? (
         <p className="mt-2 leading-snug text-muted-foreground">
-          No iPhone: toque em Compartilhar e depois em Adicionar à Tela de Início.
+          No iPhone: toque em Compartilhar no Safari e depois em Adicionar à Tela de Início.
         </p>
       ) : null}
     </div>

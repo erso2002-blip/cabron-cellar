@@ -4,7 +4,7 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Rules
 
-- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`.
+- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`.
 - Small fixes or low-risk additions increment the patch number.
 - Larger user-facing features increment the minor number.
 - Every production release must have a version file in this folder.
@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.5`: current production version with forced service worker refresh for stale iPhone/PWA clients.
+- `v0.2.6`: current production version with visible iPhone PWA install prompt and winery-site fallback for existing Achaval Ferrer records.
+- `v0.2.5`: production version with forced service worker refresh for stale iPhone/PWA clients.
 - `v0.2.4`: production version with PWA service worker cache hotfix.
 - `v0.2.3`: production version with PWA install CTA in the app menu.
 - `v0.2.2`: production version with cellar filter in `Sua Adega`.
