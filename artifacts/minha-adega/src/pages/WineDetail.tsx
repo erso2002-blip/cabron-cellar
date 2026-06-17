@@ -36,22 +36,6 @@ import {
 import { ConsumeModal } from "@/components/ConsumeModal";
 import { WineInsights } from "@/components/WineInsights";
 
-const KNOWN_WINERY_WEBSITES: Record<string, string> = {
-  "achaval ferrer": "https://achaval-ferrer.com/",
-};
-
-function normalizeProducerName(value: string | null | undefined) {
-  return (value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-}
-
-function getWineryWebsite(wine: { producer?: string | null; wineryWebsiteUrl?: string | null }) {
-  return wine.wineryWebsiteUrl || KNOWN_WINERY_WEBSITES[normalizeProducerName(wine.producer)] || null;
-}
-
 export default function WineDetail() {
   const params = useParams();
   const [, setLocation] = useLocation();
@@ -85,7 +69,7 @@ export default function WineDetail() {
   if (!wine) return <div>Vinho não encontrado</div>;
 
   const valueFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-  const wineryWebsiteUrl = getWineryWebsite(wine);
+  const wineryWebsiteUrl = wine.wineryWebsiteUrl;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">

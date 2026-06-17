@@ -122,7 +122,6 @@ export function Shell({ children }: ShellProps) {
         </header>
 
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
-          <PwaInstallButton className="mb-4 md:hidden" />
           {children}
         </main>
       </div>
