@@ -10,35 +10,53 @@ import { WineCard } from "@/components/WineCard";
 
 const ALL_CELLARS_VALUE = "__all_cellars__";
 
+function normalizeSearchValue(value: unknown) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export default function StockList() {
   const [search, setSearch] = useState("");
   const [cellarFilter, setCellarFilter] = useState(ALL_CELLARS_VALUE);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const listParams = search ? { search } : undefined;
-  
-  const { data: wines, isLoading } = useListWines(
-    listParams,
-    { query: { queryKey: getListWinesQueryKey(listParams) } }
-  );
 
-  const { data: allWines } = useListWines(
+  const { data: wines, isLoading } = useListWines(
     undefined,
     { query: { queryKey: getListWinesQueryKey() } }
   );
 
   const cellarOptions = useMemo(() => {
-    const names = (allWines ?? [])
+    const names = (wines ?? [])
       .map((wine) => wine.cellarName?.trim())
       .filter((name): name is string => Boolean(name));
 
     return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [allWines]);
+  }, [wines]);
 
   const visibleWines = useMemo(() => {
-    if (cellarFilter === ALL_CELLARS_VALUE) return wines ?? [];
+    const normalizedSearch = normalizeSearchValue(search);
+    const filteredBySearch = normalizedSearch
+      ? (wines ?? []).filter((wine) =>
+          [
+            wine.name,
+            wine.producer,
+            wine.wineryWebsiteUrl,
+            wine.grape,
+            wine.country,
+            wine.region,
+          ]
+            .map(normalizeSearchValue)
+            .some((value) => value.includes(normalizedSearch))
+        )
+      : wines ?? [];
 
-    return (wines ?? []).filter((wine) => wine.cellarName?.trim() === cellarFilter);
-  }, [cellarFilter, wines]);
+    if (cellarFilter === ALL_CELLARS_VALUE) return filteredBySearch;
+
+    return filteredBySearch.filter((wine) => wine.cellarName?.trim() === cellarFilter);
+  }, [cellarFilter, search, wines]);
 
   const hasActiveFilter = Boolean(search || cellarFilter !== ALL_CELLARS_VALUE);
 
