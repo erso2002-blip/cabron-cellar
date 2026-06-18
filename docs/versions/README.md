@@ -4,7 +4,7 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Rules
 
-- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`.
+- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`, `v0.2.16`.
 - Small fixes or low-risk additions increment the patch number.
 - Larger user-facing features increment the minor number.
 - Every production release must have a version file in this folder.
@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.15`: current production version with winery website normalization and cellar-card website visibility.
+- `v0.2.16`: current production version with legal pages linked from the app side menu and aligned app/package version display.
+- `v0.2.15`: production version with winery website normalization and cellar-card website visibility.
 - `v0.2.14`: production version with the waitlist header app CTA disabled during closed beta.
 - `v0.2.13`: production version with the dashboard attention card based on the next 12 months.
 - `v0.2.12`: production version with the qualified public waitlist form for Instagram/Bio traffic.

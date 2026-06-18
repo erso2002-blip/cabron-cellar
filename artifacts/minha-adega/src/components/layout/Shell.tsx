@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { 
   Wine, 
+  FileText,
   LayoutDashboard, 
   History, 
+  ShieldCheck,
   PlusCircle, 
   Menu 
 } from "lucide-react";
@@ -22,6 +24,11 @@ const navItems = [
   { href: "/wines", label: "Adega", icon: Wine },
   { href: "/wines/new", label: "Adicionar", icon: PlusCircle },
   { href: "/history", label: "Histórico", icon: History },
+];
+
+const legalItems = [
+  { href: "/termos", label: "Termos de Uso", icon: FileText },
+  { href: "/privacidade", label: "Privacidade", icon: ShieldCheck },
 ];
 
 export function Shell({ children }: ShellProps) {
@@ -48,6 +55,25 @@ export function Shell({ children }: ShellProps) {
     </>
   );
 
+  const LegalLinks = () => (
+    <div className="space-y-1 border-t pt-3">
+      {legalItems.map((item) => (
+        <Link key={item.href} href={item.href}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start px-0 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => setOpen(false)}
+            data-testid={`legal-${item.href.slice(1)}`}
+          >
+            <item.icon className="mr-2 h-3.5 w-3.5" />
+            {item.label}
+          </Button>
+        </Link>
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       {/* Desktop Sidebar */}
@@ -65,6 +91,7 @@ export function Shell({ children }: ShellProps) {
           <NavLinks />
         </nav>
         <div className="space-y-3 px-4 text-xs text-muted-foreground">
+          <LegalLinks />
           <PwaInstallButton compact />
           {ssoEnabled ? (
             <>
@@ -103,6 +130,7 @@ export function Shell({ children }: ShellProps) {
                 <NavLinks />
               </nav>
               <div className="space-y-3 text-xs text-muted-foreground">
+                <LegalLinks />
                 <PwaInstallButton compact />
                 {ssoEnabled ? (
                   <>

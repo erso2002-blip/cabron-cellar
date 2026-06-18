@@ -14,6 +14,7 @@ import WineDetail from "@/pages/WineDetail";
 import WineForm from "@/pages/WineForm";
 import History from "@/pages/History";
 import Waitlist from "@/pages/Waitlist";
+import { PrivacyPolicy, TermsOfUse } from "@/pages/Legal";
 import NotFound from "@/pages/not-found";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -24,10 +25,12 @@ function PublicApp() {
   const publicRoutes = (
     <Switch>
       <Route path="/waitlist" component={Waitlist} />
+      <Route path="/termos" component={TermsOfUse} />
+      <Route path="/privacidade" component={PrivacyPolicy} />
     </Switch>
   );
 
-  if (window.location.pathname.replace(basePath, "") === "/waitlist") {
+  if (["/waitlist", "/termos", "/privacidade"].includes(window.location.pathname.replace(basePath, ""))) {
     return publicRoutes;
   }
 

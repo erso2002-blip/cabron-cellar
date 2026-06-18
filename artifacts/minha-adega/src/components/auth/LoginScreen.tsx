@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
 declare global {
@@ -53,8 +54,13 @@ export function LoginScreen() {
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
 
   useEffect(() => {
+    if (!acceptedLegal) {
+      if (buttonRef.current) buttonRef.current.innerHTML = "";
+      return;
+    }
     if (!config?.configured || !config.clientId || !buttonRef.current) return;
 
     let cancelled = false;
@@ -85,7 +91,7 @@ export function LoginScreen() {
     return () => {
       cancelled = true;
     };
-  }, [config, signIn]);
+  }, [acceptedLegal, config, signIn]);
 
   async function handleRequestCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -118,8 +124,12 @@ export function LoginScreen() {
         <div className="space-y-5">
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando login...</p>
-          ) : config?.configured ? (
+          ) : config?.configured && acceptedLegal ? (
             <div className="min-h-10" ref={buttonRef} />
+          ) : config?.configured ? (
+            <p className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+              Aceite os termos para liberar o login com Google.
+            </p>
           ) : null}
 
           {config?.configured && emailLoginConfigured ? (
@@ -143,7 +153,10 @@ export function LoginScreen() {
                   required
                   value={code}
                 />
-                <Button className="w-full" disabled={loading || code.length !== 6}>
+                <Button
+                  className="w-full"
+                  disabled={loading || code.length !== 6 || !acceptedLegal}
+                >
                   Entrar com código
                 </Button>
                 <button
@@ -168,7 +181,7 @@ export function LoginScreen() {
                   type="email"
                   value={email}
                 />
-                <Button className="w-full" disabled={loading}>
+                <Button className="w-full" disabled={loading || !acceptedLegal}>
                   Receber código por e-mail
                 </Button>
               </form>
@@ -179,6 +192,24 @@ export function LoginScreen() {
             </p>
           ) : null}
         </div>
+
+        <label className="mt-5 flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
+          <Checkbox
+            checked={acceptedLegal}
+            onCheckedChange={(checked) => setAcceptedLegal(checked === true)}
+          />
+          <span>
+            Li e concordo com os{" "}
+            <a className="text-primary underline-offset-4 hover:underline" href="/termos">
+              Termos de Uso
+            </a>{" "}
+            e com a{" "}
+            <a className="text-primary underline-offset-4 hover:underline" href="/privacidade">
+              Politica de Privacidade
+            </a>
+            , incluindo o tratamento dos meus dados para funcionamento do MyCellar.
+          </span>
+        </label>
 
         {emailMessage ? (
           <p className="mt-4 text-sm text-muted-foreground">{emailMessage}</p>
