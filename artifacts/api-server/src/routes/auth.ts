@@ -4,10 +4,11 @@ import {
   isEmailLoginDeliveryConfigured,
 } from "../lib/emailDelivery.js";
 import {
+  createEmailSessionForUser,
   requestEmailLoginCode,
   verifyEmailLoginCode,
 } from "../lib/emailAuth.js";
-import { getGoogleSsoConfig } from "../middlewares/googleAuth.js";
+import { getGoogleSsoConfig, verifyGoogleUser } from "../middlewares/googleAuth.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
 import { isClosedBetaAccessEnabled } from "../lib/closedBetaAccess.js";
 
@@ -33,6 +34,26 @@ router.get("/auth/user", (req: any, res: any) => {
 
   return res.json(user);
 });
+
+router.post(
+  "/auth/google/session",
+  rateLimit({ keyPrefix: "google-login-session", windowMs: 15 * 60_000, max: 20 }),
+  async (req: any, res: any) => {
+    try {
+      const googleToken = typeof req.body?.token === "string" ? req.body.token : "";
+      if (!googleToken) {
+        return res.status(400).json({ error: "Invalid Google token" });
+      }
+
+      const user = await verifyGoogleUser(googleToken);
+      const token = await createEmailSessionForUser(user.id);
+      return res.json({ token, user });
+    } catch (err) {
+      req.log?.warn({ err }, "Google session creation failed");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+  },
+);
 
 router.post(
   "/auth/email/request",

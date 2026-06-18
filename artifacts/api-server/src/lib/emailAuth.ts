@@ -58,6 +58,17 @@ export function isEmailSessionToken(token: string) {
   return token.startsWith(EMAIL_SESSION_TOKEN_PREFIX);
 }
 
+export async function createEmailSessionForUser(userId: string) {
+  const token = `${EMAIL_SESSION_TOKEN_PREFIX}${crypto.randomBytes(32).toString("base64url")}`;
+  await db.insert(emailSessionsTable).values({
+    userId,
+    tokenHash: tokenHash(token),
+    expiresAt: new Date(Date.now() + SESSION_TTL_MS),
+  });
+
+  return token;
+}
+
 export async function requestEmailLoginCode(rawEmail: unknown) {
   const email = normalizeEmail(rawEmail);
   if (!email) {
@@ -158,12 +169,7 @@ export async function verifyEmailLoginCode(rawEmail: unknown, rawCode: unknown) 
     await migrateLegacyCellarIfNeeded(user.id);
   }
 
-  const token = `${EMAIL_SESSION_TOKEN_PREFIX}${crypto.randomBytes(32).toString("base64url")}`;
-  await db.insert(emailSessionsTable).values({
-    userId,
-    tokenHash: tokenHash(token),
-    expiresAt: new Date(Date.now() + SESSION_TTL_MS),
-  });
+  const token = await createEmailSessionForUser(userId);
 
   return { ok: true as const, token, user };
 }

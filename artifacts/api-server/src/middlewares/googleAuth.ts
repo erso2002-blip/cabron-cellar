@@ -51,7 +51,7 @@ function displayName(payload: {
   return payload.email ?? "Google user";
 }
 
-async function verifyGoogleUser(token: string): Promise<PublicUser> {
+export async function verifyGoogleUser(token: string): Promise<PublicUser> {
   if (!googleClient || !googleClientId) {
     throw new Error("Google SSO is not configured");
   }

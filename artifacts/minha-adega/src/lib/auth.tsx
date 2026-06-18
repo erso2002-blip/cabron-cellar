@@ -33,6 +33,8 @@ const AuthContext = createContext<AuthState | null>(null);
 function readStoredToken() {
   try {
     return (
+      localStorage.getItem(TOKEN_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY) ??
       sessionStorage.getItem(TOKEN_STORAGE_KEY) ??
       sessionStorage.getItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY)
     );
@@ -44,9 +46,13 @@ function readStoredToken() {
 function storeToken(token: string | null) {
   try {
     if (token) {
-      sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+      localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      localStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       sessionStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
     } else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       sessionStorage.removeItem(LEGACY_GOOGLE_TOKEN_STORAGE_KEY);
     }
@@ -67,6 +73,17 @@ async function fetchUser(token: string): Promise<AuthUser> {
   });
 
   if (!response.ok) throw new Error("Sessão inválida ou expirada");
+  return response.json();
+}
+
+async function createGoogleSession(token: string): Promise<{ token: string; user: AuthUser }> {
+  const response = await fetch("/api/auth/google/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+
+  if (!response.ok) throw await responseError(response, "Falha no login com Google");
   return response.json();
 }
 
@@ -166,10 +183,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setError(null);
 
         try {
-          const nextUser = await fetchUser(nextToken);
-          storeToken(nextToken);
-          setToken(nextToken);
-          setUser(nextUser);
+          const session = await createGoogleSession(nextToken);
+          storeToken(session.token);
+          setToken(session.token);
+          setUser(session.user);
           queryClient.clear();
         } catch (nextError) {
           storeToken(null);

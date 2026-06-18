@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, CreditCard, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Check, Clock } from "lucide-react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +33,10 @@ const intervalLabel: Record<BillingPlan["interval"], string> = {
 
 export default function Billing() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [providerConfigured, setProviderConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const formatter = useMemo(
@@ -72,49 +73,28 @@ export default function Billing() {
     };
   }, []);
 
-  async function startCheckout(planId: BillingPlan["id"]) {
-    if (!user) {
-      window.location.assign("/login");
-      return;
-    }
-
-    setCheckoutPlanId(planId);
-    setError(null);
-
-    try {
-      const response = await authFetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Nao foi possivel abrir o checkout do Mercado Pago");
-      }
-
-      const data = (await response.json()) as { checkoutUrl?: string };
-      if (!data.checkoutUrl) throw new Error("Checkout indisponivel");
-      window.location.assign(data.checkoutUrl);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Falha ao iniciar checkout");
-      setCheckoutPlanId(null);
-    }
-  }
-
   return (
     <main className="min-h-screen bg-background px-4 py-8 md:px-8">
       <div className="mx-auto max-w-6xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 className="text-3xl font-serif font-bold tracking-tight">Assinatura</h2>
-          <p className="text-muted-foreground mt-1 font-serif italic">
-            Planos MyCellar conforme o business plan.
-          </p>
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <Button
+              className="mb-4 px-0"
+              onClick={() => setLocation(user ? "/" : "/waitlist")}
+              variant="link"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Button>
+            <h2 className="text-3xl font-serif font-bold tracking-tight">Assinatura</h2>
+            <p className="text-muted-foreground mt-1 font-serif italic">
+              Planos MyCellar conforme o business plan.
+            </p>
+          </div>
+          <Badge variant={providerConfigured ? "default" : "secondary"} className="w-fit">
+            Mercado Pago {providerConfigured ? "configurado" : "pendente"}
+          </Badge>
         </div>
-        <Badge variant={providerConfigured ? "default" : "secondary"} className="w-fit">
-          Mercado Pago {providerConfigured ? "configurado" : "pendente"}
-        </Badge>
-      </div>
 
       {error ? (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -126,7 +106,6 @@ export default function Billing() {
         {(loading ? [] : plans).map((plan) => {
           const isPaid = plan.amount > 0;
           const isFeatured = plan.id === "pro-annual";
-          const isCheckingOut = checkoutPlanId === plan.id;
 
           return (
             <Card
@@ -160,15 +139,10 @@ export default function Billing() {
                 <Button
                   className="w-full"
                   variant={isPaid ? "default" : "outline"}
-                  disabled={!isPaid || !providerConfigured || Boolean(checkoutPlanId)}
-                  onClick={() => startCheckout(plan.id)}
+                  disabled
                 >
-                  {isCheckingOut ? (
-                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <CreditCard className="mr-2 h-4 w-4" />
-                  )}
-                  {isPaid ? (user ? "Assinar com Mercado Pago" : "Entrar para assinar") : "Plano atual"}
+                  {isPaid ? <Clock className="mr-2 h-4 w-4" /> : null}
+                  {isPaid ? "Em breve" : "Plano atual"}
                 </Button>
               </CardContent>
             </Card>
