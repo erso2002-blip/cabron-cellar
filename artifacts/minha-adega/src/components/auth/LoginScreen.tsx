@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
+const LEGAL_ACCEPTANCE_STORAGE_KEY = "mycellar.legalAcceptance.v1";
+
 declare global {
   interface Window {
     google?: {
@@ -21,6 +23,28 @@ declare global {
         };
       };
     };
+  }
+}
+
+function readStoredLegalAcceptance() {
+  try {
+    return localStorage.getItem(LEGAL_ACCEPTANCE_STORAGE_KEY) === "accepted";
+  } catch {
+    return false;
+  }
+}
+
+function storeLegalAcceptance(accepted: boolean) {
+  try {
+    if (accepted) {
+      localStorage.setItem(LEGAL_ACCEPTANCE_STORAGE_KEY, "accepted");
+      localStorage.setItem(`${LEGAL_ACCEPTANCE_STORAGE_KEY}.acceptedAt`, new Date().toISOString());
+    } else {
+      localStorage.removeItem(LEGAL_ACCEPTANCE_STORAGE_KEY);
+      localStorage.removeItem(`${LEGAL_ACCEPTANCE_STORAGE_KEY}.acceptedAt`);
+    }
+  } catch {
+    // Browser storage can be unavailable in restricted contexts.
   }
 }
 
@@ -55,7 +79,7 @@ export function LoginScreen() {
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
-  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(() => readStoredLegalAcceptance());
 
   useEffect(() => {
     if (!acceptedLegal) {
@@ -197,7 +221,11 @@ export function LoginScreen() {
         <label className="mt-5 flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
           <Checkbox
             checked={acceptedLegal}
-            onCheckedChange={(checked) => setAcceptedLegal(checked === true)}
+            onCheckedChange={(checked) => {
+              const nextAccepted = checked === true;
+              setAcceptedLegal(nextAccepted);
+              storeLegalAcceptance(nextAccepted);
+            }}
           />
           <span>
             Li e concordo com os{" "}
