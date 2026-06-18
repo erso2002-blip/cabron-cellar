@@ -19,12 +19,22 @@ export default function Waitlist() {
     const currentControl = formData.get("currentControl");
     const betaIntent = formData.get("betaIntent");
     const painNotes = formData.get("painNotes");
+    const params = new URLSearchParams(window.location.search);
+    const utmSource = params.get("utm_source") || params.get("ref") || "waitlist-public";
+    const utmCampaign = params.get("utm_campaign");
+    const utmMedium = params.get("utm_medium");
+    const utmContent = params.get("utm_content");
+    const source = [utmSource, utmCampaign].filter(Boolean).join(":").slice(0, 80);
 
     const notes = [
       `Garrafas: ${bottleRange || "nao informado"}`,
       `Uso: ${useType || "nao informado"}`,
       `Controle atual: ${currentControl || "nao informado"}`,
       `Interesse beta: ${betaIntent || "nao informado"}`,
+      `UTM source: ${utmSource}`,
+      utmMedium ? `UTM medium: ${utmMedium}` : null,
+      utmCampaign ? `UTM campaign: ${utmCampaign}` : null,
+      utmContent ? `UTM content: ${utmContent}` : null,
       painNotes ? `Dor/observacoes: ${painNotes}` : null,
     ]
       .filter(Boolean)
@@ -40,7 +50,7 @@ export default function Waitlist() {
           email: formData.get("email"),
           whatsapp: formData.get("whatsapp"),
           notes,
-          source: "waitlist-public",
+          source,
         }),
       });
 

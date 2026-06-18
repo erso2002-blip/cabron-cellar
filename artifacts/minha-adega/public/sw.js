@@ -1,4 +1,4 @@
-const CACHE_NAME = "minha-adega-v15";
+const CACHE_NAME = "minha-adega-v16";
 
 const PRECACHE_URLS = [
   "/manifest.json",
@@ -56,10 +56,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For navigation requests (SPA): prefer fresh HTML to avoid stale bundles after deploys.
+  // For navigation requests (SPA): always prefer fresh HTML to avoid stale bundles after deploys.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: "no-store" })
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
@@ -77,7 +77,7 @@ self.addEventListener("fetch", (event) => {
     caches.match(request).then(
       (cached) =>
         cached ||
-        fetch(request).then((response) => {
+        fetch(request, { cache: "no-store" }).then((response) => {
           // Only cache valid responses for static assets
           if (
             response.ok &&
