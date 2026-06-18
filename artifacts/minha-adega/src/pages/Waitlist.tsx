@@ -14,6 +14,21 @@ export default function Waitlist() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const bottleRange = formData.get("bottleRange");
+    const useType = formData.get("useType");
+    const currentControl = formData.get("currentControl");
+    const betaIntent = formData.get("betaIntent");
+    const painNotes = formData.get("painNotes");
+
+    const notes = [
+      `Garrafas: ${bottleRange || "nao informado"}`,
+      `Uso: ${useType || "nao informado"}`,
+      `Controle atual: ${currentControl || "nao informado"}`,
+      `Interesse beta: ${betaIntent || "nao informado"}`,
+      painNotes ? `Dor/observacoes: ${painNotes}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     setState("loading");
     try {
@@ -24,8 +39,8 @@ export default function Waitlist() {
           name: formData.get("name"),
           email: formData.get("email"),
           whatsapp: formData.get("whatsapp"),
-          notes: formData.get("notes"),
-          source: "instagram",
+          notes,
+          source: "waitlist-public",
         }),
       });
 
@@ -122,12 +137,90 @@ export default function Waitlist() {
                   <Input name="whatsapp" inputMode="tel" placeholder="Opcional" />
                 </label>
 
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-medium">Quantas garrafas você tem?</span>
+                    <select
+                      name="bottleRange"
+                      required
+                      className="flex h-10 w-full rounded-md border border-[#d8c9a4] bg-white px-3 py-2 text-sm outline-none focus:border-[#66101f] focus:ring-1 focus:ring-[#66101f]"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Selecione
+                      </option>
+                      <option value="1-9">1 a 9</option>
+                      <option value="10-24">10 a 24</option>
+                      <option value="25-49">25 a 49</option>
+                      <option value="50-99">50 a 99</option>
+                      <option value="100+">100 ou mais</option>
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-medium">Tipo de uso</span>
+                    <select
+                      name="useType"
+                      required
+                      className="flex h-10 w-full rounded-md border border-[#d8c9a4] bg-white px-3 py-2 text-sm outline-none focus:border-[#66101f] focus:ring-1 focus:ring-[#66101f]"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Selecione
+                      </option>
+                      <option value="adega-pessoal">Adega pessoal</option>
+                      <option value="restaurante">Restaurante/bar</option>
+                      <option value="loja">Loja/empório</option>
+                      <option value="profissional-vinho">Profissional do vinho</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-medium">Como controla hoje?</span>
+                    <select
+                      name="currentControl"
+                      required
+                      className="flex h-10 w-full rounded-md border border-[#d8c9a4] bg-white px-3 py-2 text-sm outline-none focus:border-[#66101f] focus:ring-1 focus:ring-[#66101f]"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Selecione
+                      </option>
+                      <option value="memoria">Memória</option>
+                      <option value="fotos">Fotos no celular</option>
+                      <option value="planilha">Planilha</option>
+                      <option value="app">Outro app</option>
+                      <option value="sem-controle">Não controlo</option>
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-medium">Quer testar o beta?</span>
+                    <select
+                      name="betaIntent"
+                      required
+                      className="flex h-10 w-full rounded-md border border-[#d8c9a4] bg-white px-3 py-2 text-sm outline-none focus:border-[#66101f] focus:ring-1 focus:ring-[#66101f]"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Selecione
+                      </option>
+                      <option value="sim-agora">Sim, quero testar</option>
+                      <option value="talvez">Talvez</option>
+                      <option value="acompanhar">Só quero acompanhar</option>
+                    </select>
+                  </label>
+                </div>
+
                 <label className="block space-y-2">
-                  <span className="text-sm font-medium">Como é sua adega hoje?</span>
+                  <span className="text-sm font-medium">Qual é sua maior dificuldade?</span>
                   <Textarea
-                    name="notes"
+                    name="painNotes"
                     maxLength={500}
-                    placeholder="Ex.: poucas garrafas, adega climatizada, compras frequentes..."
+                    placeholder="Ex.: não lembro o que tenho, perco o ponto de consumo, compro repetido..."
                   />
                 </label>
 
