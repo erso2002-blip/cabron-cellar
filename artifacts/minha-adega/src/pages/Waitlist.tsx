@@ -58,12 +58,9 @@ export default function Waitlist() {
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 md:px-8">
         <header className="flex items-center justify-between">
           <img src="/logo.svg" alt="MyCellar" className="h-11 w-auto md:h-14" />
-          <a
-            href="/"
-            className="rounded-md border border-[#d8c9a4] px-3 py-2 text-sm font-medium text-[#66101f]"
-          >
-            Abrir app
-          </a>
+          <span className="rounded-md border border-[#d8c9a4] px-3 py-2 text-sm font-medium text-[#7a7068]">
+            App em beta fechado
+          </span>
         </header>
 
         <div className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr]">
