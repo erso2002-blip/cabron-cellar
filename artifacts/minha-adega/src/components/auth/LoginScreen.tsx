@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -72,14 +72,20 @@ export function LoginScreen() {
     loading,
     requestEmailCode,
     signIn,
+    user,
     verifyEmailCode,
   } = useAuth();
+  const [, setLocation] = useLocation();
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
   const [acceptedLegal, setAcceptedLegal] = useState(() => readStoredLegalAcceptance());
+
+  useEffect(() => {
+    if (user) setLocation("/");
+  }, [setLocation, user]);
 
   useEffect(() => {
     if (!acceptedLegal) {
