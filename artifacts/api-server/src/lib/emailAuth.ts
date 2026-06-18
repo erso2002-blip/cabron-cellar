@@ -15,6 +15,11 @@ import {
   canImportLegacyCellar,
   migrateLegacyCellarIfNeeded,
 } from "./legacyCellar.js";
+import {
+  closedBetaAccessDeniedResult,
+  isEmailAllowedForClosedBeta,
+  normalizeAccessEmail,
+} from "./closedBetaAccess.js";
 
 const EMAIL_SESSION_TOKEN_PREFIX = "mc_email_";
 const LOGIN_CODE_TTL_MS = 10 * 60 * 1000;
@@ -22,11 +27,7 @@ const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
 
 function normalizeEmail(email: unknown) {
-  if (typeof email !== "string") return null;
-  const normalized = email.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return null;
-  if (normalized.length > 180) return null;
-  return normalized;
+  return normalizeAccessEmail(email);
 }
 
 function codeHash(email: string, code: string) {
@@ -62,6 +63,9 @@ export async function requestEmailLoginCode(rawEmail: unknown) {
   if (!email) {
     return { ok: false as const, status: 400, error: "Invalid email" };
   }
+  if (!isEmailAllowedForClosedBeta(email)) {
+    return closedBetaAccessDeniedResult();
+  }
 
   const code = generateCode();
   const expiresAt = new Date(Date.now() + LOGIN_CODE_TTL_MS);
@@ -82,6 +86,9 @@ export async function verifyEmailLoginCode(rawEmail: unknown, rawCode: unknown) 
   const code = typeof rawCode === "string" ? rawCode.trim() : "";
   if (!email || !/^\d{6}$/.test(code)) {
     return { ok: false as const, status: 400, error: "Invalid code" };
+  }
+  if (!isEmailAllowedForClosedBeta(email)) {
+    return closedBetaAccessDeniedResult();
   }
 
   const [record] = await db
@@ -185,6 +192,7 @@ export async function verifyEmailSessionToken(token: string): Promise<PublicUser
     .limit(1);
 
   if (!user) return null;
+  if (!isEmailAllowedForClosedBeta(user.email)) return null;
 
   const name = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
   return {

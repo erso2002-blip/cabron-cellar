@@ -13,6 +13,7 @@ import {
   canImportLegacyCellar,
   migrateLegacyCellarIfNeeded,
 } from "../lib/legacyCellar.js";
+import { isEmailAllowedForClosedBeta } from "../lib/closedBetaAccess.js";
 import type { PublicUser } from "../types/express.js";
 
 const googleClientId =
@@ -63,6 +64,9 @@ async function verifyGoogleUser(token: string): Promise<PublicUser> {
   const payload = ticket.getPayload();
   if (!payload?.sub || !payload.email) {
     throw new Error("Invalid Google token");
+  }
+  if (!isEmailAllowedForClosedBeta(payload.email)) {
+    throw new Error("Email is not allowed for closed beta access");
   }
 
   const user: PublicUser = {

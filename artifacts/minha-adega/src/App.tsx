@@ -26,12 +26,13 @@ function PublicApp() {
   const publicRoutes = (
     <Switch>
       <Route path="/waitlist" component={Waitlist} />
+      <Route path="/login" component={LoginScreen} />
       <Route path="/termos" component={TermsOfUse} />
       <Route path="/privacidade" component={PrivacyPolicy} />
     </Switch>
   );
 
-  if (["/waitlist", "/termos", "/privacidade"].includes(location)) {
+  if (["/waitlist", "/login", "/termos", "/privacidade"].includes(location)) {
     return publicRoutes;
   }
 
@@ -51,7 +52,7 @@ function PublicApp() {
       </Shell>
     );
   }
-  if (!user) return <LoginScreen />;
+  if (!user) return <Waitlist />;
 
   return (
     <Shell>

@@ -8,6 +8,9 @@ const LEGACY_GOOGLE_TOKEN_STORAGE_KEY = "mycellar.googleIdToken";
 type AuthConfig = {
   configured: boolean;
   clientId: string | null;
+  closedBeta?: {
+    enabled: boolean;
+  };
   emailLogin?: {
     configured: boolean;
   };

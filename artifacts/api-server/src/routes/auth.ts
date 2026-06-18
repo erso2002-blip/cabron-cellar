@@ -9,12 +9,16 @@ import {
 } from "../lib/emailAuth.js";
 import { getGoogleSsoConfig } from "../middlewares/googleAuth.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
+import { isClosedBetaAccessEnabled } from "../lib/closedBetaAccess.js";
 
 const router = Router();
 
 router.get("/auth/config", (_req: any, res: any) => {
   res.json({
     ...getGoogleSsoConfig(),
+    closedBeta: {
+      enabled: isClosedBetaAccessEnabled(),
+    },
     emailLogin: {
       configured: isEmailLoginDeliveryConfigured(),
     },
