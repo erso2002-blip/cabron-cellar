@@ -6,6 +6,7 @@ import {
   LayoutDashboard, 
   History, 
   ShieldCheck,
+  CreditCard,
   PlusCircle, 
   Menu 
 } from "lucide-react";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/wines", label: "Adega", icon: Wine },
   { href: "/wines/new", label: "Adicionar", icon: PlusCircle },
   { href: "/history", label: "Histórico", icon: History },
+  { href: "/billing", label: "Assinatura", icon: CreditCard },
 ];
 
 const legalItems = [
