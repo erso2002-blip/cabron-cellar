@@ -22,12 +22,12 @@ router.get("/dashboard/stats", async (req: any, res: any) => {
     .from(winesTable)
     .where(eq(winesTable.userId, userId));
 
-  // Wines approaching drink deadline (upcoming 180 days or overdue)
+  // Bottles that need attention in the next 12 months or are overdue.
   const [drinkSoonCount] = await db
     .select({ count: count() })
     .from(winesTable)
     .where(
-      sql`${winesTable.userId} = ${userId} AND ${winesTable.drinkUntil} IS NOT NULL AND ${winesTable.drinkUntil} <= CURRENT_DATE + INTERVAL '180 days' AND ${winesTable.quantity} > 0`
+      sql`${winesTable.userId} = ${userId} AND ${winesTable.drinkUntil} IS NOT NULL AND ${winesTable.drinkUntil} <= CURRENT_DATE + INTERVAL '12 months' AND ${winesTable.quantity} > 0`
     );
 
   // Recent consumptions (last 5) with wine info

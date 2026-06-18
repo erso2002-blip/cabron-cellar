@@ -173,6 +173,7 @@ router.get("/wines/drink-soon", async (req: any, res: any) => {
       and(
         eq(winesTable.userId, userId),
         sql`${winesTable.drinkUntil} IS NOT NULL`,
+        sql`${winesTable.drinkUntil} <= CURRENT_DATE + INTERVAL '12 months'`,
         sql`${winesTable.quantity} > 0`
       )
     )
@@ -193,7 +194,7 @@ router.get("/wines/drink-soon", async (req: any, res: any) => {
       );
       if (daysUntilDeadline < 0) urgency = "overdue";
       else if (daysUntilDeadline <= 90) urgency = "critical";
-      else if (daysUntilDeadline <= 180) urgency = "soon";
+      else if (daysUntilDeadline <= 365) urgency = "soon";
       else urgency = "ok";
     }
 

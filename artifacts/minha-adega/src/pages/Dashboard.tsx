@@ -56,12 +56,12 @@ export default function Dashboard() {
 
         <Card className="bg-card hover:bg-secondary/50 transition-colors shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Beber em Breve</CardTitle>
+            <CardTitle className="text-sm font-medium">Atenção 12 Meses</CardTitle>
             <AlertTriangle className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold font-serif">{stats?.winesDrinkSoonCount || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Garrafas requerem atenção</p>
+            <p className="text-xs text-muted-foreground mt-1">Garrafas que requerem atenção</p>
           </CardContent>
         </Card>
 
@@ -82,14 +82,14 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="font-serif text-xl flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              Janela de Consumo
+              Atenção nos Próximos 12 Meses
             </CardTitle>
-            <CardDescription>Vinhos que estão próximos do fim da janela ideal de consumo</CardDescription>
+            <CardDescription>Garrafas que devem ser avaliadas ou consumidas dentro dos próximos 12 meses</CardDescription>
           </CardHeader>
           <CardContent>
             {!drinkSoon?.length ? (
               <div className="text-center py-8 text-muted-foreground italic font-serif">
-                Sua adega está em dia. Nenhuma garrafa requer consumo imediato.
+                Sua adega está em dia. Nenhuma garrafa requer atenção nos próximos 12 meses.
               </div>
             ) : (
               <div className="space-y-4">
