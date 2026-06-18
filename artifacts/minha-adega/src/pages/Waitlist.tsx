@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Check, Clock, Sparkles, Wine } from "lucide-react";
+import { Link } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +69,9 @@ export default function Waitlist() {
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 md:px-8">
         <header className="flex items-center justify-between">
           <img src="/logo.svg" alt="MyCellar" className="h-11 w-auto md:h-14" />
-          <span className="rounded-md border border-[#d8c9a4] px-3 py-2 text-sm font-medium text-[#7a7068]">
-            App em beta fechado
-          </span>
+          <Button asChild variant="outline" size="sm" className="border-[#d8c9a4] text-[#2d2525]">
+            <Link href="/login">Já tenho acesso</Link>
+          </Button>
         </header>
 
         <div className="grid flex-1 items-center gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr]">
@@ -239,6 +240,10 @@ export default function Waitlist() {
 
                 <Button className="w-full" size="lg" disabled={state === "loading"}>
                   {state === "loading" ? "Enviando..." : "Entrar na lista de espera"}
+                </Button>
+
+                <Button asChild variant="outline" className="w-full border-[#d8c9a4] text-[#2d2525]">
+                  <Link href="/login">Entrar no beta fechado</Link>
                 </Button>
 
                 <p className="text-xs leading-5 text-[#7a7068]">

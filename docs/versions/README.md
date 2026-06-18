@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.20`: current production version with closed beta access limited to pre-approved tester e-mails.
+- `v0.2.21`: current production version with a visible waitlist-to-login entry point for approved beta testers.
+- `v0.2.20`: production version with closed beta access limited to pre-approved tester e-mails.
 - `v0.2.19`: production version with persisted legal acceptance on the returning login screen.
 - `v0.2.18`: production version with protected waitlist report and cache/PWA refresh reinforcement.
 - `v0.2.17`: production version with legal text corrections and internal legal-page navigation fix.
