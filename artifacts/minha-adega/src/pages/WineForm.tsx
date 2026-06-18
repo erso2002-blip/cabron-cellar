@@ -28,6 +28,7 @@ import { PageSkeleton } from "@/components/ui/loading";
 import { ArrowLeft, Save, Sparkles, Loader2, X } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 import { authFetch } from "@/lib/auth";
+import { isLikelyWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(160),
@@ -38,8 +39,8 @@ const formSchema = z.object({
     .max(300)
     .optional()
     .nullable()
-    .refine((value) => !value || /^https?:\/\//i.test(value), {
-      message: "Informe uma URL começando com https://",
+    .refine((value) => isLikelyWebsiteUrl(value), {
+      message: "Informe um site válido. Ex: vinicola.com.br",
     }),
   country: z.string().max(80).optional(),
   region: z.string().max(120).optional(),
@@ -101,7 +102,9 @@ export default function WineForm() {
     const name = data.name?.trim() || buildFallbackWineName(data);
     if (name) form.setValue("name", name, { shouldValidate: true });
     if (data.producer) form.setValue("producer", data.producer, { shouldValidate: true });
-    if (data.wineryWebsiteUrl) form.setValue("wineryWebsiteUrl", data.wineryWebsiteUrl, { shouldValidate: true });
+    if (data.wineryWebsiteUrl) {
+      form.setValue("wineryWebsiteUrl", normalizeWebsiteUrl(data.wineryWebsiteUrl), { shouldValidate: true });
+    }
     if (data.vintage) form.setValue("vintage", data.vintage, { shouldValidate: true });
     if (data.grape) form.setValue("grape", data.grape);
     if (data.country) form.setValue("country", data.country);
@@ -174,7 +177,7 @@ export default function WineForm() {
       form.reset({
         name: wine.name,
         producer: wine.producer,
-        wineryWebsiteUrl: wine.wineryWebsiteUrl || "",
+        wineryWebsiteUrl: normalizeWebsiteUrl(wine.wineryWebsiteUrl),
         country: wine.country || "",
         region: wine.region || "",
         grape: wine.grape || "",
@@ -198,7 +201,7 @@ export default function WineForm() {
       ...data,
       vintage: data.vintage || undefined,
       pricePaid: data.pricePaid || undefined,
-      wineryWebsiteUrl: data.wineryWebsiteUrl || undefined,
+      wineryWebsiteUrl: normalizeWebsiteUrl(data.wineryWebsiteUrl) || undefined,
       drinkUntil: data.drinkUntil || undefined,
       labelPhotoUrl: data.labelPhotoUrl || undefined,
     };
@@ -303,7 +306,7 @@ export default function WineForm() {
                       <FormControl>
                         <Input placeholder="https://www.viticola.com" {...field} value={field.value || ""} />
                       </FormControl>
-                      <FormDescription>Referência oficial do produtor para consulta futura.</FormDescription>
+                      <FormDescription>Aceita com ou sem https://. Ex: vinicola.com.br</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

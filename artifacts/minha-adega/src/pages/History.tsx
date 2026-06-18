@@ -2,6 +2,7 @@ import { useListConsumption } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/loading";
+import { normalizeWebsiteUrl } from "@/lib/url";
 import { GlassWater, Calendar, Star, MessageSquare, RotateCcw, ExternalLink, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -152,9 +153,9 @@ export default function History() {
                     <div className="space-y-4">
                       <div>
                         <p className="text-lg font-serif italic text-muted-foreground">{record.wineProducer}</p>
-                        {record.wineryWebsiteUrl && (
+                        {normalizeWebsiteUrl(record.wineryWebsiteUrl) && (
                           <a
-                            href={record.wineryWebsiteUrl}
+                            href={normalizeWebsiteUrl(record.wineryWebsiteUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 break-all"

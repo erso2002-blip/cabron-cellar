@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ConsumeModal } from "@/components/ConsumeModal";
 import { WineInsights } from "@/components/WineInsights";
+import { normalizeWebsiteUrl } from "@/lib/url";
 
 export default function WineDetail() {
   const params = useParams();
@@ -69,7 +70,7 @@ export default function WineDetail() {
   if (!wine) return <div>Vinho não encontrado</div>;
 
   const valueFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-  const wineryWebsiteUrl = wine.wineryWebsiteUrl;
+  const wineryWebsiteUrl = normalizeWebsiteUrl(wine.wineryWebsiteUrl);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">

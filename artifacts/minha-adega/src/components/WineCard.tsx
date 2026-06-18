@@ -1,7 +1,8 @@
 import { Link } from "wouter";
 import { Wine as WineType } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wine, MapPin, Calendar, Warehouse } from "lucide-react";
+import { Wine, MapPin, Calendar, Warehouse, ExternalLink } from "lucide-react";
+import { websiteHostname } from "@/lib/url";
 
 interface WineCardProps {
   wine: WineType;
@@ -15,6 +16,7 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
     [wine.locationPlace, wine.cellarName, wine.shelf]
       .filter(Boolean)
       .join(" · ") || wine.cellarLocation;
+  const wineryWebsiteHost = websiteHostname(wine.wineryWebsiteUrl);
   
   if (isList) {
     return (
@@ -54,6 +56,12 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
                 <div className="flex items-center gap-1 mt-1.5 text-xs text-primary/70 font-medium">
                   <Warehouse className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">{location}</span>
+                </div>
+              )}
+              {wineryWebsiteHost && (
+                <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{wineryWebsiteHost}</span>
                 </div>
               )}
             </div>
@@ -104,6 +112,12 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
             <div className="flex items-center gap-1 mt-2 text-xs text-primary/70 font-medium">
               <Warehouse className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{location}</span>
+            </div>
+          )}
+          {wineryWebsiteHost && (
+            <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+              <ExternalLink className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{wineryWebsiteHost}</span>
             </div>
           )}
         </CardContent>
