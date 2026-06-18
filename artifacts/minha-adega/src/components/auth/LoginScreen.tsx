@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -200,14 +201,14 @@ export function LoginScreen() {
           />
           <span>
             Li e concordo com os{" "}
-            <a className="text-primary underline-offset-4 hover:underline" href="/termos">
+            <Link className="text-primary underline-offset-4 hover:underline" href="/termos">
               Termos de Uso
-            </a>{" "}
+            </Link>{" "}
             e com a{" "}
-            <a className="text-primary underline-offset-4 hover:underline" href="/privacidade">
-              Politica de Privacidade
-            </a>
-            , incluindo o tratamento dos meus dados para funcionamento do MyCellar.
+            <Link className="text-primary underline-offset-4 hover:underline" href="/privacidade">
+              Política de Privacidade
+            </Link>
+            {", incluindo o tratamento dos meus dados para funcionamento do MyCellar."}
           </span>
         </label>
 

@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 
 import { queryClient } from "@/lib/queryClient";
@@ -21,6 +21,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function PublicApp() {
   const { config, user, loading } = useAuth();
+  const [location] = useLocation();
 
   const publicRoutes = (
     <Switch>
@@ -30,7 +31,7 @@ function PublicApp() {
     </Switch>
   );
 
-  if (["/waitlist", "/termos", "/privacidade"].includes(window.location.pathname.replace(basePath, ""))) {
+  if (["/waitlist", "/termos", "/privacidade"].includes(location)) {
     return publicRoutes;
   }
 
