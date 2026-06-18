@@ -594,9 +594,33 @@ components:
           type: ["string", "null"]
         wineProducer:
           type: ["string", "null"]
+        wineryWebsiteUrl:
+          type: ["string", "null"]
+        wineCountry:
+          type: ["string", "null"]
+        wineRegion:
+          type: ["string", "null"]
+        wineGrape:
+          type: ["string", "null"]
         wineVintage:
           type: ["integer", "null"]
+        winePricePaid:
+          type: ["number", "null"]
+        wineQuantity:
+          type: ["integer", "null"]
+        wineCellarLocation:
+          type: ["string", "null"]
+        wineLocationPlace:
+          type: ["string", "null"]
+        wineCellarName:
+          type: ["string", "null"]
+        wineShelf:
+          type: ["string", "null"]
+        wineDrinkUntil:
+          type: ["string", "null"]
         labelPhotoUrl:
+          type: ["string", "null"]
+        wineNotes:
           type: ["string", "null"]
         consumedAt:
           type: string

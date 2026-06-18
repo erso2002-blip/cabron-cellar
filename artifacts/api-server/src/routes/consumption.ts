@@ -32,8 +32,20 @@ router.get("/consumption", async (req: any, res: any) => {
       createdAt: consumptionTable.createdAt,
       wineName: winesTable.name,
       wineProducer: winesTable.producer,
+      wineryWebsiteUrl: winesTable.wineryWebsiteUrl,
+      wineCountry: winesTable.country,
+      wineRegion: winesTable.region,
+      wineGrape: winesTable.grape,
       wineVintage: winesTable.vintage,
+      winePricePaid: winesTable.pricePaid,
+      wineQuantity: winesTable.quantity,
+      wineCellarLocation: winesTable.cellarLocation,
+      wineLocationPlace: winesTable.locationPlace,
+      wineCellarName: winesTable.cellarName,
+      wineShelf: winesTable.shelf,
+      wineDrinkUntil: winesTable.drinkUntil,
       labelPhotoUrl: winesTable.labelPhotoUrl,
+      wineNotes: winesTable.notes,
     })
     .from(consumptionTable)
     .leftJoin(winesTable, eq(consumptionTable.wineId, winesTable.id))
@@ -42,7 +54,12 @@ router.get("/consumption", async (req: any, res: any) => {
     .limit(limit)
     .offset(offset);
 
-  return res.json(records);
+  return res.json(
+    records.map((record) => ({
+      ...record,
+      winePricePaid: record.winePricePaid ? parseFloat(record.winePricePaid) : null,
+    }))
+  );
 });
 
 // DELETE /consumption/:id/restore

@@ -309,11 +309,11 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
                   </p>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <Button
                   type="button"
                   size="sm"
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                   onClick={applyToForm}
                   disabled={Object.values(extracted).every((v) => v === null)}
                 >
@@ -324,6 +324,7 @@ export default function LabelScanner({ onExtracted, onPhotoUploaded }: Props) {
                   type="button"
                   variant="ghost"
                   size="sm"
+                  className="w-full sm:w-auto"
                   onClick={clear}
                 >
                   Nova foto

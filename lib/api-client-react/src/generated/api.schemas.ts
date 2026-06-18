@@ -168,9 +168,33 @@ export interface Consumption {
   /** @nullable */
   wineProducer?: string | null;
   /** @nullable */
+  wineryWebsiteUrl?: string | null;
+  /** @nullable */
+  wineCountry?: string | null;
+  /** @nullable */
+  wineRegion?: string | null;
+  /** @nullable */
+  wineGrape?: string | null;
+  /** @nullable */
   wineVintage?: number | null;
   /** @nullable */
+  winePricePaid?: number | null;
+  /** @nullable */
+  wineQuantity?: number | null;
+  /** @nullable */
+  wineCellarLocation?: string | null;
+  /** @nullable */
+  wineLocationPlace?: string | null;
+  /** @nullable */
+  wineCellarName?: string | null;
+  /** @nullable */
+  wineShelf?: string | null;
+  /** @nullable */
+  wineDrinkUntil?: string | null;
+  /** @nullable */
   labelPhotoUrl?: string | null;
+  /** @nullable */
+  wineNotes?: string | null;
   consumedAt: string;
   /** @nullable */
   personalNote?: string | null;
@@ -255,4 +279,3 @@ export type ListConsumptionParams = {
 limit?: number;
 offset?: number;
 };
-

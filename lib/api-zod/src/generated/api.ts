@@ -300,8 +300,20 @@ export const ConsumeWineResponse = zod.object({
   "wineId": zod.number(),
   "wineName": zod.string().nullish(),
   "wineProducer": zod.string().nullish(),
+  "wineryWebsiteUrl": zod.string().nullish(),
+  "wineCountry": zod.string().nullish(),
+  "wineRegion": zod.string().nullish(),
+  "wineGrape": zod.string().nullish(),
   "wineVintage": zod.number().nullish(),
+  "winePricePaid": zod.number().nullish(),
+  "wineQuantity": zod.number().nullish(),
+  "wineCellarLocation": zod.string().nullish(),
+  "wineLocationPlace": zod.string().nullish(),
+  "wineCellarName": zod.string().nullish(),
+  "wineShelf": zod.string().nullish(),
+  "wineDrinkUntil": zod.string().nullish(),
   "labelPhotoUrl": zod.string().nullish(),
+  "wineNotes": zod.string().nullish(),
   "consumedAt": zod.string(),
   "personalNote": zod.string().nullish(),
   "occasion": zod.string().nullish(),
@@ -404,5 +416,4 @@ export const GetDashboardStatsResponse = zod.object({
   "count": zod.number()
 })).optional()
 })
-
 

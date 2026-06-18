@@ -2,15 +2,27 @@ import { useListConsumption } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/loading";
-import { GlassWater, Calendar, Star, MessageSquare, RotateCcw } from "lucide-react";
+import { GlassWater, Calendar, Star, MessageSquare, RotateCcw, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { authFetch } from "@/lib/auth";
 import { toast } from "sonner";
 
+function Detail({ label, value }: { label: string; value: string | number | null | undefined }) {
+  if (value === null || value === undefined || value === "") return null;
+
+  return (
+    <div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-sm font-medium text-foreground break-words">{value}</div>
+    </div>
+  );
+}
+
 export default function History() {
   const { data: history, isLoading } = useListConsumption({ limit: 50 });
   const queryClient = useQueryClient();
+  const valueFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
   async function restoreConsumption(id: number) {
     try {
@@ -61,7 +73,7 @@ export default function History() {
               </div>
               <Card className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex justify-between items-start gap-3 mb-3">
                     <div className="text-xs font-mono text-muted-foreground flex items-center gap-1.5">
                       <Calendar className="w-3 h-3" />
                       {new Date(record.consumedAt).toLocaleDateString('pt-BR')}
@@ -78,19 +90,78 @@ export default function History() {
                     {record.wineName} {record.wineVintage && <span className="font-mono text-sm font-normal text-muted-foreground ml-2">{record.wineVintage}</span>}
                   </h4>
                   <p className="text-sm text-muted-foreground italic mb-4">{record.wineProducer}</p>
-                  
-                  {record.occasion && (
-                    <div className="text-sm bg-secondary/50 p-2 rounded mb-3 border border-border/50 inline-block">
-                      <span className="font-medium text-foreground">Ocasião:</span> {record.occasion}
+
+                  {record.labelPhotoUrl && (
+                    <div className="mb-4 h-36 w-28 overflow-hidden rounded-lg border bg-secondary">
+                      <img src={record.labelPhotoUrl} alt={record.wineName || "Rótulo"} className="h-full w-full object-cover" />
                     </div>
                   )}
-                  
-                  {record.personalNote && (
-                    <div className="text-sm mt-3 pt-3 border-t flex gap-2">
-                      <MessageSquare className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <p className="text-foreground/90 font-serif leading-relaxed">{record.personalNote}</p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Dados do vinho
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Detail label="País" value={record.wineCountry} />
+                        <Detail label="Região" value={record.wineRegion} />
+                        <Detail label="Uva" value={record.wineGrape} />
+                        <Detail label="Safra" value={record.wineVintage} />
+                        <Detail
+                          label="Preço pago"
+                          value={record.winePricePaid !== null && record.winePricePaid !== undefined ? valueFormatter.format(record.winePricePaid) : null}
+                        />
+                        <Detail label="Beber até" value={record.wineDrinkUntil ? new Date(record.wineDrinkUntil).toLocaleDateString("pt-BR") : null} />
+                        <Detail label="Adega" value={record.wineCellarName} />
+                        <Detail label="Local" value={record.wineLocationPlace || record.wineCellarLocation} />
+                        <Detail label="Prateleira" value={record.wineShelf} />
+                        <Detail label="Estoque atual" value={record.wineQuantity} />
+                      </div>
+
+                      {record.wineryWebsiteUrl && (
+                        <a
+                          href={record.wineryWebsiteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 break-all"
+                        >
+                          Site da vinícola
+                          <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                        </a>
+                      )}
                     </div>
-                  )}
+
+                    {(record.occasion || record.personalNote || record.quantity || record.wouldBuyAgain !== null) && (
+                      <div className="pt-3 border-t">
+                        <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Consumo
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <Detail label="Quantidade consumida" value={record.quantity} />
+                          <Detail label="Ocasião" value={record.occasion} />
+                          <Detail label="Compraria de novo" value={record.wouldBuyAgain === null || record.wouldBuyAgain === undefined ? null : record.wouldBuyAgain ? "Sim" : "Não"} />
+                        </div>
+
+                        {record.personalNote && (
+                          <div className="text-sm mt-3 pt-3 border-t flex gap-2">
+                            <MessageSquare className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                            <p className="text-foreground/90 font-serif leading-relaxed">{record.personalNote}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {record.wineNotes && (
+                      <div className="pt-3 border-t">
+                        <div className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Notas da garrafa
+                        </div>
+                        <p className="text-sm font-serif leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                          {record.wineNotes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="mt-4 pt-3 border-t flex justify-end">
                     <Button
