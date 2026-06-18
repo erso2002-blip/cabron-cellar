@@ -28,12 +28,13 @@ function PublicApp() {
     <Switch>
       <Route path="/waitlist" component={Waitlist} />
       <Route path="/login" component={LoginScreen} />
+      <Route path="/billing" component={Billing} />
       <Route path="/termos" component={TermsOfUse} />
       <Route path="/privacidade" component={PrivacyPolicy} />
     </Switch>
   );
 
-  if (["/waitlist", "/login", "/termos", "/privacidade"].includes(location)) {
+  if (["/waitlist", "/login", "/billing", "/termos", "/privacidade"].includes(location)) {
     return publicRoutes;
   }
 

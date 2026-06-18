@@ -70,6 +70,20 @@ async function fetchUser(token: string): Promise<AuthUser> {
   return response.json();
 }
 
+async function responseError(response: Response, fallback: string) {
+  try {
+    const data = (await response.json()) as { error?: string };
+    if (data.error === "Access is restricted to closed beta testers") {
+      return new Error("Este e-mail ainda não está liberado na beta fechada.");
+    }
+    if (data.error) return new Error(data.error);
+  } catch {
+    // Keep the user-facing fallback when the API does not return JSON.
+  }
+
+  return new Error(fallback);
+}
+
 export function getAuthToken() {
   return readStoredToken();
 }
@@ -177,9 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             body: JSON.stringify({ email }),
           });
 
-          if (!response.ok) {
-            throw new Error("Não foi possível enviar o código por e-mail");
-          }
+          if (!response.ok) throw await responseError(response, "Não foi possível enviar o código por e-mail");
         } catch (nextError) {
           setError(
             nextError instanceof Error
@@ -202,9 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             body: JSON.stringify({ email, code }),
           });
 
-          if (!response.ok) {
-            throw new Error("Código inválido ou expirado");
-          }
+          if (!response.ok) throw await responseError(response, "Código inválido ou expirado");
 
           const data = await response.json();
           storeToken(data.token);
