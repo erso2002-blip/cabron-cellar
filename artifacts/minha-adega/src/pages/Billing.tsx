@@ -11,6 +11,8 @@ type BillingPlan = {
   name: string;
   description: string;
   amount: number;
+  originalAmount?: number;
+  promotionLabel?: string;
   currency: "BRL";
   interval: "free" | "monthly" | "annual";
   bottlesLimit: number | null;
@@ -88,7 +90,7 @@ export default function Billing() {
             </Button>
             <h2 className="text-3xl font-serif font-bold tracking-tight">Assinatura</h2>
             <p className="text-muted-foreground mt-1 font-serif italic">
-              Planos MyCellar conforme o business plan.
+              Promocao de lancamento por tempo limitado.
             </p>
           </div>
           <Badge variant={providerConfigured ? "default" : "secondary"} className="w-fit">
@@ -121,7 +123,16 @@ export default function Billing() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
+                  {plan.promotionLabel && plan.originalAmount ? (
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary">{plan.promotionLabel}</Badge>
+                      <span className="text-sm text-muted-foreground line-through">
+                        De {formatter.format(plan.originalAmount)}
+                      </span>
+                    </div>
+                  ) : null}
                   <div className="font-serif text-3xl font-bold">
+                    {isPaid && plan.originalAmount ? "Por " : ""}
                     {formatter.format(plan.amount)}
                   </div>
                   <div className="text-sm text-muted-foreground">{intervalLabel[plan.interval]}</div>

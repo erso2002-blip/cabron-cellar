@@ -5,6 +5,8 @@ export type BillingPlan = {
   name: string;
   description: string;
   amount: number;
+  originalAmount?: number;
+  promotionLabel?: string;
   currency: "BRL";
   interval: "free" | "monthly" | "annual";
   bottlesLimit: number | null;
@@ -25,8 +27,10 @@ export const billingPlans: BillingPlan[] = [
   {
     id: "pro-monthly",
     name: "Pro Mensal",
-    description: "Plano completo com flexibilidade mensal.",
-    amount: 29,
+    description: "Plano completo com flexibilidade mensal em promocao de lancamento.",
+    amount: 25.45,
+    originalAmount: 49.9,
+    promotionLabel: "Promocao de lancamento",
     currency: "BRL",
     interval: "monthly",
     bottlesLimit: null,
@@ -40,8 +44,10 @@ export const billingPlans: BillingPlan[] = [
   {
     id: "pro-annual",
     name: "Pro Anual",
-    description: "Plano completo anual com desconto de fundador.",
-    amount: 290,
+    description: "Plano completo anual com preco especial de lancamento.",
+    amount: 254.5,
+    originalAmount: 499,
+    promotionLabel: "Promocao de lancamento",
     currency: "BRL",
     interval: "annual",
     bottlesLimit: null,
@@ -58,4 +64,3 @@ export const billingPlans: BillingPlan[] = [
 export function getBillingPlan(planId: unknown) {
   return billingPlans.find((plan) => plan.id === planId) ?? null;
 }
-

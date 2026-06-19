@@ -5,8 +5,8 @@ Integração preparada para assinaturas recorrentes via endpoint `/preapproval` 
 ## Planos
 
 - Free: R$ 0, ate 30 garrafas.
-- Pro Mensal: R$ 29/mês.
-- Pro Anual: R$ 290/ano.
+- Pro Mensal promocional de lançamento: de R$ 49,90 por R$ 25,45/mês.
+- Pro Anual promocional de lançamento: de R$ 499,00 por R$ 254,50/ano.
 
 ## Variáveis de ambiente
 
@@ -20,4 +20,3 @@ Integração preparada para assinaturas recorrentes via endpoint `/preapproval` 
 - O checkout pago cria uma assinatura Mercado Pago em status `pending` e redireciona o usuário para o `init_point`.
 - A ativação automática de benefício Pro ainda depende de webhook/consulta de status e persistência de assinatura por usuário.
 - Não inserir credenciais no código ou em arquivo commitado.
-
