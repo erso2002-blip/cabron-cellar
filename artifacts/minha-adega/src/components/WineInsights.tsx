@@ -50,11 +50,18 @@ export function WineInsights({ wine }: Props) {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
+      if (resp.status === 402) {
+        throw new Error("Insights de harmonização estão disponíveis no plano Pro.");
+      }
       if (!resp.ok) throw new Error("Falha ao carregar insights");
       const data = (await resp.json()) as Insights;
       setInsights(data);
-    } catch {
-      setError("Não foi possível carregar os insights agora. Tente novamente.");
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Não foi possível carregar os insights agora. Tente novamente.",
+      );
       setOpen(false);
     } finally {
       setLoading(false);

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getOpenAIClient } from "../lib/openai.js";
+import { requireProFeature } from "../lib/planAccess.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
@@ -12,9 +13,12 @@ function bounded(value: unknown) {
 
 // POST /wines/suggest-drink-until
 router.post("/wines/suggest-drink-until", rateLimit({ keyPrefix: "drink-ai", windowMs: 60_000, max: 12 }), async (req: any, res: any) => {
-  if (!getAuthenticatedUser(req)) {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+  const proGate = requireProFeature(user, "drink_until_suggestion");
+  if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const { name, producer, grape, vintage, country, region } = req.body as {
     name?: string;

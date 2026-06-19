@@ -7,6 +7,7 @@ import {
   UploadWineLabelBody,
 } from "@workspace/api-zod";
 import { getAuthenticatedUser } from "../lib/auth.js";
+import { getFreeBottleLimit, getPresentBottleCount, isProUser } from "../lib/planAccess.js";
 
 const router = Router();
 const MAX_LABEL_PHOTO_URL_LENGTH = 6_800_000;
@@ -64,6 +65,14 @@ function invalidWinePayload(data: Record<string, unknown>) {
   }
 
   return false;
+}
+
+function bottleLimitError(limit: number) {
+  return {
+    error: "Free bottle limit exceeded",
+    limit,
+    upgradeRequired: true,
+  };
 }
 
 // GET /wines
@@ -139,6 +148,15 @@ router.post("/wines", async (req: any, res: any) => {
   }
 
   const { pricePaid, ...rest } = parsed.data;
+  if (!isProUser(user)) {
+    const limit = getFreeBottleLimit();
+    const currentBottles = await getPresentBottleCount(userId);
+    const nextBottles = currentBottles + parsed.data.quantity;
+    if (nextBottles > limit) {
+      return res.status(402).json(bottleLimitError(limit));
+    }
+  }
+
   const [wine] = await db
     .insert(winesTable)
     .values({
@@ -254,6 +272,22 @@ router.patch("/wines/:id", async (req: any, res: any) => {
   const updateData: Record<string, unknown> = { ...rest };
   if (pricePaid !== undefined) {
     updateData.pricePaid = pricePaid != null ? String(pricePaid) : null;
+  }
+
+  if (!isProUser(user) && parsed.data.quantity !== undefined) {
+    const [currentWine] = await db
+      .select({ quantity: winesTable.quantity })
+      .from(winesTable)
+      .where(and(eq(winesTable.id, id), eq(winesTable.userId, userId)));
+
+    if (!currentWine) return res.status(404).json({ error: "Wine not found" });
+
+    const limit = getFreeBottleLimit();
+    const currentBottles = await getPresentBottleCount(userId);
+    const nextBottles = currentBottles - currentWine.quantity + parsed.data.quantity;
+    if (nextBottles > limit) {
+      return res.status(402).json(bottleLimitError(limit));
+    }
   }
 
   const [wine] = await db

@@ -22,7 +22,12 @@ export const billingPlans: BillingPlan[] = [
     currency: "BRL",
     interval: "free",
     bottlesLimit: 30,
-    features: ["Ate 30 garrafas", "Leitura de rotulo por IA", "Cadastro manual", "Historico basico"],
+    features: [
+      "Ate 30 garrafas presentes na adega",
+      "Leitura de rotulo por IA",
+      "Cadastro manual",
+      "Historico basico",
+    ],
   },
   {
     id: "pro-monthly",
@@ -37,7 +42,8 @@ export const billingPlans: BillingPlan[] = [
     features: [
       "Garrafas ilimitadas",
       "Fotos ilimitadas",
-      "IA, harmonizacao e recomendacao",
+      "Harmonizacao de pratos",
+      "Sugestao de data ideal de consumo",
       "Historico e backup",
     ],
   },
@@ -54,7 +60,8 @@ export const billingPlans: BillingPlan[] = [
     features: [
       "Garrafas ilimitadas",
       "Fotos ilimitadas",
-      "IA, harmonizacao e recomendacao",
+      "Harmonizacao de pratos",
+      "Sugestao de data ideal de consumo",
       "Historico e backup",
       "Economia vs. mensal",
     ],

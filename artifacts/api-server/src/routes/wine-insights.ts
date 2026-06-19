@@ -2,6 +2,7 @@ import { Router } from "express";
 import { and, db, desc, eq, sql, winesTable } from "@workspace/db";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getOpenAIClient } from "../lib/openai.js";
+import { requireProFeature } from "../lib/planAccess.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
@@ -56,6 +57,8 @@ router.post("/pairings/dish", rateLimit({ keyPrefix: "dish-pairing-ai", windowMs
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+  const proGate = requireProFeature(user, "dish_pairing");
+  if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const dish = cleanText(req.body?.dish, 160);
   if (dish.length < 2) {
@@ -167,6 +170,8 @@ router.post("/wines/:id/insights", rateLimit({ keyPrefix: "insights-ai", windowM
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
+  const proGate = requireProFeature(user, "wine_harmonization");
+  if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const userId = user.id;
   const id = parseInt(req.params.id);

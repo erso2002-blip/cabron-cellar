@@ -63,6 +63,9 @@ export default function DishPairing() {
       if (response.status === 409) {
         throw new Error("Sua adega ainda não tem garrafas disponíveis para harmonizar.");
       }
+      if (response.status === 402) {
+        throw new Error("Harmonização de pratos está disponível no plano Pro.");
+      }
       if (!response.ok) {
         throw new Error("Não foi possível gerar a harmonização agora.");
       }

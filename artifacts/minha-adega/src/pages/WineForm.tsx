@@ -70,6 +70,19 @@ interface LabelData {
   wineryWebsiteUrl: string | null;
 }
 
+function userFacingSaveError(error: unknown) {
+  if (
+    error &&
+    typeof error === "object" &&
+    "status" in error &&
+    (error as { status?: number }).status === 402
+  ) {
+    return "Plano Básico permite até 30 garrafas presentes na adega. Para passar disso, use o Pro.";
+  }
+
+  return null;
+}
+
 export default function WineForm() {
   const params = useParams();
   const [, setLocation] = useLocation();
@@ -138,13 +151,16 @@ export default function WineForm() {
           region: values.region || undefined,
         }),
       });
+      if (resp.status === 402) {
+        throw new Error("Sugestão de data ideal de consumo está disponível no plano Pro.");
+      }
       if (!resp.ok) throw new Error("Falha na sugestão");
       const data = (await resp.json()) as { suggestedDate: string; reason: string };
       form.setValue("drinkUntil", data.suggestedDate);
       setDrinkUntilHint(data.reason);
       toast.success("Sugestão aplicada!");
-    } catch {
-      toast.error("Não foi possível gerar uma sugestão agora");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível gerar uma sugestão agora");
     } finally {
       setIsSuggesting(false);
     }
@@ -216,7 +232,7 @@ export default function WineForm() {
             queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
             setLocation(`/wines/${updatedWine.id}`);
           },
-          onError: () => toast.error("Erro ao atualizar vinho")
+          onError: (error) => toast.error(userFacingSaveError(error) ?? "Erro ao atualizar vinho")
         }
       );
     } else {
@@ -229,7 +245,7 @@ export default function WineForm() {
             queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
             setLocation(`/wines/${newWine.id}`);
           },
-          onError: () => toast.error("Erro ao adicionar vinho")
+          onError: (error) => toast.error(userFacingSaveError(error) ?? "Erro ao adicionar vinho")
         }
       );
     }
