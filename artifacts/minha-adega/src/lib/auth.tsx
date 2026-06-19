@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 
 const TOKEN_STORAGE_KEY = "mycellar.authToken";
 const LEGACY_GOOGLE_TOKEN_STORAGE_KEY = "mycellar.googleIdToken";
+const EMAIL_SESSION_TOKEN_PREFIX = "mc_email_";
 
 type AuthConfig = {
   configured: boolean;
@@ -105,6 +106,10 @@ export function getAuthToken() {
   return readStoredToken();
 }
 
+function isPersistentSessionToken(token: string) {
+  return token.startsWith(EMAIL_SESSION_TOKEN_PREFIX);
+}
+
 export function authFetch(input: RequestInfo | URL, init: RequestInit = {}) {
   const token = getAuthToken();
   const headers = new Headers(init.headers);
@@ -147,9 +152,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        if (!isPersistentSessionToken(storedToken)) {
+          const session = await createGoogleSession(storedToken);
+          if (cancelled) return;
+
+          storeToken(session.token);
+          setUser(session.user);
+          setToken(session.token);
+          return;
+        }
+
         const nextUser = await fetchUser(storedToken);
         if (cancelled) return;
 
+        storeToken(storedToken);
         setUser(nextUser);
         setToken(storedToken);
       } catch (nextError) {
