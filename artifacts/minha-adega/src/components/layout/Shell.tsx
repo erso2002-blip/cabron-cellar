@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Wine, 
   FileText,
+  ChefHat,
   LayoutDashboard, 
   History, 
   ShieldCheck,
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/wines", label: "Adega", icon: Wine },
   { href: "/wines/new", label: "Adicionar", icon: PlusCircle },
   { href: "/history", label: "Histórico", icon: History },
+  { href: "/pairing", label: "Harmonizar", icon: ChefHat },
   { href: "/billing", label: "Assinatura", icon: CreditCard },
 ];
 

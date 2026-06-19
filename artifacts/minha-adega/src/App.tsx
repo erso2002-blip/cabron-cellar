@@ -15,6 +15,7 @@ import WineForm from "@/pages/WineForm";
 import History from "@/pages/History";
 import Waitlist from "@/pages/Waitlist";
 import Billing from "@/pages/Billing";
+import DishPairing from "@/pages/DishPairing";
 import { PrivacyPolicy, TermsOfUse } from "@/pages/Legal";
 import NotFound from "@/pages/not-found";
 
@@ -49,6 +50,7 @@ function PublicApp() {
           <Route path="/wines/:id/edit" component={WineForm} />
           <Route path="/wines/:id" component={WineDetail} />
           <Route path="/history" component={History} />
+          <Route path="/pairing" component={DishPairing} />
           <Route path="/billing" component={Billing} />
           <Route component={NotFound} />
         </Switch>
@@ -66,6 +68,7 @@ function PublicApp() {
         <Route path="/wines/:id/edit" component={WineForm} />
         <Route path="/wines/:id" component={WineDetail} />
         <Route path="/history" component={History} />
+        <Route path="/pairing" component={DishPairing} />
         <Route path="/billing" component={Billing} />
         <Route component={NotFound} />
       </Switch>
