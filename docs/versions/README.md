@@ -14,8 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.28`: current production version with reverse dish-to-cellar pairing.
-- `v0.2.29`: prepared release with Basic plan label-AI positioning, pending production deploy.
+- `v0.2.29`: current production version with Basic plan label-AI positioning.
+- `v0.2.28`: production version with reverse dish-to-cellar pairing.
 - `v0.2.27`: production version with launch-promotion prices in billing.
 - `v0.2.26`: production version with legacy Google token auto-upgrade to persistent app sessions.
 - `v0.2.25`: production version with paid billing buttons disabled as `Em breve`.
