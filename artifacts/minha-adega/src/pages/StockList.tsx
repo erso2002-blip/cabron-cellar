@@ -5,8 +5,9 @@ import { PageSkeleton } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, PlusCircle, LayoutGrid, List as ListIcon } from "lucide-react";
+import { Search, PlusCircle, LayoutGrid, List as ListIcon, Upload } from "lucide-react";
 import { WineCard } from "@/components/WineCard";
+import { WineImportModal } from "@/components/WineImportModal";
 
 const ALL_CELLARS_VALUE = "__all_cellars__";
 const PRESENT_WINES_PARAMS = { minQuantity: 1 } as const;
@@ -23,8 +24,9 @@ export default function StockList() {
   const [search, setSearch] = useState("");
   const [cellarFilter, setCellarFilter] = useState(ALL_CELLARS_VALUE);
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
-  const { data: wines, isLoading } = useListWines(
+  const { data: wines, isLoading, refetch } = useListWines(
     PRESENT_WINES_PARAMS,
     { query: { queryKey: getListWinesQueryKey(PRESENT_WINES_PARAMS) } }
   );
@@ -68,12 +70,23 @@ export default function StockList() {
           <h2 className="text-3xl font-serif font-bold tracking-tight">Sua Adega</h2>
           <p className="text-muted-foreground mt-1 font-serif italic">Acervo completo de rótulos.</p>
         </div>
-        <Link href="/wines/new">
-          <Button className="shrink-0" data-testid="button-add-wine">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar Vinho
+        <div className="flex gap-2">
+          <Link href="/wines/new">
+            <Button className="shrink-0" data-testid="button-add-wine">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Adicionar Vinho
+            </Button>
+          </Link>
+          <Button 
+            variant="outline"
+            className="shrink-0"
+            onClick={() => setImportModalOpen(true)}
+            data-testid="button-import-wines"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Importar
           </Button>
-        </Link>
+        </div>
       </div>
 
       <div className="flex w-full min-w-0 flex-col gap-4 overflow-hidden rounded-lg border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
@@ -151,6 +164,15 @@ export default function StockList() {
           ))}
         </div>
       )}
+
+      <WineImportModal 
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onImportSuccess={() => {
+          refetch?.();
+          setImportModalOpen(false);
+        }}
+      />
     </div>
   );
 }

@@ -8,6 +8,8 @@ import {
 } from "@workspace/api-zod";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getFreeBottleLimit, getPresentBottleCount, isProUser } from "../lib/planAccess.js";
+import { generateWineTemplate, validateWineRow } from "../lib/wineTemplate.js";
+import ExcelJS from "exceljs";
 
 const router = Router();
 const MAX_LABEL_PHOTO_URL_LENGTH = 6_800_000;
@@ -75,6 +77,186 @@ function bottleLimitError(limit: number) {
     upgradeRequired: true,
   };
 }
+
+// GET /wines/template — serve the Excel import template
+router.get("/wines/template", async (req: any, res: any) => {
+  try {
+    const buffer = await generateWineTemplate();
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", 'attachment; filename="template-vinhos.xlsx"');
+    res.setHeader("Content-Length", buffer.length);
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Error generating template:", error);
+    return res.status(500).json({ error: "Failed to generate template" });
+  }
+});
+
+// POST /wines/import — import wines from Excel file
+router.post("/wines/import", async (req: any, res: any) => {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const userId = user.id;
+
+  // Expect base64-encoded Excel file in request body
+  const { fileData } = req.body;
+  if (!fileData || typeof fileData !== "string") {
+    return res.status(400).json({ error: "fileData is required and must be a base64 string" });
+  }
+
+  try {
+    // Decode base64 and create buffer
+    const buffer = Buffer.from(fileData, "base64");
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as any);
+
+    // Get the first worksheet
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) {
+      return res.status(400).json({ error: "No worksheet found in the uploaded file" });
+    }
+
+    const expectedHeaders = [
+      "Nome do Vinho",
+      "Produtor",
+      "Safra",
+      "Tipo",
+      "País/Região",
+      "Preço",
+      "Website",
+      "Estoque",
+      "Notas"
+    ];
+
+    // Validate headers
+    const headerRow = worksheet.getRow(1);
+    const actualHeaders = (headerRow.values as any) || [];
+    
+    if (!actualHeaders || actualHeaders.length < expectedHeaders.length) {
+      return res.status(400).json({ 
+        error: "Invalid template structure. Expected headers: " + expectedHeaders.join(", ")
+      });
+    }
+
+    // Compare headers (case-sensitive)
+    const headerMismatch = expectedHeaders.some((expected, index) => {
+      return actualHeaders[index + 1] !== expected; // +1 because ExcelJS uses 1-based indexing
+    });
+
+    if (headerMismatch) {
+      return res.status(400).json({ 
+        error: "Template headers don't match. Please use the official template.",
+        expectedHeaders,
+        actualHeaders: actualHeaders.slice(1, expectedHeaders.length + 1)
+      });
+    }
+
+    // Process rows
+    const results = {
+      successful: 0,
+      failed: 0,
+      errors: [] as string[],
+      wines: [] as any[]
+    };
+
+    const maxRows = 1000;
+    const dataSummary: { [key: string]: number } = {};
+
+    for (let rowNum = 2; rowNum <= (worksheet.rowCount || 1000) && rowNum <= maxRows + 1; rowNum++) {
+      const row = worksheet.getRow(rowNum);
+      const rowData = (row.values as any[]) || [];
+
+      // Skip empty rows
+      if (!rowData || rowData.length < 2) continue;
+
+      // Convert row to object with headers
+      const rowObj: Record<string, any> = {};
+      expectedHeaders.forEach((header, index) => {
+        rowObj[header] = rowData[index + 1];
+      });
+
+      // Validate row
+      const validation = validateWineRow(rowObj as any, rowNum);
+
+      if (!validation.valid) {
+        results.failed++;
+        results.errors.push(...validation.errors);
+      } else if (validation.data) {
+        // Check plan limits
+        if (!isProUser(user)) {
+          const limit = getFreeBottleLimit();
+          const currentBottles = await getPresentBottleCount(userId);
+          const nextBottles = currentBottles + (validation.data.quantity || 1);
+          if (nextBottles > limit) {
+            results.failed++;
+            results.errors.push(
+              `Linha ${rowNum}: Limite de garrafas gratuitas (${limit}) seria excedido. Atualize para PRO para continuar.`
+            );
+            continue;
+          }
+        }
+
+        try {
+          // Ensure data has required fields (name and producer are already validated)
+          if (!validation.data.name || !validation.data.producer) {
+            results.failed++;
+            results.errors.push(`Linha ${rowNum}: Dados inválidos - Nome e Produtor são obrigatórios`);
+            continue;
+          }
+
+          const wineInsertData = {
+            name: validation.data.name,
+            producer: validation.data.producer,
+            userId,
+            vintage: validation.data.vintage,
+            grape: validation.data.grape,
+            country: validation.data.country,
+            region: validation.data.region,
+            quantity: validation.data.quantity || 1,
+            pricePaid: validation.data.pricePaid,
+            wineryWebsiteUrl: validation.data.wineryWebsiteUrl,
+            notes: validation.data.notes
+          };
+
+          const [wine] = await db
+            .insert(winesTable)
+            .values(wineInsertData as any)
+            .returning();
+
+          results.successful++;
+          results.wines.push({
+            id: wine.id,
+            name: wine.name,
+            producer: wine.producer,
+            vintage: wine.vintage,
+            quantity: wine.quantity
+          });
+          dataSummary[wine.name] = (dataSummary[wine.name] || 0) + 1;
+        } catch (dbError) {
+          results.failed++;
+          results.errors.push(`Linha ${rowNum}: Erro ao inserir no banco de dados`);
+        }
+      }
+    }
+
+    if (results.successful + results.failed === 0) {
+      return res.status(400).json({ error: "No valid wine data found in the file" });
+    }
+
+    return res.status(200).json({
+      message: `Importação concluída: ${results.successful} vinhos importados, ${results.failed} com erro`,
+      successful: results.successful,
+      failed: results.failed,
+      errors: results.errors,
+      wines: results.wines.slice(0, 10) // Return first 10 for preview
+    });
+  } catch (error) {
+    console.error("Error processing import:", error);
+    return res.status(500).json({ error: "Failed to process the uploaded file" });
+  }
+});
 
 // GET /wines
 router.get("/wines", async (req: any, res: any) => {
