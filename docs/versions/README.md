@@ -4,7 +4,7 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Rules
 
-- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`, `v0.2.16`, `v0.2.17`, `v0.2.18`, `v0.2.19`, `v0.2.20`, `v0.2.21`, `v0.2.22`, `v0.2.23`, `v0.2.24`, `v0.2.25`, `v0.2.26`, `v0.2.27`, `v0.2.28`, `v0.2.29`, `v0.2.30`, `v0.2.31`, `v0.2.32`, `v0.2.33`, `v0.2.34`, `v0.2.35`.
+- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`, `v0.2.16`, `v0.2.17`, `v0.2.18`, `v0.2.19`, `v0.2.20`, `v0.2.21`, `v0.2.22`, `v0.2.23`, `v0.2.24`, `v0.2.25`, `v0.2.26`, `v0.2.27`, `v0.2.28`, `v0.2.29`, `v0.2.30`, `v0.2.31`, `v0.2.32`, `v0.2.33`, `v0.2.34`, `v0.2.35`, `v0.2.36`.
 - Small fixes or low-risk additions increment the patch number.
 - Larger user-facing features increment the minor number.
 - Every production release must have a version file in this folder.
@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.35`: current production version with mobile horizontal overflow fixed on the cellar screen.
+- `v0.2.36`: current production version with additional wine photos stored separately from the main label photo.
+- `v0.2.35`: production version with mobile horizontal overflow fixed on the cellar screen.
 - `v0.2.34`: production version with the service worker cache bumped so mobile/PWA clients receive the extra-photo copy update.
 - `v0.2.33`: production version with the extra photo field renamed and explicitly limited to one additional image per wine.
 - `v0.2.32`: production version with the main cellar list restricted to bottles currently in stock.

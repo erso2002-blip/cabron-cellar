@@ -25,6 +25,7 @@ const STRING_LIMITS: Record<string, number> = {
   shelf: 80,
   notes: 2_000,
   labelPhotoUrl: MAX_LABEL_PHOTO_URL_LENGTH,
+  additionalPhotoUrl: MAX_LABEL_PHOTO_URL_LENGTH,
 };
 
 function routeParam(value: string | string[] | undefined): string {

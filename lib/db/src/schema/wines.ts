@@ -29,6 +29,7 @@ export const winesTable = pgTable("wines", {
   drinkUntil: date("drink_until", { mode: "string" }),
   // AI-ready field: will be the source for automatic label reading in future integration
   labelPhotoUrl: text("label_photo_url"),
+  additionalPhotoUrl: text("additional_photo_url"),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })

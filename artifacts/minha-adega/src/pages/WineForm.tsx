@@ -57,6 +57,7 @@ const formSchema = z.object({
   shelf: z.string().max(80).optional(),
   drinkUntil: z.string().optional().nullable(),
   labelPhotoUrl: z.string().max(6_800_000).optional().nullable(),
+  additionalPhotoUrl: z.string().max(6_800_000).optional().nullable(),
   notes: z.string().max(2_000).optional(),
 });
 
@@ -132,10 +133,10 @@ export default function WineForm() {
 
   function handlePhotoUploaded(url: string) {
     form.setValue("labelPhotoUrl", url);
-    toast.success("Foto adicional salva!");
+    toast.success("Foto principal salva!");
   }
 
-  async function handleLabelPhotoFile(file: File) {
+  async function handleAdditionalPhotoFile(file: File) {
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor, selecione uma imagem");
       return;
@@ -150,7 +151,7 @@ export default function WineForm() {
     try {
       const { dataUrl } = await compactImage(file);
       const uploadedUrl = await uploadPhotoToStorage(file);
-      form.setValue("labelPhotoUrl", uploadedUrl || dataUrl, { shouldDirty: true, shouldValidate: true });
+      form.setValue("additionalPhotoUrl", uploadedUrl || dataUrl, { shouldDirty: true, shouldValidate: true });
       toast.success("Foto adicional carregada. Salve as alterações para gravar no vinho.");
     } catch {
       toast.error("Não foi possível carregar a foto selecionada");
@@ -161,7 +162,7 @@ export default function WineForm() {
 
   function handleLabelPhotoInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) void handleLabelPhotoFile(file);
+    if (file) void handleAdditionalPhotoFile(file);
     e.target.value = "";
   }
 
@@ -220,6 +221,7 @@ export default function WineForm() {
       shelf: "",
       drinkUntil: null,
       labelPhotoUrl: "",
+      additionalPhotoUrl: "",
       notes: "",
     },
   });
@@ -242,6 +244,7 @@ export default function WineForm() {
         shelf: wine.shelf || "",
         drinkUntil: wine.drinkUntil || null,
         labelPhotoUrl: wine.labelPhotoUrl || "",
+        additionalPhotoUrl: wine.additionalPhotoUrl || "",
         notes: wine.notes || "",
       });
     }
@@ -256,6 +259,7 @@ export default function WineForm() {
       wineryWebsiteUrl: normalizeWebsiteUrl(data.wineryWebsiteUrl) || undefined,
       drinkUntil: data.drinkUntil || undefined,
       labelPhotoUrl: data.labelPhotoUrl || undefined,
+      additionalPhotoUrl: data.additionalPhotoUrl || undefined,
     };
 
     if (isEditing) {
@@ -542,7 +546,7 @@ export default function WineForm() {
               <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={form.control}
-                  name="labelPhotoUrl"
+                  name="additionalPhotoUrl"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Fotos adicionais</FormLabel>

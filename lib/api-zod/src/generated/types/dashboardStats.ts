@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * MyCellar - Personal Wine Cellar Management API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { Consumption } from './consumption';
 import type { CountryStat } from './countryStat';

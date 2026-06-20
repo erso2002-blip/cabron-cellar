@@ -127,6 +127,21 @@ export default function WineDetail() {
           </div>
           
           <ConsumeModal wine={wine} />
+
+          {wine.additionalPhotoUrl && (
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Foto adicional
+              </h3>
+              <div className="bg-secondary rounded-lg aspect-[4/3] flex items-center justify-center overflow-hidden border border-border shadow-sm">
+                <img
+                  src={wine.additionalPhotoUrl}
+                  alt={`Foto adicional de ${wine.name}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="md:col-span-8 lg:col-span-9 space-y-8">

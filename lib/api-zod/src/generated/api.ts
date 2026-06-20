@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * MyCellar - Personal Wine Cellar Management API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from 'zod';
 
@@ -96,6 +96,7 @@ export const ListWinesResponseItem = zod.object({
   "shelf": zod.string().nullish().describe('Prateleira \/ posição'),
   "drinkUntil": zod.string().nullish().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().nullish().describe('URL for label photo — AI integration point for automatic field extraction'),
+  "additionalPhotoUrl": zod.string().nullish().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().nullish(),
   "userId": zod.string().optional(),
   "createdAt": zod.string(),
@@ -129,6 +130,7 @@ export const CreateWineBody = zod.object({
   "shelf": zod.string().optional(),
   "drinkUntil": zod.string().optional().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().optional(),
+  "additionalPhotoUrl": zod.string().optional().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().optional()
 })
 
@@ -149,6 +151,7 @@ export const CreateWineResponse = zod.object({
   "shelf": zod.string().nullish().describe('Prateleira \/ posição'),
   "drinkUntil": zod.string().nullish().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().nullish().describe('URL for label photo — AI integration point for automatic field extraction'),
+  "additionalPhotoUrl": zod.string().nullish().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().nullish(),
   "userId": zod.string().optional(),
   "createdAt": zod.string(),
@@ -204,6 +207,7 @@ export const GetWineResponse = zod.object({
   "shelf": zod.string().nullish().describe('Prateleira \/ posição'),
   "drinkUntil": zod.string().nullish().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().nullish().describe('URL for label photo — AI integration point for automatic field extraction'),
+  "additionalPhotoUrl": zod.string().nullish().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().nullish(),
   "userId": zod.string().optional(),
   "createdAt": zod.string(),
@@ -239,6 +243,7 @@ export const UpdateWineBody = zod.object({
   "shelf": zod.string().optional(),
   "drinkUntil": zod.string().optional(),
   "labelPhotoUrl": zod.string().optional(),
+  "additionalPhotoUrl": zod.string().optional().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().optional()
 })
 
@@ -259,6 +264,7 @@ export const UpdateWineResponse = zod.object({
   "shelf": zod.string().nullish().describe('Prateleira \/ posição'),
   "drinkUntil": zod.string().nullish().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().nullish().describe('URL for label photo — AI integration point for automatic field extraction'),
+  "additionalPhotoUrl": zod.string().nullish().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().nullish(),
   "userId": zod.string().optional(),
   "createdAt": zod.string(),
@@ -352,6 +358,7 @@ export const UploadWineLabelResponse = zod.object({
   "shelf": zod.string().nullish().describe('Prateleira \/ posição'),
   "drinkUntil": zod.string().nullish().describe('Date string YYYY-MM-DD'),
   "labelPhotoUrl": zod.string().nullish().describe('URL for label photo — AI integration point for automatic field extraction'),
+  "additionalPhotoUrl": zod.string().nullish().describe('Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.'),
   "notes": zod.string().nullish(),
   "userId": zod.string().optional(),
   "createdAt": zod.string(),
@@ -375,8 +382,20 @@ export const ListConsumptionResponseItem = zod.object({
   "wineId": zod.number(),
   "wineName": zod.string().nullish(),
   "wineProducer": zod.string().nullish(),
+  "wineryWebsiteUrl": zod.string().nullish(),
+  "wineCountry": zod.string().nullish(),
+  "wineRegion": zod.string().nullish(),
+  "wineGrape": zod.string().nullish(),
   "wineVintage": zod.number().nullish(),
+  "winePricePaid": zod.number().nullish(),
+  "wineQuantity": zod.number().nullish(),
+  "wineCellarLocation": zod.string().nullish(),
+  "wineLocationPlace": zod.string().nullish(),
+  "wineCellarName": zod.string().nullish(),
+  "wineShelf": zod.string().nullish(),
+  "wineDrinkUntil": zod.string().nullish(),
   "labelPhotoUrl": zod.string().nullish(),
+  "wineNotes": zod.string().nullish(),
   "consumedAt": zod.string(),
   "personalNote": zod.string().nullish(),
   "occasion": zod.string().nullish(),
@@ -401,8 +420,20 @@ export const GetDashboardStatsResponse = zod.object({
   "wineId": zod.number(),
   "wineName": zod.string().nullish(),
   "wineProducer": zod.string().nullish(),
+  "wineryWebsiteUrl": zod.string().nullish(),
+  "wineCountry": zod.string().nullish(),
+  "wineRegion": zod.string().nullish(),
+  "wineGrape": zod.string().nullish(),
   "wineVintage": zod.number().nullish(),
+  "winePricePaid": zod.number().nullish(),
+  "wineQuantity": zod.number().nullish(),
+  "wineCellarLocation": zod.string().nullish(),
+  "wineLocationPlace": zod.string().nullish(),
+  "wineCellarName": zod.string().nullish(),
+  "wineShelf": zod.string().nullish(),
+  "wineDrinkUntil": zod.string().nullish(),
   "labelPhotoUrl": zod.string().nullish(),
+  "wineNotes": zod.string().nullish(),
   "consumedAt": zod.string(),
   "personalNote": zod.string().nullish(),
   "occasion": zod.string().nullish(),
@@ -416,4 +447,5 @@ export const GetDashboardStatsResponse = zod.object({
   "count": zod.number()
 })).optional()
 })
+
 

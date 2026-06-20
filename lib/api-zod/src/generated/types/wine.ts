@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * MyCellar - Personal Wine Cellar Management API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface Wine {
@@ -53,6 +53,11 @@ export interface Wine {
      * @nullable
      */
   labelPhotoUrl?: string | null;
+  /**
+     * Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.
+     * @nullable
+     */
+  additionalPhotoUrl?: string | null;
   /** @nullable */
   notes?: string | null;
   userId?: string;

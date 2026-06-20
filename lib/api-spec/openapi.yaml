@@ -446,6 +446,9 @@ components:
         labelPhotoUrl:
           type: ["string", "null"]
           description: URL for label photo — AI integration point for automatic field extraction
+        additionalPhotoUrl:
+          type: ["string", "null"]
+          description: Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.
         notes:
           type: ["string", "null"]
         userId:
@@ -495,6 +498,9 @@ components:
           description: Date string YYYY-MM-DD
         labelPhotoUrl:
           type: string
+        additionalPhotoUrl:
+          type: string
+          description: Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.
         notes:
           type: string
 
@@ -535,6 +541,9 @@ components:
           type: string
         labelPhotoUrl:
           type: string
+        additionalPhotoUrl:
+          type: string
+          description: Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo.
         notes:
           type: string
 
