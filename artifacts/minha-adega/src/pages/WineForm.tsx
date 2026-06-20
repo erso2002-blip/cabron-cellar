@@ -31,6 +31,8 @@ import { authFetch } from "@/lib/auth";
 import { MAX_LABEL_PHOTO_FILE_SIZE, compactImage, uploadPhotoToStorage } from "@/lib/labelPhoto";
 import { isLikelyWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
 
+const MAX_ADDITIONAL_PHOTOS_PER_WINE = 1;
+
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(160),
   producer: z.string().min(1, "Produtor é obrigatório").max(160),
@@ -130,7 +132,7 @@ export default function WineForm() {
 
   function handlePhotoUploaded(url: string) {
     form.setValue("labelPhotoUrl", url);
-    toast.success("Foto do rótulo salva!");
+    toast.success("Foto adicional salva!");
   }
 
   async function handleLabelPhotoFile(file: File) {
@@ -149,7 +151,7 @@ export default function WineForm() {
       const { dataUrl } = await compactImage(file);
       const uploadedUrl = await uploadPhotoToStorage(file);
       form.setValue("labelPhotoUrl", uploadedUrl || dataUrl, { shouldDirty: true, shouldValidate: true });
-      toast.success("Foto carregada. Salve as alterações para gravar no vinho.");
+      toast.success("Foto adicional carregada. Salve as alterações para gravar no vinho.");
     } catch {
       toast.error("Não foi possível carregar a foto selecionada");
     } finally {
@@ -543,13 +545,13 @@ export default function WineForm() {
                   name="labelPhotoUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Foto do rótulo</FormLabel>
+                      <FormLabel>Fotos adicionais</FormLabel>
                       <div className="flex gap-4 items-start">
                         {field.value && (
                           <div className="relative shrink-0">
                             <img
                               src={field.value}
-                              alt="Foto do rótulo"
+                              alt="Foto adicional do vinho"
                               className="w-16 h-20 object-cover rounded border shadow-sm"
                             />
                             <button
@@ -611,13 +613,13 @@ export default function WineForm() {
                           </div>
                           <FormControl>
                             <Input
-                              placeholder="https://... ou carregue uma foto"
+                              placeholder="https://... ou carregue uma foto adicional"
                               {...field}
                               value={field.value || ""}
                             />
                           </FormControl>
                           <FormDescription className="mt-1">
-                            Carregue uma foto do rótulo, tire uma foto pelo celular ou cole uma URL.
+                            Use para foto da taça, contra-rótulo ou outro detalhe. Limite: {MAX_ADDITIONAL_PHOTOS_PER_WINE} foto por vinho; ao carregar outra, ela substitui a anterior.
                           </FormDescription>
                         </div>
                       </div>
