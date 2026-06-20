@@ -62,7 +62,7 @@ export default function StockList() {
   const hasActiveFilter = Boolean(search || cellarFilter !== ALL_CELLARS_VALUE);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-serif font-bold tracking-tight">Sua Adega</h2>
@@ -76,21 +76,21 @@ export default function StockList() {
         </Link>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 justify-between items-center bg-card p-4 rounded-lg shadow-sm border">
-        <div className="flex flex-col sm:flex-row gap-3 w-full lg:flex-1">
-          <div className="relative w-full sm:max-w-96">
+      <div className="flex w-full min-w-0 flex-col gap-4 overflow-hidden rounded-lg border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row lg:flex-1">
+          <div className="relative w-full min-w-0 sm:max-w-96">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Buscar por nome, produtor, uva, país ou região..."
-              className="pl-9 w-full bg-background"
+              className="w-full min-w-0 bg-background pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               data-testid="input-search-wines"
             />
           </div>
           <Select value={cellarFilter} onValueChange={setCellarFilter}>
-            <SelectTrigger className="w-full sm:w-56 bg-background" data-testid="select-cellar-filter">
+            <SelectTrigger className="w-full min-w-0 bg-background sm:w-56" data-testid="select-cellar-filter">
               <SelectValue placeholder="Filtrar por adega" />
             </SelectTrigger>
             <SelectContent>
@@ -103,7 +103,7 @@ export default function StockList() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center space-x-2 w-full lg:w-auto justify-end">
+        <div className="flex w-full items-center justify-end space-x-2 lg:w-auto">
           <Button
             variant={viewMode === "grid" ? "secondary" : "ghost"}
             size="icon"
@@ -143,8 +143,8 @@ export default function StockList() {
       ) : (
         <div className={
           viewMode === "grid" 
-            ? "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
-            : "flex flex-col gap-4"
+            ? "grid min-w-0 grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+            : "flex min-w-0 flex-col gap-4"
         }>
           {visibleWines.map(wine => (
             <WineCard key={wine.id} wine={wine} viewMode={viewMode} />

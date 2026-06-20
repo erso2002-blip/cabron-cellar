@@ -42,9 +42,9 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
 
   if (isList) {
     return (
-      <Link href={`/wines/${wine.id}`}>
-        <Card className="hover:bg-secondary/50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
-          <CardContent className="p-3 sm:p-4 flex items-center gap-4 sm:gap-6">
+      <Link href={`/wines/${wine.id}`} className="block min-w-0">
+        <Card className="min-w-0 overflow-hidden hover:bg-secondary/50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
+          <CardContent className="flex min-w-0 items-center gap-3 p-3 sm:gap-6 sm:p-4">
             <LabelPhoto wine={wine} compact />
 
             <div className="flex-1 min-w-0">
@@ -82,7 +82,7 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
               )}
             </div>
 
-            <div className="flex-shrink-0 text-right">
+            <div className="hidden flex-shrink-0 text-right sm:block">
               <div className="text-2xl font-serif font-bold">{wine.quantity}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Garrafas</div>
             </div>
@@ -93,9 +93,9 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
   }
 
   return (
-    <Link href={`/wines/${wine.id}`}>
-      <Card className="h-full hover:bg-secondary/50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
-        <CardContent className="p-3 flex gap-4">
+    <Link href={`/wines/${wine.id}`} className="block min-w-0">
+      <Card className="h-full min-w-0 overflow-hidden hover:bg-secondary/50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
+        <CardContent className="flex min-w-0 gap-4 p-3">
           <LabelPhoto wine={wine} />
 
           <div className="min-w-0 flex-1">

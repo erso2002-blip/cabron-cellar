@@ -79,7 +79,7 @@ export function Shell({ children }: ShellProps) {
   );
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 border-r bg-card px-4 py-6 md:flex md:flex-col">
         <div className="mb-8 px-4">
@@ -113,8 +113,8 @@ export function Shell({ children }: ShellProps) {
       </aside>
 
       {/* Mobile Header & Nav */}
-      <div className="flex flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-card px-4 md:hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+        <header className="sticky top-0 z-10 flex h-14 w-full max-w-full items-center justify-between border-b bg-card px-4 md:hidden">
           <Link href="/" aria-label="MyCellar">
             <img
               src="/logo.svg"
@@ -153,7 +153,7 @@ export function Shell({ children }: ShellProps) {
           </Sheet>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <main className="mx-auto w-full max-w-full min-w-0 flex-1 overflow-x-hidden p-4 md:max-w-7xl md:p-8">
           {children}
         </main>
       </div>
