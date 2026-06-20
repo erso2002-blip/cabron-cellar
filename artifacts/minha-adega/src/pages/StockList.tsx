@@ -9,6 +9,7 @@ import { Search, PlusCircle, LayoutGrid, List as ListIcon } from "lucide-react";
 import { WineCard } from "@/components/WineCard";
 
 const ALL_CELLARS_VALUE = "__all_cellars__";
+const PRESENT_WINES_PARAMS = { minQuantity: 1 } as const;
 
 function normalizeSearchValue(value: unknown) {
   return String(value ?? "")
@@ -24,8 +25,8 @@ export default function StockList() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const { data: wines, isLoading } = useListWines(
-    undefined,
-    { query: { queryKey: getListWinesQueryKey() } }
+    PRESENT_WINES_PARAMS,
+    { query: { queryKey: getListWinesQueryKey(PRESENT_WINES_PARAMS) } }
   );
 
   const cellarOptions = useMemo(() => {
