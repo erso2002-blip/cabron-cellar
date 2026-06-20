@@ -8,7 +8,7 @@
     "deploy": "npm run build && vercel deploy --prod",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
-    "release": "git tag v0.2.38 && git push origin main --tags"
+    "release": "git tag v$(node -p \"require('./package.json').version\") && git push origin main --tags"
   },
   "private": true,
   "devDependencies": {
