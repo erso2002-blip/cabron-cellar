@@ -82,9 +82,12 @@ export function WineCard({ wine, viewMode }: WineCardProps) {
               )}
             </div>
 
-            <div className="hidden flex-shrink-0 text-right sm:block">
-              <div className="text-2xl font-serif font-bold">{wine.quantity}</div>
-              <div className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Garrafas</div>
+            <div className="w-10 flex-shrink-0 text-right sm:w-16">
+              <div className="text-xl font-serif font-bold sm:text-2xl">{wine.quantity}</div>
+              <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs sm:tracking-widest">
+                <span className="sm:hidden">un.</span>
+                <span className="hidden sm:inline">Garrafas</span>
+              </div>
             </div>
           </CardContent>
         </Card>
