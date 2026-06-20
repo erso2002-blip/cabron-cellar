@@ -4,7 +4,7 @@ This folder tracks release versions, production status, rollback references, and
 
 ## Rules
 
-- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`, `v0.2.16`, `v0.2.17`, `v0.2.18`, `v0.2.19`, `v0.2.20`, `v0.2.21`, `v0.2.22`, `v0.2.23`, `v0.2.24`, `v0.2.25`, `v0.2.26`, `v0.2.27`, `v0.2.28`, `v0.2.29`, `v0.2.30`.
+- Public releases use semantic versions: `v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.2.1`, `v0.2.2`, `v0.2.3`, `v0.2.4`, `v0.2.5`, `v0.2.6`, `v0.2.7`, `v0.2.8`, `v0.2.9`, `v0.2.10`, `v0.2.11`, `v0.2.12`, `v0.2.13`, `v0.2.14`, `v0.2.15`, `v0.2.16`, `v0.2.17`, `v0.2.18`, `v0.2.19`, `v0.2.20`, `v0.2.21`, `v0.2.22`, `v0.2.23`, `v0.2.24`, `v0.2.25`, `v0.2.26`, `v0.2.27`, `v0.2.28`, `v0.2.29`, `v0.2.30`, `v0.2.31`.
 - Small fixes or low-risk additions increment the patch number.
 - Larger user-facing features increment the minor number.
 - Every production release must have a version file in this folder.
@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.30`: current production version with Pro gating for harmonization and drink-date suggestions, plus Free 30-present-bottle enforcement.
+- `v0.2.31`: current production version with wine-form label-photo upload controls, compact cellar layout, enriched label analysis, and assisted cellar import positioned as Pro.
+- `v0.2.30`: production version with Pro gating for harmonization and drink-date suggestions, plus Free 30-present-bottle enforcement.
 - `v0.2.29`: production version with Basic plan label-AI positioning.
 - `v0.2.28`: production version with reverse dish-to-cellar pairing.
 - `v0.2.27`: production version with launch-promotion prices in billing.

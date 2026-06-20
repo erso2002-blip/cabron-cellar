@@ -21,7 +21,7 @@ function normalizeSearchValue(value: unknown) {
 export default function StockList() {
   const [search, setSearch] = useState("");
   const [cellarFilter, setCellarFilter] = useState(ALL_CELLARS_VALUE);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
 
   const { data: wines, isLoading } = useListWines(
     undefined,

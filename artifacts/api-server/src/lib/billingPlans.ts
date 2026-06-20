@@ -42,6 +42,7 @@ export const billingPlans: BillingPlan[] = [
     features: [
       "Garrafas ilimitadas",
       "Fotos ilimitadas",
+      "Importacao assistida de adega",
       "Harmonizacao de pratos",
       "Sugestao de data ideal de consumo",
       "Historico e backup",
@@ -60,6 +61,7 @@ export const billingPlans: BillingPlan[] = [
     features: [
       "Garrafas ilimitadas",
       "Fotos ilimitadas",
+      "Importacao assistida de adega",
       "Harmonizacao de pratos",
       "Sugestao de data ideal de consumo",
       "Historico e backup",

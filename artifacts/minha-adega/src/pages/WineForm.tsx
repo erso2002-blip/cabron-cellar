@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,9 +25,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
-import { ArrowLeft, Save, Sparkles, Loader2, X } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Loader2, X, Camera, Upload } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 import { authFetch } from "@/lib/auth";
+import { MAX_LABEL_PHOTO_FILE_SIZE, compactImage, uploadPhotoToStorage } from "@/lib/labelPhoto";
 import { isLikelyWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
 
 const formSchema = z.object({
@@ -100,8 +101,11 @@ export default function WineForm() {
 
   const createMutation = useCreateWine();
   const updateMutation = useUpdateWine();
+  const labelPhotoFileRef = useRef<HTMLInputElement>(null);
+  const labelPhotoCameraRef = useRef<HTMLInputElement>(null);
 
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [isUploadingLabelPhoto, setIsUploadingLabelPhoto] = useState(false);
   const [drinkUntilHint, setDrinkUntilHint] = useState<string | null>(null);
 
   function buildFallbackWineName(data: LabelData) {
@@ -127,6 +131,36 @@ export default function WineForm() {
   function handlePhotoUploaded(url: string) {
     form.setValue("labelPhotoUrl", url);
     toast.success("Foto do rótulo salva!");
+  }
+
+  async function handleLabelPhotoFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione uma imagem");
+      return;
+    }
+
+    if (file.size > MAX_LABEL_PHOTO_FILE_SIZE) {
+      toast.error("Imagem muito grande. Máximo 4MB.");
+      return;
+    }
+
+    setIsUploadingLabelPhoto(true);
+    try {
+      const { dataUrl } = await compactImage(file);
+      const uploadedUrl = await uploadPhotoToStorage(file);
+      form.setValue("labelPhotoUrl", uploadedUrl || dataUrl, { shouldDirty: true, shouldValidate: true });
+      toast.success("Foto carregada. Salve as alterações para gravar no vinho.");
+    } catch {
+      toast.error("Não foi possível carregar a foto selecionada");
+    } finally {
+      setIsUploadingLabelPhoto(false);
+    }
+  }
+
+  function handleLabelPhotoInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) void handleLabelPhotoFile(file);
+    e.target.value = "";
   }
 
   async function handleSuggestDrinkUntil() {
@@ -528,15 +562,62 @@ export default function WineForm() {
                           </div>
                         )}
                         <div className="flex-1">
+                          <div className="mb-3 flex flex-col gap-2 sm:flex-row">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="w-full sm:w-auto"
+                              onClick={() => labelPhotoCameraRef.current?.click()}
+                              disabled={isUploadingLabelPhoto}
+                            >
+                              {isUploadingLabelPhoto ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Camera className="mr-2 h-4 w-4" />
+                              )}
+                              Tirar foto
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="w-full sm:w-auto"
+                              onClick={() => labelPhotoFileRef.current?.click()}
+                              disabled={isUploadingLabelPhoto}
+                            >
+                              {isUploadingLabelPhoto ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Upload className="mr-2 h-4 w-4" />
+                              )}
+                              Carregar foto
+                            </Button>
+                            <input
+                              ref={labelPhotoCameraRef}
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="hidden"
+                              onChange={handleLabelPhotoInputChange}
+                            />
+                            <input
+                              ref={labelPhotoFileRef}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="hidden"
+                              onChange={handleLabelPhotoInputChange}
+                            />
+                          </div>
                           <FormControl>
                             <Input
-                              placeholder="https://... (use o scanner acima para preencher automaticamente)"
+                              placeholder="https://... ou carregue uma foto"
                               {...field}
                               value={field.value || ""}
                             />
                           </FormControl>
                           <FormDescription className="mt-1">
-                            Use o scanner de rótulo acima para salvar a foto automaticamente, ou cole uma URL.
+                            Carregue uma foto do rótulo, tire uma foto pelo celular ou cole uma URL.
                           </FormDescription>
                         </div>
                       </div>
