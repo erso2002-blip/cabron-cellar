@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useListConsumption } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +15,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { authFetch } from "@/lib/auth";
 import { toast } from "sonner";
+
+type BuyAgainFilter = "all" | "yes" | "no" | "unrated";
 
 function Detail({ label, value }: { label: string; value: string | number | null | undefined }) {
   if (value === null || value === undefined || value === "") return null;
@@ -35,7 +45,18 @@ function formatDate(value: string | Date) {
 export default function History() {
   const { data: history, isLoading } = useListConsumption({ limit: 50 });
   const queryClient = useQueryClient();
+  const [buyAgainFilter, setBuyAgainFilter] = useState<BuyAgainFilter>("all");
   const valueFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const filteredHistory = useMemo(() => {
+    if (!history) return [];
+
+    return history.filter((record) => {
+      if (buyAgainFilter === "all") return true;
+      if (buyAgainFilter === "yes") return record.wouldBuyAgain === true;
+      if (buyAgainFilter === "no") return record.wouldBuyAgain === false;
+      return record.wouldBuyAgain === null || record.wouldBuyAgain === undefined;
+    });
+  }, [buyAgainFilter, history]);
 
   async function restoreConsumption(id: number) {
     try {
@@ -78,8 +99,37 @@ export default function History() {
           </p>
         </div>
       ) : (
-        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-          {history.map((record) => (
+        <>
+          <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm sm:w-fit sm:min-w-64">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Compraria novamente
+            </label>
+            <Select value={buyAgainFilter} onValueChange={(value) => setBuyAgainFilter(value as BuyAgainFilter)}>
+              <SelectTrigger className="w-full sm:w-64" data-testid="buy-again-filter">
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="yes">Sim</SelectItem>
+                <SelectItem value="no">Não</SelectItem>
+                <SelectItem value="unrated">Sem avaliação</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {!filteredHistory.length ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-border rounded-xl bg-card">
+              <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mb-4">
+                <Star className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-foreground">Nenhum consumo neste filtro</h3>
+              <p className="text-muted-foreground mt-2 max-w-md">
+                Ajuste o filtro para visualizar outros registros do histórico.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+          {filteredHistory.map((record) => (
             <div key={record.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
               <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-background bg-secondary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-primary">
                 <GlassWater className="w-4 h-4" />
@@ -235,7 +285,9 @@ export default function History() {
               </Dialog>
             </div>
           ))}
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

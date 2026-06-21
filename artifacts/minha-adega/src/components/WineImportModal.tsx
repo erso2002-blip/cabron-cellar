@@ -182,7 +182,7 @@ export function WineImportModal({ open, onOpenChange, onImportSuccess }: WineImp
             <DialogHeader>
               <DialogTitle>Importar Vinhos em Lote</DialogTitle>
               <DialogDescription>
-                Baixe o template, preencha com seus vinhos e importe para sua adega
+                Baixe a planilha modelo, preencha com seus vinhos e importe para sua adega
               </DialogDescription>
             </DialogHeader>
 
@@ -190,7 +190,7 @@ export function WineImportModal({ open, onOpenChange, onImportSuccess }: WineImp
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Use o template oficial para garantir que o formato está correto
+                  Use a planilha modelo oficial para garantir que o formato está correto
                 </AlertDescription>
               </Alert>
 
@@ -202,7 +202,7 @@ export function WineImportModal({ open, onOpenChange, onImportSuccess }: WineImp
                   className="w-full"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  {isLoading ? "Baixando..." : "Baixar Template"}
+                  {isLoading ? "Baixando..." : "Baixar Planilha Modelo"}
                 </Button>
 
                 <div className="relative">
@@ -228,7 +228,7 @@ export function WineImportModal({ open, onOpenChange, onImportSuccess }: WineImp
                   className="w-full"
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  Selecionar Arquivo
+                  Enviar Arquivo
                 </Button>
               </div>
             </div>
