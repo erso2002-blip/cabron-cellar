@@ -1,3 +1,5 @@
+import { activeMarket, type MarketCurrency } from "./markets.js";
+
 export type BillingPlanId = "free" | "pro-monthly" | "pro-annual";
 
 export type BillingPlan = {
@@ -7,7 +9,7 @@ export type BillingPlan = {
   amount: number;
   originalAmount?: number;
   promotionLabel?: string;
-  currency: "BRL";
+  currency: MarketCurrency;
   interval: "free" | "monthly" | "annual";
   bottlesLimit: number | null;
   features: string[];
@@ -19,7 +21,7 @@ export const billingPlans: BillingPlan[] = [
     name: "Gratuito",
     description: "Entrada para organizar uma adega pequena.",
     amount: 0,
-    currency: "BRL",
+    currency: activeMarket.currency,
     interval: "free",
     bottlesLimit: 30,
     features: [
@@ -36,7 +38,7 @@ export const billingPlans: BillingPlan[] = [
     amount: 25.45,
     originalAmount: 49.9,
     promotionLabel: "Promoção de lançamento",
-    currency: "BRL",
+    currency: activeMarket.currency,
     interval: "monthly",
     bottlesLimit: null,
     features: [
@@ -55,7 +57,7 @@ export const billingPlans: BillingPlan[] = [
     amount: 254.5,
     originalAmount: 499,
     promotionLabel: "Promoção de lançamento",
-    currency: "BRL",
+    currency: activeMarket.currency,
     interval: "annual",
     bottlesLimit: null,
     features: [

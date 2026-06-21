@@ -36,6 +36,7 @@ import {
 import { ConsumeModal } from "@/components/ConsumeModal";
 import { WineInsights } from "@/components/WineInsights";
 import { normalizeWebsiteUrl } from "@/lib/url";
+import { formatCurrency, formatDate } from "@/lib/formatters";
 
 export default function WineDetail() {
   const params = useParams();
@@ -69,7 +70,6 @@ export default function WineDetail() {
   if (isLoading) return <PageSkeleton />;
   if (!wine) return <div>Vinho não encontrado</div>;
 
-  const valueFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const wineryWebsiteUrl = normalizeWebsiteUrl(wine.wineryWebsiteUrl);
 
   return (
@@ -195,7 +195,7 @@ export default function WineDetail() {
                 <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
                   <DollarSign className="w-3.5 h-3.5" /> Preço Pago
                 </div>
-                <div className="font-medium">{valueFormatter.format(wine.pricePaid)}</div>
+                <div className="font-medium">{formatCurrency(wine.pricePaid)}</div>
               </div>
             )}
 
@@ -219,7 +219,7 @@ export default function WineDetail() {
                 <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
                   <Clock className="w-3.5 h-3.5" /> Beber até
                 </div>
-                <div className="font-medium">{new Date(wine.drinkUntil).toLocaleDateString('pt-BR')}</div>
+                <div className="font-medium">{formatDate(wine.drinkUntil)}</div>
               </div>
             )}
           </div>

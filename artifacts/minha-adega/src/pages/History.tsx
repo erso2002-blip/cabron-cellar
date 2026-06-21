@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { authFetch } from "@/lib/auth";
+import { formatCurrency, formatDate } from "@/lib/formatters";
 import { toast } from "sonner";
 
 type BuyAgainFilter = "all" | "yes" | "no";
@@ -38,15 +39,10 @@ function Detail({ label, value }: { label: string; value: string | number | null
   );
 }
 
-function formatDate(value: string | Date) {
-  return new Date(value).toLocaleDateString("pt-BR");
-}
-
 export default function History() {
   const { data: history, isLoading } = useListConsumption({ limit: 50 });
   const queryClient = useQueryClient();
   const [buyAgainFilter, setBuyAgainFilter] = useState<BuyAgainFilter>("all");
-  const valueFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const filteredHistory = useMemo(() => {
     if (!history) return [];
 
@@ -225,7 +221,7 @@ export default function History() {
                           <Detail label="Safra" value={record.wineVintage} />
                           <Detail
                             label="Preço pago"
-                            value={record.winePricePaid !== null && record.winePricePaid !== undefined ? valueFormatter.format(record.winePricePaid) : null}
+                            value={record.winePricePaid !== null && record.winePricePaid !== undefined ? formatCurrency(record.winePricePaid) : null}
                           />
                           <Detail label="Beber até" value={record.wineDrinkUntil ? formatDate(record.wineDrinkUntil) : null} />
                           <Detail label="Adega" value={record.wineCellarName} />

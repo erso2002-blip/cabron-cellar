@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { billingPlans, getBillingPlan } from "../lib/billingPlans.js";
+import { activeMarket } from "../lib/markets.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
 
 const router = Router();
@@ -55,6 +56,7 @@ function getAutoRecurring(plan: NonNullable<ReturnType<typeof getBillingPlan>>) 
 router.get("/billing/plans", (_req: any, res: any) => {
   res.json({
     plans: billingPlans,
+    market: activeMarket,
     provider: {
       name: "Mercado Pago",
       configured: Boolean(process.env.MERCADO_PAGO_ACCESS_TOKEN),
@@ -140,4 +142,3 @@ router.post(
 );
 
 export default router;
-

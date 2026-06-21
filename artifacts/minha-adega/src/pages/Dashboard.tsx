@@ -5,6 +5,7 @@ import { PageSkeleton } from "@/components/ui/loading";
 import { Link } from "wouter";
 import { Wine, TrendingUp, AlertTriangle, Clock, MapPin, Plus } from "lucide-react";
 import { UrgencyBadge } from "@/components/UrgencyBadge";
+import { formatCurrency } from "@/lib/formatters";
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
@@ -13,8 +14,6 @@ export default function Dashboard() {
   if (statsLoading || drinkSoonLoading) {
     return <PageSkeleton />;
   }
-
-  const valueFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -49,7 +48,7 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-serif">{valueFormatter.format(stats?.estimatedValue || 0)}</div>
+            <div className="text-3xl font-bold font-serif">{formatCurrency(stats?.estimatedValue || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">Baseado no preço pago</p>
           </CardContent>
         </Card>

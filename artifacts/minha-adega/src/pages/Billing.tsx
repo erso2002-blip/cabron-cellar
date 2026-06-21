@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Clock } from "lucide-react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { authFetch, useAuth } from "@/lib/auth";
+import type { MarketCurrency } from "@/config/markets";
+import { formatCurrency } from "@/lib/formatters";
 
 type BillingPlan = {
   id: "free" | "pro-monthly" | "pro-annual";
@@ -13,7 +15,7 @@ type BillingPlan = {
   amount: number;
   originalAmount?: number;
   promotionLabel?: string;
-  currency: "BRL";
+  currency: MarketCurrency;
   interval: "free" | "monthly" | "annual";
   bottlesLimit: number | null;
   features: string[];
@@ -40,11 +42,6 @@ export default function Billing() {
   const [providerConfigured, setProviderConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const formatter = useMemo(
-    () => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }),
-    [],
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -127,13 +124,13 @@ export default function Billing() {
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <Badge variant="secondary">{plan.promotionLabel}</Badge>
                       <span className="text-sm text-muted-foreground line-through">
-                        De {formatter.format(plan.originalAmount)}
+                        De {formatCurrency(plan.originalAmount, plan.currency)}
                       </span>
                     </div>
                   ) : null}
                   <div className="font-serif text-3xl font-bold">
                     {isPaid && plan.originalAmount ? "Por " : ""}
-                    {formatter.format(plan.amount)}
+                    {formatCurrency(plan.amount, plan.currency)}
                   </div>
                   <div className="text-sm text-muted-foreground">{intervalLabel[plan.interval]}</div>
                 </div>
