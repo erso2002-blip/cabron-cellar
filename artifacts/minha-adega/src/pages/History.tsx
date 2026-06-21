@@ -25,7 +25,7 @@ import {
 import { authFetch } from "@/lib/auth";
 import { toast } from "sonner";
 
-type BuyAgainFilter = "all" | "yes" | "no" | "unrated";
+type BuyAgainFilter = "all" | "yes" | "no";
 
 function Detail({ label, value }: { label: string; value: string | number | null | undefined }) {
   if (value === null || value === undefined || value === "") return null;
@@ -53,8 +53,7 @@ export default function History() {
     return history.filter((record) => {
       if (buyAgainFilter === "all") return true;
       if (buyAgainFilter === "yes") return record.wouldBuyAgain === true;
-      if (buyAgainFilter === "no") return record.wouldBuyAgain === false;
-      return record.wouldBuyAgain === null || record.wouldBuyAgain === undefined;
+      return record.wouldBuyAgain === false;
     });
   }, [buyAgainFilter, history]);
 
@@ -112,7 +111,6 @@ export default function History() {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="yes">Sim</SelectItem>
                 <SelectItem value="no">Não</SelectItem>
-                <SelectItem value="unrated">Sem avaliação</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -174,7 +172,7 @@ export default function History() {
                           {record.wouldBuyAgain && (
                             <Badge variant="secondary" className="mt-3 bg-amber-100 text-amber-800 hover:bg-amber-200 border-amber-200">
                               <Star className="w-3 h-3 mr-1 fill-amber-500 text-amber-500" />
-                              Compraria de novo
+                              Compraria novamente
                             </Badge>
                           )}
                         </div>
@@ -245,7 +243,7 @@ export default function History() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <Detail label="Quantidade consumida" value={record.quantity} />
                             <Detail label="Ocasião" value={record.occasion} />
-                            <Detail label="Compraria de novo" value={record.wouldBuyAgain === null || record.wouldBuyAgain === undefined ? null : record.wouldBuyAgain ? "Sim" : "Não"} />
+                            <Detail label="Compraria novamente" value={record.wouldBuyAgain === null || record.wouldBuyAgain === undefined ? null : record.wouldBuyAgain ? "Sim" : "Não"} />
                           </div>
 
                           {record.personalNote && (

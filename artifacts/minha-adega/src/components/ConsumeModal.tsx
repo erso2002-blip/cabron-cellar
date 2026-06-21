@@ -85,12 +85,12 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
       <DialogTrigger asChild>
         <Button size="lg" className="w-full text-base py-6 shadow-md" data-testid="btn-consume-trigger">
           <GlassWater className="mr-2 h-5 w-5" />
-          Marcar como Consumida
+          Marcar como consumido
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Consumir Vinho</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">Consumir vinho</DialogTitle>
           <DialogDescription>
             Registre a abertura desta garrafa. Saúde!
           </DialogDescription>
@@ -104,7 +104,7 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
                 name="consumedAt"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data de Consumo</FormLabel>
+                    <FormLabel>Data de consumo</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -117,7 +117,7 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
                 name="quantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Qtd. Garrafas</FormLabel>
+                    <FormLabel>Qtd. de garrafas</FormLabel>
                     <FormControl>
                       <Input type="number" min="1" max={wine.quantity} {...field} />
                     </FormControl>
@@ -132,7 +132,7 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
               name="occasion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Ocasião (Opcional)</FormLabel>
+                  <FormLabel>Ocasião (opcional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Ex: Jantar de aniversário..." {...field} />
                   </FormControl>
@@ -146,7 +146,7 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
               name="personalNote"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notas de Degustação (Opcional)</FormLabel>
+                  <FormLabel>Notas de degustação (opcional)</FormLabel>
                   <FormControl>
                     <Textarea placeholder="O que achou do vinho?" className="resize-none" {...field} />
                   </FormControl>
@@ -180,7 +180,7 @@ export function ConsumeModal({ wine }: { wine: WineType }) {
                 Cancelar
               </Button>
               <Button type="submit" disabled={consumeMutation.isPending}>
-                {consumeMutation.isPending ? "Salvando..." : "Registrar Consumo"}
+                {consumeMutation.isPending ? "Salvando..." : "Registrar consumo"}
               </Button>
             </DialogFooter>
           </form>

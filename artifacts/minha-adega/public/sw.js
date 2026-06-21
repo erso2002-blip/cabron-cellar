@@ -1,4 +1,4 @@
-const CACHE_NAME = "minha-adega-v35";
+const CACHE_NAME = "minha-adega-v37";
 
 const PRECACHE_URLS = [
   "/manifest.json",

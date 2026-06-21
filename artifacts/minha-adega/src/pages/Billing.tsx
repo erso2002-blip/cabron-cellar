@@ -28,8 +28,8 @@ type BillingPlansResponse = {
 };
 
 const intervalLabel: Record<BillingPlan["interval"], string> = {
-  free: "Gratis",
-  monthly: "por mes",
+  free: "Grátis",
+  monthly: "por mês",
   annual: "por ano",
 };
 
@@ -54,7 +54,7 @@ export default function Billing() {
       setError(null);
       try {
         const response = await authFetch("/api/billing/plans");
-        if (!response.ok) throw new Error("Nao foi possivel carregar os planos");
+        if (!response.ok) throw new Error("Não foi possível carregar os planos");
         const data = (await response.json()) as BillingPlansResponse;
         if (cancelled) return;
         setPlans(data.plans);
@@ -90,7 +90,7 @@ export default function Billing() {
             </Button>
             <h2 className="text-3xl font-serif font-bold tracking-tight">Assinatura</h2>
             <p className="text-muted-foreground mt-1 font-serif italic">
-              Promocao de lancamento por tempo limitado.
+              Promoção de lançamento por tempo limitado.
             </p>
           </div>
           <Badge variant={providerConfigured ? "default" : "secondary"} className="w-fit">
