@@ -5,8 +5,8 @@ Integração preparada para assinaturas recorrentes via endpoint `/preapproval` 
 ## Planos
 
 - Free: R$ 0, ate 30 garrafas.
-- Pro Mensal promocional de lançamento: de R$ 49,90 por R$ 25,45/mês.
-- Pro Anual promocional de lançamento: de R$ 499,00 por R$ 254,50/ano.
+- Pro Mensal promocional de lançamento: de R$ 39,90 por R$ 20,35/mês.
+- Pro Anual promocional de lançamento: de R$ 399,00 por R$ 203,49/ano.
 
 ## Variáveis de ambiente
 

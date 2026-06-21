@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.43`: current production version with the first Brazil, Argentina, and Chile market configuration layer plus backup documentation/script.
+- `v0.2.44`: current production version with Brazilian launch-promotion subscription prices updated to R$ 39,90 base pricing.
+- `v0.2.43`: production version with the first Brazil, Argentina, and Chile market configuration layer plus backup documentation/script.
 - `v0.2.42`: production version with subscription copy corrected according to written Portuguese norms.
 - `v0.2.41`: production version with consumption evaluation copy corrected and the `Sem avaliação` filter removed.
 - `v0.2.40`: production version with the `Compraria novamente` consumption-history filter and import copy adjustments.
