@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.48`: current production version with profile, notification preference, and account deletion request endpoints wired to Perfil.
+- `v0.2.49`: current production version with Google login beta-access error handling and PWA cache refresh.
+- `v0.2.48`: production version with profile, notification preference, and account deletion request endpoints wired to Perfil.
 - `v0.2.47`: production version with safer account-deletion request copy, profile editing request, simplified side menu, and native/PWA version alignment.
 - `v0.2.46`: profile editing request, simplified side menu, and native/PWA version alignment.
 - `v0.2.45`: production version with launch-promotion subscription prices set to R$ 19,90/month and R$ 199,00/year.

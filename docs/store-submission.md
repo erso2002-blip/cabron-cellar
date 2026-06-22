@@ -1,7 +1,7 @@
 # MyCellar - App Store e Play Store
 
 Data: 2026-06-22
-Versao base: v0.2.48
+Versao base: v0.2.49
 App ID / Bundle ID: `br.com.mycellar.app`
 
 ## Estrategia
@@ -135,8 +135,8 @@ Ponto de cuidado:
 - URL de suporte: `https://mycellar.com.br`.
 - URL de marketing: `https://mycellar.com.br`.
 - Copyright: `2026 MyCellar`.
-- Versao: `0.2.48`.
-- Build: `45`.
+- Versao: `0.2.49`.
+- Build: `49`.
 - Distribuicao inicial recomendada: TestFlight/beta fechado antes de abertura ampla.
 - Review notes: informar que o app e uma adega pessoal, nao vende bebidas, e que recursos pagos/checkout podem estar limitados durante beta.
 - Demo account: criar antes do review se o login Google/e-mail nao for suficiente para revisao sem friccao.
@@ -197,7 +197,7 @@ Padrao visual:
 
 - Apple: criar registro do app no App Store Connect com `br.com.mycellar.app`.
 - Apple: configurar categoria, URLs, privacidade, classificacao etaria e metadados acima.
-- Apple: em Mac/Xcode, abrir `ios/App/App.xcworkspace`, selecionar time Apple Developer, assinar, arquivar e enviar build `0.2.48 (48)`.
+- Apple: em Mac/Xcode, abrir `ios/App/App.xcworkspace`, selecionar time Apple Developer, assinar, arquivar e enviar build `0.2.49 (49)`.
 - Apple: liberar primeiro em TestFlight para validacao real de login, camera e fotos.
 - Google: criar conta Play Console do projeto/empresa.
 - Google: apos conta criada, gerar `.aab` em ambiente com JDK/Android SDK.

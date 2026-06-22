@@ -10,7 +10,10 @@ import {
 } from "../lib/emailAuth.js";
 import { getGoogleSsoConfig, verifyGoogleUser } from "../middlewares/googleAuth.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
-import { isClosedBetaAccessEnabled } from "../lib/closedBetaAccess.js";
+import {
+  CLOSED_BETA_ACCESS_DENIED_ERROR,
+  isClosedBetaAccessEnabled,
+} from "../lib/closedBetaAccess.js";
 
 const router = Router();
 
@@ -50,6 +53,9 @@ router.post(
       return res.json({ token, user });
     } catch (err) {
       req.log?.warn({ err }, "Google session creation failed");
+      if (err instanceof Error && err.message === CLOSED_BETA_ACCESS_DENIED_ERROR) {
+        return res.status(403).json({ error: CLOSED_BETA_ACCESS_DENIED_ERROR });
+      }
       return res.status(401).json({ error: "Unauthorized" });
     }
   },

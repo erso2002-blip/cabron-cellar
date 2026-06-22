@@ -1,4 +1,5 @@
 const CLOSED_BETA_ALLOWED_EMAILS_ENV = "CLOSED_BETA_ALLOWED_EMAILS";
+export const CLOSED_BETA_ACCESS_DENIED_ERROR = "Access is restricted to closed beta testers";
 
 export function normalizeAccessEmail(email: unknown) {
   if (typeof email !== "string") return null;
@@ -33,6 +34,6 @@ export function closedBetaAccessDeniedResult() {
   return {
     ok: false as const,
     status: 403,
-    error: "Access is restricted to closed beta testers",
+    error: CLOSED_BETA_ACCESS_DENIED_ERROR,
   };
 }
