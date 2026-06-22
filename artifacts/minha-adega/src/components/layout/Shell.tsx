@@ -1,21 +1,19 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { 
-  Wine, 
-  FileText,
+import {
+  Wine,
   ChefHat,
-  LayoutDashboard, 
-  History, 
-  ShieldCheck,
+  LayoutDashboard,
+  History,
   CreditCard,
-  PlusCircle, 
-  Menu 
+  PlusCircle,
+  Menu,
+  UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { PwaInstallButton } from "@/components/PwaInstallButton";
 import { APP_VERSION } from "@/config/app";
-import { useAuth } from "@/lib/auth";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -28,18 +26,12 @@ const navItems = [
   { href: "/history", label: "Histórico", icon: History },
   { href: "/pairing", label: "Harmonizar", icon: ChefHat },
   { href: "/billing", label: "Assinatura", icon: CreditCard },
-];
-
-const legalItems = [
-  { href: "/termos", label: "Termos de Uso", icon: FileText },
-  { href: "/privacidade", label: "Privacidade", icon: ShieldCheck },
+  { href: "/profile", label: "Perfil", icon: UserCircle },
 ];
 
 export function Shell({ children }: ShellProps) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
-  const { config, user, signOut } = useAuth();
-  const ssoEnabled = config?.configured ?? false;
 
   const NavLinks = () => (
     <>
@@ -59,25 +51,6 @@ export function Shell({ children }: ShellProps) {
     </>
   );
 
-  const LegalLinks = () => (
-    <div className="space-y-1 border-t pt-3">
-      {legalItems.map((item) => (
-        <Link key={item.href} href={item.href}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start px-0 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => setOpen(false)}
-            data-testid={`legal-${item.href.slice(1)}`}
-          >
-            <item.icon className="mr-2 h-3.5 w-3.5" />
-            {item.label}
-          </Button>
-        </Link>
-      ))}
-    </div>
-  );
-
   return (
     <div className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-background">
       {/* Desktop Sidebar */}
@@ -95,19 +68,7 @@ export function Shell({ children }: ShellProps) {
           <NavLinks />
         </nav>
         <div className="space-y-3 px-4 text-xs text-muted-foreground">
-          <LegalLinks />
           <PwaInstallButton compact />
-          {ssoEnabled ? (
-            <>
-              <div>
-                <div className="truncate font-medium text-foreground">{user?.name}</div>
-                <div className="truncate">{user?.email}</div>
-              </div>
-              <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
-                Sair
-              </Button>
-            </>
-          ) : null}
           <div>v{APP_VERSION}</div>
         </div>
       </aside>
@@ -124,7 +85,11 @@ export function Shell({ children }: ShellProps) {
           </Link>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="mobile-menu-trigger">
+              <Button
+                variant="ghost"
+                size="icon"
+                data-testid="mobile-menu-trigger"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
@@ -134,19 +99,7 @@ export function Shell({ children }: ShellProps) {
                 <NavLinks />
               </nav>
               <div className="space-y-3 text-xs text-muted-foreground">
-                <LegalLinks />
                 <PwaInstallButton compact />
-                {ssoEnabled ? (
-                  <>
-                    <div>
-                      <div className="truncate font-medium text-foreground">{user?.name}</div>
-                      <div className="truncate">{user?.email}</div>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
-                      Sair
-                    </Button>
-                  </>
-                ) : null}
                 <div>v{APP_VERSION}</div>
               </div>
             </SheetContent>

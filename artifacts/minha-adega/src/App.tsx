@@ -16,6 +16,7 @@ import History from "@/pages/History";
 import Waitlist from "@/pages/Waitlist";
 import Billing from "@/pages/Billing";
 import DishPairing from "@/pages/DishPairing";
+import Profile from "@/pages/Profile";
 import { PrivacyPolicy, TermsOfUse } from "@/pages/Legal";
 import NotFound from "@/pages/not-found";
 
@@ -35,7 +36,11 @@ function PublicApp() {
     </Switch>
   );
 
-  if (["/waitlist", "/login", "/billing", "/termos", "/privacidade"].includes(location)) {
+  if (
+    ["/waitlist", "/login", "/billing", "/termos", "/privacidade"].includes(
+      location,
+    )
+  ) {
     return publicRoutes;
   }
 
@@ -52,6 +57,7 @@ function PublicApp() {
           <Route path="/history" component={History} />
           <Route path="/pairing" component={DishPairing} />
           <Route path="/billing" component={Billing} />
+          <Route path="/profile" component={Profile} />
           <Route component={NotFound} />
         </Switch>
       </Shell>
@@ -70,6 +76,7 @@ function PublicApp() {
         <Route path="/history" component={History} />
         <Route path="/pairing" component={DishPairing} />
         <Route path="/billing" component={Billing} />
+        <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
     </Shell>

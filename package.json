@@ -1,10 +1,14 @@
 {
   "name": "workspace",
-  "version": "0.2.45",
+  "version": "0.2.47",
   "license": "MIT",
   "scripts": {
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "mobile:build": "PORT=3000 BASE_PATH=/ pnpm --filter @workspace/minha-adega build && pnpm exec cap sync",
+    "mobile:sync": "pnpm exec cap sync",
+    "mobile:open:ios": "pnpm exec cap open ios",
+    "mobile:open:android": "pnpm exec cap open android",
     "deploy": "npm run build && vercel deploy --prod",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
@@ -12,6 +16,11 @@
   },
   "private": true,
   "devDependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1",
     "prettier": "^3.8.3",
     "typescript": "~5.9.3"
   }

@@ -14,7 +14,9 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.45`: current production version with launch-promotion subscription prices set to R$ 19,90/month and R$ 199,00/year.
+- `v0.2.47`: current production version with safer account-deletion request copy, profile editing request, simplified side menu, and native/PWA version alignment.
+- `v0.2.46`: profile editing request, simplified side menu, and native/PWA version alignment.
+- `v0.2.45`: production version with launch-promotion subscription prices set to R$ 19,90/month and R$ 199,00/year.
 - `v0.2.44`: production version with Brazilian launch-promotion subscription prices updated to R$ 39,90 base pricing.
 - `v0.2.43`: production version with the first Brazil, Argentina, and Chile market configuration layer plus backup documentation/script.
 - `v0.2.42`: production version with subscription copy corrected according to written Portuguese norms.
