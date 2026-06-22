@@ -1,7 +1,7 @@
 # MyCellar - Handoff App Store Connect
 
 Data: 2026-06-22
-Versao: 0.2.47
+Versao: 0.2.48
 Build: 45
 Bundle ID: br.com.mycellar.app
 
@@ -23,7 +23,7 @@ Confirmar no Xcode:
 
 - Team: conta Apple Developer correta do projeto.
 - Bundle Identifier: `br.com.mycellar.app`.
-- Version: `0.2.47`.
+- Version: `0.2.48`.
 - Build: `45`.
 - Target device: iPhone.
 - Signing: automatic signing ativo.

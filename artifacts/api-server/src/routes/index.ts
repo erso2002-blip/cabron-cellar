@@ -10,12 +10,14 @@ import storageRouter from "./storage.js";
 import wineInsightsRouter from "./wine-insights.js";
 import waitlistRouter from "./waitlist.js";
 import billingRouter from "./billing.js";
+import accountRouter from "./account.js";
 
 const router = Router();
 
 router.use(healthRouter);
 router.use(waitlistRouter);
 router.use(authRouter);
+router.use(accountRouter);
 router.use(billingRouter);
 router.use(winesRouter);
 router.use(consumptionRouter);

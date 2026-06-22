@@ -10,6 +10,8 @@ import {
   Trash2,
   UserCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,22 +21,77 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/lib/auth";
+import { Switch } from "@/components/ui/switch";
+import { authFetch, useAuth } from "@/lib/auth";
 
 const supportEmail = "contato@mycellar.com.br";
+
+type AccountProfile = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  profileImage: string | null;
+};
+
+type NotificationPreferences = {
+  cellarReminders: boolean;
+  emailUpdates: boolean;
+  productUpdates: boolean;
+  pushEnabled: boolean;
+};
+
+async function apiJson<T>(input: RequestInfo | URL, init?: RequestInit) {
+  const response = await authFetch(input, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error || "Não foi possível concluir a ação");
+  }
+
+  return response.json() as Promise<T>;
+}
 
 function ProfileRow({
   children,
   description,
   href,
   icon: Icon,
+  onClick,
   tone = "default",
 }: {
   children: React.ReactNode;
   description?: string;
   href?: string;
   icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
   tone?: "default" | "danger";
 }) {
   const content = (
@@ -68,6 +125,14 @@ function ProfileRow({
     </div>
   );
 
+  if (onClick) {
+    return (
+      <button type="button" className="block w-full" onClick={onClick}>
+        {content}
+      </button>
+    );
+  }
+
   if (!href) return content;
 
   if (href.startsWith("mailto:")) {
@@ -87,22 +152,102 @@ function ProfileRow({
 
 export default function Profile() {
   const { user, signOut } = useAuth();
-  const editProfileHref = `mailto:${supportEmail}?subject=${encodeURIComponent(
-    "Atualização de perfil MyCellar",
-  )}&body=${encodeURIComponent(
-    `Olá, quero atualizar meus dados de perfil no MyCellar.\n\nNome atual: ${
-      user?.name || ""
-    }\nE-mail da conta: ${user?.email || ""}\nTelefone: \n\nNovos dados:\nNome: \nTelefone: `,
-  )}`;
-  const deleteAccountHref = `mailto:${supportEmail}?subject=${encodeURIComponent(
-    "Solicitação de exclusão de conta MyCellar",
-  )}&body=${encodeURIComponent(
-    `Olá, quero solicitar a exclusão da minha conta MyCellar e dos dados associados.\n\nNome: ${
-      user?.name || ""
-    }\nE-mail da conta: ${
-      user?.email || ""
-    }\n\nConfirmo que estou solicitando a exclusão/análise dos dados vinculados a esta conta.`,
-  )}`;
+  const [profile, setProfile] = useState<AccountProfile | null>(null);
+  const [notifications, setNotifications] =
+    useState<NotificationPreferences | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", phone: "" });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAccount() {
+      try {
+        const [nextProfile, nextNotifications] = await Promise.all([
+          apiJson<AccountProfile>("/api/account/profile"),
+          apiJson<NotificationPreferences>("/api/account/notifications"),
+        ]);
+
+        if (cancelled) return;
+        setProfile(nextProfile);
+        setProfileForm({
+          name: nextProfile.name || "",
+          phone: nextProfile.phone || "",
+        });
+        setNotifications(nextNotifications);
+      } catch {
+        if (!cancelled) toast.error("Não foi possível carregar dados da conta.");
+      }
+    }
+
+    loadAccount();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function saveProfile() {
+    setSaving(true);
+    try {
+      const updated = await apiJson<AccountProfile>("/api/account/profile", {
+        method: "PUT",
+        body: JSON.stringify(profileForm),
+      });
+      setProfile(updated);
+      setProfileForm({
+        name: updated.name || "",
+        phone: updated.phone || "",
+      });
+      setProfileOpen(false);
+      toast.success("Perfil atualizado.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro ao atualizar perfil.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveNotifications(next: NotificationPreferences) {
+    setNotifications(next);
+    try {
+      const updated = await apiJson<NotificationPreferences>(
+        "/api/account/notifications",
+        {
+          method: "PUT",
+          body: JSON.stringify(next),
+        },
+      );
+      setNotifications(updated);
+      toast.success("Preferências salvas.");
+    } catch {
+      toast.error("Não foi possível salvar notificações.");
+    }
+  }
+
+  async function requestAccountDeletion() {
+    setSaving(true);
+    try {
+      await apiJson("/api/account/deletion-request", { method: "POST" });
+      setDeleteOpen(false);
+      toast.success("Solicitação registrada para validação.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível registrar a solicitação.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const displayName = profile?.name || user?.name || "Usuário MyCellar";
+  const displayEmail = profile?.email || user?.email || "E-mail não informado";
+  const displayPhone = profile?.phone || "Não informado";
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -120,17 +265,21 @@ export default function Profile() {
           </div>
           <div className="min-w-0 flex-1 text-center sm:text-left">
             <CardTitle className="truncate font-serif text-2xl">
-              {user?.name || "Usuário MyCellar"}
+              {displayName}
             </CardTitle>
             <CardDescription className="truncate">
-              {user?.email || "E-mail não informado"}
+              {displayEmail}
             </CardDescription>
           </div>
-          <Button asChild variant="outline" size="sm" className="w-full sm:w-auto sm:shrink-0">
-            <a href={editProfileHref}>
-              <Edit3 className="mr-2 h-4 w-4" />
-              Editar perfil
-            </a>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto sm:shrink-0"
+            onClick={() => setProfileOpen(true)}
+          >
+            <Edit3 className="mr-2 h-4 w-4" />
+            Editar perfil
           </Button>
         </CardHeader>
       </Card>
@@ -147,22 +296,20 @@ export default function Profile() {
             <div>
               <div className="text-sm text-muted-foreground">Nome</div>
               <div className="mt-1 font-medium">
-                {user?.name || "Não informado"}
+                {displayName}
               </div>
             </div>
             <Separator />
             <div>
               <div className="text-sm text-muted-foreground">E-mail</div>
               <div className="mt-1 font-medium">
-                {user?.email || "Não informado"}
+                {displayEmail}
               </div>
             </div>
             <Separator />
             <div>
               <div className="text-sm text-muted-foreground">Telefone</div>
-              <div className="mt-1 font-medium text-muted-foreground">
-                Não informado
-              </div>
+              <div className="mt-1 font-medium">{displayPhone}</div>
             </div>
           </CardContent>
         </Card>
@@ -182,15 +329,16 @@ export default function Profile() {
             </ProfileRow>
             <ProfileRow
               icon={Bell}
+              onClick={() => setNotificationsOpen(true)}
               description="Preferências de comunicação do app."
             >
               Notificações
             </ProfileRow>
             <ProfileRow
-              href={deleteAccountHref}
               icon={Trash2}
+              onClick={() => setDeleteOpen(true)}
               tone="danger"
-              description="Envie a solicitação por e-mail para validação e tratamento seguro dos dados."
+              description="Registre uma solicitação para validação e tratamento seguro dos dados."
             >
               Excluir conta
             </ProfileRow>
@@ -226,17 +374,130 @@ export default function Profile() {
             >
               Contato oficial
             </ProfileRow>
-            <button type="button" className="block w-full" onClick={signOut}>
-              <ProfileRow
-                icon={LogOut}
-                description="Encerrar sessão neste dispositivo."
-              >
-                Sair da conta
-              </ProfileRow>
-            </button>
+            <ProfileRow
+              icon={LogOut}
+              onClick={signOut}
+              description="Encerrar sessão neste dispositivo."
+            >
+              Sair da conta
+            </ProfileRow>
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar perfil</DialogTitle>
+            <DialogDescription>
+              Atualize os dados principais vinculados à conta.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="profile-name">Nome</Label>
+              <Input
+                id="profile-name"
+                value={profileForm.name}
+                onChange={(event) =>
+                  setProfileForm((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-phone">Telefone</Label>
+              <Input
+                id="profile-phone"
+                value={profileForm.phone}
+                onChange={(event) =>
+                  setProfileForm((current) => ({
+                    ...current,
+                    phone: event.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProfileOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveProfile} disabled={saving}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notificações</DialogTitle>
+            <DialogDescription>
+              Escolha quais comunicações deseja receber.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {notifications ? (
+              [
+                ["cellarReminders", "Lembretes da adega", "Alertas sobre consumo e organização."],
+                ["emailUpdates", "Atualizações por e-mail", "Comunicados importantes da conta."],
+                ["productUpdates", "Novidades do produto", "Recursos e melhorias do MyCellar."],
+                ["pushEnabled", "Push no dispositivo", "Permissão técnica para notificações do app."],
+              ].map(([key, title, description]) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between gap-4 rounded-md border p-3"
+                >
+                  <div>
+                    <div className="font-medium">{title}</div>
+                    <div className="text-sm text-muted-foreground">{description}</div>
+                  </div>
+                  <Switch
+                    checked={notifications[key as keyof NotificationPreferences]}
+                    onCheckedChange={(checked) =>
+                      saveNotifications({
+                        ...notifications,
+                        [key]: checked,
+                      })
+                    }
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-muted-foreground">Carregando...</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Solicitar exclusão da conta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A solicitação será registrada para validação. A exclusão ou
+              anonimização dos dados não será executada sem tratamento seguro.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={saving}
+              onClick={(event) => {
+                event.preventDefault();
+                requestAccountDeletion();
+              }}
+            >
+              Solicitar exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
