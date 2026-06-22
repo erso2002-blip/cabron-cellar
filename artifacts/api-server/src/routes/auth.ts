@@ -52,7 +52,13 @@ router.post(
       const token = await createEmailSessionForUser(user.id);
       return res.json({ token, user });
     } catch (err) {
-      req.log?.warn({ err }, "Google session creation failed");
+      req.log?.warn(
+        {
+          err,
+          reason: err instanceof Error ? err.message : "unknown",
+        },
+        "Google session creation failed",
+      );
       if (err instanceof Error && err.message === CLOSED_BETA_ACCESS_DENIED_ERROR) {
         return res.status(403).json({ error: CLOSED_BETA_ACCESS_DENIED_ERROR });
       }

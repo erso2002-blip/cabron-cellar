@@ -17,10 +17,18 @@ import {
   CLOSED_BETA_ACCESS_DENIED_ERROR,
   isEmailAllowedForClosedBeta,
 } from "../lib/closedBetaAccess.js";
+import { ensureAccountSchema } from "../lib/accountSchema.js";
 import type { PublicUser } from "../types/express.js";
 
 const googleClientId =
   process.env.GOOGLE_CLIENT_ID ?? process.env.VITE_GOOGLE_CLIENT_ID ?? null;
+const googleAudienceClientIds = [
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.VITE_GOOGLE_CLIENT_ID,
+]
+  .map((clientId) => clientId?.trim())
+  .filter((clientId): clientId is string => Boolean(clientId));
+const googleAudiences = Array.from(new Set(googleAudienceClientIds));
 
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 
@@ -61,7 +69,7 @@ export async function verifyGoogleUser(token: string): Promise<PublicUser> {
 
   const ticket = await googleClient.verifyIdToken({
     idToken: token,
-    audience: googleClientId,
+    audience: googleAudiences.length > 0 ? googleAudiences : googleClientId,
   });
 
   const payload = ticket.getPayload();
@@ -78,6 +86,8 @@ export async function verifyGoogleUser(token: string): Promise<PublicUser> {
     email: payload.email,
     profileImage: payload.picture ?? null,
   };
+
+  await ensureAccountSchema();
 
   await db
     .insert(usersTable)

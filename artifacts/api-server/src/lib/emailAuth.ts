@@ -20,6 +20,7 @@ import {
   isEmailAllowedForClosedBeta,
   normalizeAccessEmail,
 } from "./closedBetaAccess.js";
+import { ensureAccountSchema } from "./accountSchema.js";
 
 const EMAIL_SESSION_TOKEN_PREFIX = "mc_email_";
 const LOGIN_CODE_TTL_MS = 10 * 60 * 1000;
@@ -144,6 +145,8 @@ export async function verifyEmailLoginCode(rawEmail: unknown, rawCode: unknown) 
     email,
     profileImage: null,
   };
+
+  await ensureAccountSchema();
 
   await db
     .insert(usersTable)

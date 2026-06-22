@@ -4,9 +4,9 @@ import {
   db,
   eq,
   notificationPreferencesTable,
-  pool,
   usersTable,
 } from "@workspace/db";
+import { ensureAccountSchema } from "../lib/accountSchema.js";
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { rateLimit } from "../middlewares/rateLimit.js";
 
@@ -23,8 +23,6 @@ type NotificationPayload = {
   productUpdates?: unknown;
   pushEnabled?: unknown;
 };
-
-let accountSchemaReady: Promise<void> | null = null;
 
 function normalizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return null;
@@ -74,40 +72,6 @@ function notificationResponse(row: {
     productUpdates: row.productUpdates,
     pushEnabled: row.pushEnabled,
   };
-}
-
-async function ensureAccountSchema() {
-  if (!accountSchemaReady) {
-    accountSchemaReady = (async () => {
-      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone varchar`);
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS notification_preferences (
-          user_id varchar PRIMARY KEY,
-          cellar_reminders boolean NOT NULL DEFAULT true,
-          email_updates boolean NOT NULL DEFAULT true,
-          product_updates boolean NOT NULL DEFAULT false,
-          push_enabled boolean NOT NULL DEFAULT false,
-          created_at timestamptz NOT NULL DEFAULT now(),
-          updated_at timestamptz NOT NULL DEFAULT now()
-        )
-      `);
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS account_deletion_requests (
-          id varchar PRIMARY KEY DEFAULT gen_random_uuid()::text,
-          user_id varchar NOT NULL,
-          email varchar,
-          name varchar,
-          status varchar NOT NULL DEFAULT 'pending',
-          source varchar NOT NULL DEFAULT 'app',
-          metadata jsonb,
-          requested_at timestamptz NOT NULL DEFAULT now(),
-          processed_at timestamptz
-        )
-      `);
-    })();
-  }
-
-  return accountSchemaReady;
 }
 
 async function getProfile(userId: string) {
