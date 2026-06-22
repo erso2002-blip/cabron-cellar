@@ -16,7 +16,7 @@ router.get("/dashboard/stats", async (req: any, res: any) => {
   const [totals] = await db
     .select({
       totalBottles: sql<number>`COALESCE(SUM(${winesTable.quantity}), 0)::int`,
-      totalWines: count(),
+      totalWines: sql<number>`COUNT(*) FILTER (WHERE ${winesTable.quantity} > 0)::int`,
       estimatedValue: sql<number>`COALESCE(SUM(${winesTable.quantity} * CAST(${winesTable.pricePaid} AS NUMERIC)), 0)`,
     })
     .from(winesTable)
@@ -24,7 +24,7 @@ router.get("/dashboard/stats", async (req: any, res: any) => {
 
   // Bottles that need attention in the next 12 months or are overdue.
   const [drinkSoonCount] = await db
-    .select({ count: count() })
+    .select({ count: sql<number>`COALESCE(SUM(${winesTable.quantity}), 0)::int` })
     .from(winesTable)
     .where(
       sql`${winesTable.userId} = ${userId} AND ${winesTable.drinkUntil} IS NOT NULL AND ${winesTable.drinkUntil} <= CURRENT_DATE + INTERVAL '12 months' AND ${winesTable.quantity} > 0`
@@ -60,7 +60,7 @@ router.get("/dashboard/stats", async (req: any, res: any) => {
       count: sql<number>`SUM(${winesTable.quantity})::int`,
     })
     .from(winesTable)
-    .where(sql`${winesTable.userId} = ${userId} AND ${winesTable.country} IS NOT NULL`)
+    .where(sql`${winesTable.userId} = ${userId} AND ${winesTable.country} IS NOT NULL AND ${winesTable.quantity} > 0`)
     .groupBy(winesTable.country)
     .orderBy(sql`SUM(${winesTable.quantity}) DESC`)
     .limit(5);
