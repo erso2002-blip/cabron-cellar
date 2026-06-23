@@ -199,6 +199,34 @@ async function upsertSubscriptionFromProvider(data: MercadoPagoPreapprovalDetail
   return result.rows[0] ?? null;
 }
 
+async function reconcilePendingSubscriptions(userId: string) {
+  const pendingResult = await pool.query(
+    `
+      SELECT provider_subscription_id
+      FROM billing_subscriptions
+      WHERE user_id = $1
+        AND status IN ('pending', 'unknown')
+        AND provider_subscription_id IS NOT NULL
+      ORDER BY updated_at DESC
+      LIMIT 3
+    `,
+    [userId],
+  );
+
+  for (const row of pendingResult.rows) {
+    try {
+      const subscription = await fetchMercadoPagoPreapproval(row.provider_subscription_id);
+      await upsertSubscriptionFromProvider(subscription);
+    } catch (err) {
+      // Status polling is a fallback for delayed/missing webhooks; do not block billing UI.
+      console.warn("Mercado Pago subscription reconciliation failed", {
+        providerSubscriptionId: row.provider_subscription_id,
+        error: err instanceof Error ? err.message : "unknown",
+      });
+    }
+  }
+}
+
 router.get("/billing/plans", (_req: any, res: any) => {
   res.json({
     plans: billingPlans,
@@ -215,6 +243,7 @@ router.get("/billing/status", async (req: any, res: any) => {
   if (!user) return res.status(401).json({ error: "Unauthorized" });
 
   await ensureBillingSchema();
+  await reconcilePendingSubscriptions(user.id);
   const result = await pool.query(
     `
       SELECT plan_id, status, provider_status, provider_subscription_id, next_payment_at, updated_at

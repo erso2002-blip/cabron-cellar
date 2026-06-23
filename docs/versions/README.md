@@ -14,7 +14,8 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.53`: current production version prepared for Mercado Pago webhook/persistence validation.
+- `v0.2.54`: current production version with Mercado Pago status reconciliation fallback and real billing status on `/billing`.
+- `v0.2.53`: production version prepared for Mercado Pago webhook/persistence validation.
 - `v0.2.52`: production version with dashboard active-stock metrics fixed.
 - `v0.2.51`: production version with Google SSO audience validation accepting both configured client IDs.
 - `v0.2.50`: production version with refreshed closed-beta allowlist and Google login access validation.

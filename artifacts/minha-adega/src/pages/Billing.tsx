@@ -33,6 +33,11 @@ type CheckoutResponse = {
   checkoutUrl?: string;
 };
 
+type BillingStatusResponse = {
+  plan: BillingPlan["id"];
+  pro: boolean;
+};
+
 const intervalLabel: Record<BillingPlan["interval"], string> = {
   free: "Grátis",
   monthly: "por mês",
@@ -44,6 +49,7 @@ export default function Billing() {
   const [, setLocation] = useLocation();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [providerConfigured, setProviderConfigured] = useState(false);
+  const [currentPlanId, setCurrentPlanId] = useState<BillingPlan["id"]>("free");
   const [loading, setLoading] = useState(true);
   const [checkoutPlanId, setCheckoutPlanId] = useState<BillingPlan["id"] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +82,32 @@ export default function Billing() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBillingStatus() {
+      if (!user) {
+        setCurrentPlanId("free");
+        return;
+      }
+
+      try {
+        const response = await authFetch("/api/billing/status");
+        if (!response.ok) return;
+        const data = (await response.json()) as BillingStatusResponse;
+        if (!cancelled) setCurrentPlanId(data.pro ? data.plan : "free");
+      } catch {
+        if (!cancelled) setCurrentPlanId("free");
+      }
+    }
+
+    loadBillingStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   async function startCheckout(planId: BillingPlan["id"]) {
     setCheckoutPlanId(planId);
@@ -137,6 +169,7 @@ export default function Billing() {
           const isPaid = plan.amount > 0;
           const isFeatured = plan.id === "pro-annual";
           const isStartingCheckout = checkoutPlanId === plan.id;
+          const isCurrentPlan = currentPlanId === plan.id;
 
           return (
             <Card
@@ -179,7 +212,7 @@ export default function Billing() {
                 <Button
                   className="w-full"
                   variant={isPaid ? "default" : "outline"}
-                  disabled={!isPaid || !providerConfigured || checkoutPlanId !== null}
+                  disabled={isCurrentPlan || !isPaid || !providerConfigured || checkoutPlanId !== null}
                   onClick={() => startCheckout(plan.id)}
                 >
                   {isStartingCheckout ? (
@@ -187,7 +220,13 @@ export default function Billing() {
                   ) : isPaid ? (
                     <CreditCard className="mr-2 h-4 w-4" />
                   ) : null}
-                  {isPaid ? (isStartingCheckout ? "Abrindo checkout" : "Assinar agora") : "Plano atual"}
+                  {isCurrentPlan
+                    ? "Plano atual"
+                    : isPaid
+                      ? isStartingCheckout
+                        ? "Abrindo checkout"
+                        : "Assinar agora"
+                      : "Plano gratuito"}
                 </Button>
               </CardContent>
             </Card>
