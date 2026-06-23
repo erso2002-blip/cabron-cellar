@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Check, Clock } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,10 @@ type BillingPlansResponse = {
   };
 };
 
+type CheckoutResponse = {
+  checkoutUrl?: string;
+};
+
 const intervalLabel: Record<BillingPlan["interval"], string> = {
   free: "Grátis",
   monthly: "por mês",
@@ -41,6 +45,7 @@ export default function Billing() {
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [providerConfigured, setProviderConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checkoutPlanId, setCheckoutPlanId] = useState<BillingPlan["id"] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +76,32 @@ export default function Billing() {
       cancelled = true;
     };
   }, []);
+
+  async function startCheckout(planId: BillingPlan["id"]) {
+    setCheckoutPlanId(planId);
+    setError(null);
+
+    try {
+      const response = await authFetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || "Não foi possível iniciar o checkout");
+      }
+
+      const data = (await response.json()) as CheckoutResponse;
+      if (!data.checkoutUrl) throw new Error("Checkout não retornou link de pagamento");
+
+      window.location.assign(data.checkoutUrl);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Falha ao iniciar checkout");
+      setCheckoutPlanId(null);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 md:px-8">
@@ -105,6 +136,7 @@ export default function Billing() {
         {(loading ? [] : plans).map((plan) => {
           const isPaid = plan.amount > 0;
           const isFeatured = plan.id === "pro-annual";
+          const isStartingCheckout = checkoutPlanId === plan.id;
 
           return (
             <Card
@@ -147,10 +179,15 @@ export default function Billing() {
                 <Button
                   className="w-full"
                   variant={isPaid ? "default" : "outline"}
-                  disabled
+                  disabled={!isPaid || !providerConfigured || checkoutPlanId !== null}
+                  onClick={() => startCheckout(plan.id)}
                 >
-                  {isPaid ? <Clock className="mr-2 h-4 w-4" /> : null}
-                  {isPaid ? "Em breve" : "Plano atual"}
+                  {isStartingCheckout ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : isPaid ? (
+                    <CreditCard className="mr-2 h-4 w-4" />
+                  ) : null}
+                  {isPaid ? (isStartingCheckout ? "Abrindo checkout" : "Assinar agora") : "Plano atual"}
                 </Button>
               </CardContent>
             </Card>
