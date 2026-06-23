@@ -249,7 +249,9 @@ router.get("/billing/status", async (req: any, res: any) => {
       SELECT plan_id, status, provider_status, provider_subscription_id, next_payment_at, updated_at
       FROM billing_subscriptions
       WHERE user_id = $1
-      ORDER BY updated_at DESC
+      ORDER BY
+        CASE WHEN status = 'active' THEN 0 ELSE 1 END,
+        updated_at DESC
       LIMIT 1
     `,
     [user.id],
