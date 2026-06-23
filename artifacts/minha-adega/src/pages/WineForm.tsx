@@ -25,11 +25,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
-import { ArrowLeft, Save, Sparkles, Loader2, X, Camera, Upload } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Loader2, X, Camera, Upload, ExternalLink } from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 import { authFetch } from "@/lib/auth";
 import { MAX_LABEL_PHOTO_FILE_SIZE, compactImage, uploadPhotoToStorage } from "@/lib/labelPhoto";
-import { isLikelyWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
+import { isLikelyWebsiteUrl, normalizeWebsiteUrl, websiteHostname } from "@/lib/url";
 
 const MAX_ADDITIONAL_PHOTOS_PER_WINE = 1;
 
@@ -74,6 +74,28 @@ interface LabelData {
   wineryWebsiteUrl: string | null;
 }
 
+interface DrinkUntilSuggestion {
+  suggestedDate: string;
+  reason: string;
+  sourceUrl: string | null;
+  sourceTitle: string | null;
+  sourceType: "official_winery" | "producer_pdf" | "reputable_reference" | "profile_estimate";
+  confidence: "low" | "medium" | "high";
+}
+
+const sourceTypeLabels: Record<DrinkUntilSuggestion["sourceType"], string> = {
+  official_winery: "Fonte oficial",
+  producer_pdf: "Ficha técnica",
+  reputable_reference: "Referência externa",
+  profile_estimate: "Estimativa por perfil",
+};
+
+const confidenceLabels: Record<DrinkUntilSuggestion["confidence"], string> = {
+  low: "baixa",
+  medium: "média",
+  high: "alta",
+};
+
 function userFacingSaveError(error: unknown) {
   if (
     error &&
@@ -109,7 +131,7 @@ export default function WineForm() {
 
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isUploadingLabelPhoto, setIsUploadingLabelPhoto] = useState(false);
-  const [drinkUntilHint, setDrinkUntilHint] = useState<string | null>(null);
+  const [drinkUntilHint, setDrinkUntilHint] = useState<DrinkUntilSuggestion | null>(null);
 
   function buildFallbackWineName(data: LabelData) {
     const parts = [data.producer, data.grape, data.vintage ? String(data.vintage) : null]
@@ -192,9 +214,9 @@ export default function WineForm() {
         throw new Error("Sugestão de data ideal de consumo está disponível no plano Pro.");
       }
       if (!resp.ok) throw new Error("Falha na sugestão");
-      const data = (await resp.json()) as { suggestedDate: string; reason: string };
+      const data = (await resp.json()) as DrinkUntilSuggestion;
       form.setValue("drinkUntil", data.suggestedDate);
-      setDrinkUntilHint(data.reason);
+      setDrinkUntilHint(data);
       toast.success("Sugestão aplicada!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível gerar uma sugestão agora");
@@ -482,10 +504,28 @@ export default function WineForm() {
                         <Input type="date" {...field} value={field.value || ""} />
                       </FormControl>
                       {drinkUntilHint ? (
-                        <p className="text-xs text-primary/80 italic flex gap-1">
-                          <Sparkles className="h-3 w-3 mt-0.5 shrink-0" />
-                          {drinkUntilHint}
-                        </p>
+                        <div className="space-y-1 text-xs text-primary/80">
+                          <p className="italic flex gap-1">
+                            <Sparkles className="h-3 w-3 mt-0.5 shrink-0" />
+                            {drinkUntilHint.reason}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+                            <span>
+                              {sourceTypeLabels[drinkUntilHint.sourceType]} · confiança {confidenceLabels[drinkUntilHint.confidence]}
+                            </span>
+                            {drinkUntilHint.sourceUrl && (
+                              <a
+                                href={drinkUntilHint.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
+                              >
+                                {websiteHostname(drinkUntilHint.sourceUrl) || "Ver fonte"}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       ) : (
                         <FormDescription>Quando este vinho começará a perder qualidade?</FormDescription>
                       )}

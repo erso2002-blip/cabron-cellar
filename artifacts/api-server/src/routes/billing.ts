@@ -48,6 +48,16 @@ type MercadoPagoPreapprovalDetails = {
   };
 };
 
+type MercadoPagoPaymentDetails = {
+  id?: number | string;
+  status?: string;
+  external_reference?: string;
+  metadata?: Record<string, unknown>;
+  point_of_interaction?: {
+    transaction_data?: Record<string, unknown>;
+  };
+};
+
 function getPublicAppUrl(req: any) {
   const configuredUrl =
     process.env.MYCELLAR_PUBLIC_URL ??
@@ -153,6 +163,70 @@ async function fetchMercadoPagoPreapproval(id: string) {
   }
 
   return data;
+}
+
+async function fetchMercadoPagoPayment(id: string) {
+  const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+  if (!accessToken) throw new Error("Mercado Pago is not configured");
+
+  const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(id)}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = (await response.json().catch(() => ({}))) as MercadoPagoPaymentDetails;
+  if (!response.ok) {
+    const error = new Error("Could not fetch Mercado Pago payment");
+    (error as Error & { statusCode?: number }).statusCode = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+function getStringMetadata(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function getSubscriptionIdFromPayment(payment: MercadoPagoPaymentDetails) {
+  return (
+    getStringMetadata(payment.metadata?.preapproval_id) ??
+    getStringMetadata(payment.metadata?.subscription_id) ??
+    getStringMetadata(payment.point_of_interaction?.transaction_data?.preapproval_id) ??
+    getStringMetadata(payment.point_of_interaction?.transaction_data?.subscription_id)
+  );
+}
+
+async function getLocalSubscriptionIdFromPayment(payment: MercadoPagoPaymentDetails) {
+  const externalReference = getStringMetadata(payment.external_reference);
+  if (!externalReference) return null;
+
+  const result = await pool.query(
+    `
+      SELECT provider_subscription_id
+      FROM billing_subscriptions
+      WHERE external_reference = $1
+      ORDER BY updated_at DESC
+      LIMIT 1
+    `,
+    [externalReference],
+  );
+
+  return getStringMetadata(result.rows[0]?.provider_subscription_id);
+}
+
+async function reconcileSubscriptionFromPayment(paymentId: string) {
+  const payment = await fetchMercadoPagoPayment(paymentId);
+  const providerSubscriptionId =
+    getSubscriptionIdFromPayment(payment) ?? (await getLocalSubscriptionIdFromPayment(payment));
+
+  if (!providerSubscriptionId) return false;
+
+  const subscription = await fetchMercadoPagoPreapproval(providerSubscriptionId);
+  await upsertSubscriptionFromProvider(subscription);
+  return true;
 }
 
 async function upsertSubscriptionFromProvider(data: MercadoPagoPreapprovalDetails) {
@@ -418,6 +492,21 @@ router.post("/billing/mercado-pago/webhook", async (req: any, res: any) => {
 
   if (!dataId) {
     return res.status(202).json({ received: true, processed: false });
+  }
+
+  if (topic === "payment") {
+    try {
+      const processed = await reconcileSubscriptionFromPayment(dataId);
+      if (processed) {
+        await pool.query("UPDATE billing_webhook_events SET processed_at = now() WHERE id = $1", [
+          eventResult.rows[0]?.id,
+        ]);
+      }
+      return res.status(200).json({ received: true, processed });
+    } catch (err) {
+      req.log?.error({ err, topic, dataId }, "Mercado Pago payment webhook processing failed");
+      return res.status(202).json({ received: true, processed: false });
+    }
   }
 
   if (topic && !["subscription_preapproval", "preapproval"].includes(topic)) {

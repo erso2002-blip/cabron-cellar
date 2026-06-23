@@ -7,8 +7,56 @@ import { rateLimit } from "../middlewares/rateLimit.js";
 const router = Router();
 const MAX_INPUT_LENGTH = 180;
 
+interface DrinkUntilSuggestion {
+  suggestedDate: string;
+  reason: string;
+  sourceUrl: string | null;
+  sourceTitle: string | null;
+  sourceType: "official_winery" | "producer_pdf" | "reputable_reference" | "profile_estimate";
+  confidence: "low" | "medium" | "high";
+}
+
+const drinkUntilSuggestionSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    suggestedDate: { type: "string" },
+    reason: { type: "string" },
+    sourceUrl: { type: ["string", "null"] },
+    sourceTitle: { type: ["string", "null"] },
+    sourceType: {
+      type: "string",
+      enum: ["official_winery", "producer_pdf", "reputable_reference", "profile_estimate"],
+    },
+    confidence: { type: "string", enum: ["low", "medium", "high"] },
+  },
+  required: ["suggestedDate", "reason", "sourceUrl", "sourceTitle", "sourceType", "confidence"],
+} as const;
+
 function bounded(value: unknown) {
   return typeof value !== "string" || value.length <= MAX_INPUT_LENGTH;
+}
+
+function sanitizeSuggestion(parsed: DrinkUntilSuggestion): DrinkUntilSuggestion | null {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(parsed.suggestedDate)) return null;
+
+  const sourceUrl =
+    typeof parsed.sourceUrl === "string" && /^https?:\/\//i.test(parsed.sourceUrl)
+      ? parsed.sourceUrl
+      : null;
+
+  const sourceTypes = ["official_winery", "producer_pdf", "reputable_reference", "profile_estimate"];
+  const confidences = ["low", "medium", "high"];
+
+  return {
+    suggestedDate: parsed.suggestedDate,
+    reason: typeof parsed.reason === "string" ? parsed.reason.slice(0, 500) : "",
+    sourceUrl,
+    sourceTitle: typeof parsed.sourceTitle === "string" ? parsed.sourceTitle.slice(0, 180) : null,
+    sourceType: sourceTypes.includes(parsed.sourceType) ? parsed.sourceType : "profile_estimate",
+    confidence: confidences.includes(parsed.confidence) ? parsed.confidence : "low",
+  };
 }
 
 // POST /wines/suggest-drink-until
@@ -54,46 +102,59 @@ router.post("/wines/suggest-drink-until", rateLimit({ keyPrefix: "drink-ai", win
       return res.status(503).json({ error: "AI service is not configured" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: "gpt-4o-mini",
-      max_tokens: 200,
-      messages: [
+      max_output_tokens: 900,
+      store: false,
+      tools: [
         {
-          role: "system",
-          content: `You are a sommelier expert. Given wine details, estimate the ideal drinking window and return ONLY a JSON object with no markdown.
-Format: {"suggestedDate": "YYYY-MM-DD", "reason": "brief explanation in Portuguese, max 2 sentences"}
-The suggestedDate should be the LAST date of the ideal drinking window (the "drink by" date).
-Base the estimate on wine type, grape variety, vintage year, and region. 
-If vintage is recent (less than 2 years), add appropriate aging time.
-Today's year is ${new Date().getFullYear()}.`,
+          type: "web_search_preview",
+          search_context_size: "medium",
         },
+      ],
+      text: {
+        format: {
+          type: "json_schema",
+          name: "drink_until_suggestion",
+          strict: true,
+          schema: drinkUntilSuggestionSchema,
+        },
+      },
+      input: [
         {
           role: "user",
-          content: `Estimate the drink-until date for this wine: ${wineDescription}`,
+          content: `Research the best "drink by" date for this wine and return a conservative suggestion in Portuguese.
+
+Wine: ${wineDescription}
+Current year: ${new Date().getFullYear()}
+
+Rules:
+- Search the web for this exact wine, producer and vintage.
+- Prioritize the official winery/producer page, technical sheet, PDF, or vintage note.
+- If the producer has an official suggested drinking window, maturity window, aging potential, guarda, potencial de guarda, or consumo ideal, use that as the primary basis.
+- If no producer source is available, use a reputable wine reference and clearly mark sourceType as "reputable_reference".
+- If no reliable source gives a window, estimate from wine style, grape, vintage, country and region and mark sourceType as "profile_estimate" with confidence "low".
+- suggestedDate must be the last day of the ideal drinking window.
+- sourceUrl must be the direct source URL used. Do not use search result pages, retailers, marketplaces, Vivino, Wine-Searcher, shops, or social networks as the official winery source.
+- reason must mention whether the date came from producer research, reputable reference, or profile estimate. Max 2 short sentences.`,
         },
       ],
     });
 
-    const content = response.choices[0]?.message?.content?.trim() ?? "";
-
-    let parsed: { suggestedDate: string; reason: string };
+    let parsed: DrinkUntilSuggestion;
     try {
-      parsed = JSON.parse(content);
+      parsed = JSON.parse(response.output_text.trim()) as DrinkUntilSuggestion;
     } catch {
-      req.log.warn({ content }, "Failed to parse drink-until suggestion");
+      req.log.warn({ content: response.output_text }, "Failed to parse drink-until suggestion");
       return res.status(422).json({ error: "Could not generate suggestion" });
     }
 
-    // Validate date format
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(parsed.suggestedDate)) {
+    const suggestion = sanitizeSuggestion(parsed);
+    if (!suggestion) {
       return res.status(422).json({ error: "Invalid date in suggestion" });
     }
 
-    return res.json({
-      suggestedDate: parsed.suggestedDate,
-      reason: parsed.reason,
-    });
+    return res.json(suggestion);
   } catch (err) {
     req.log.error({ err }, "OpenAI drink-until suggestion error");
     return res.status(500).json({ error: "Suggestion failed" });
