@@ -57,7 +57,7 @@ router.post("/pairings/dish", rateLimit({ keyPrefix: "dish-pairing-ai", windowMs
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const proGate = requireProFeature(user, "dish_pairing");
+  const proGate = await requireProFeature(user, "dish_pairing");
   if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const dish = cleanText(req.body?.dish, 160);
@@ -170,7 +170,7 @@ router.post("/wines/:id/insights", rateLimit({ keyPrefix: "insights-ai", windowM
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const proGate = requireProFeature(user, "wine_harmonization");
+  const proGate = await requireProFeature(user, "wine_harmonization");
   if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const userId = user.id;

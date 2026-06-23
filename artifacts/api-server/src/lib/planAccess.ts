@@ -1,5 +1,6 @@
-import { and, db, eq, sql, winesTable } from "@workspace/db";
+import { and, db, eq, pool, sql, winesTable } from "@workspace/db";
 import type { PublicUser } from "../types/express.js";
+import { ensureBillingSchema } from "./billingSchema.js";
 import { billingPlans } from "./billingPlans.js";
 
 const FREE_PLAN = billingPlans.find((plan) => plan.id === "free");
@@ -23,12 +24,32 @@ export function isProUser(user: PublicUser | null) {
   return (email && proEmails.includes(email)) || proUserIds.includes(userId);
 }
 
+export async function hasActiveProAccess(user: PublicUser | null) {
+  if (!user) return false;
+  if (isProUser(user)) return true;
+
+  await ensureBillingSchema();
+  const result = await pool.query(
+    `
+      SELECT 1
+      FROM billing_subscriptions
+      WHERE user_id = $1
+        AND status = 'active'
+        AND plan_id IN ('pro-monthly', 'pro-annual')
+      LIMIT 1
+    `,
+    [user.id],
+  );
+
+  return Boolean(result.rowCount);
+}
+
 export function getFreeBottleLimit() {
   return FREE_PLAN?.bottlesLimit ?? 30;
 }
 
-export function requireProFeature(user: PublicUser | null, feature: string) {
-  if (isProUser(user)) return null;
+export async function requireProFeature(user: PublicUser | null, feature: string) {
+  if (await hasActiveProAccess(user)) return null;
 
   return {
     status: 402,

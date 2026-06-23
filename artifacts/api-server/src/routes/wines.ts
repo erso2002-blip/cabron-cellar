@@ -7,7 +7,7 @@ import {
   UploadWineLabelBody,
 } from "@workspace/api-zod";
 import { getAuthenticatedUser } from "../lib/auth.js";
-import { getFreeBottleLimit, getPresentBottleCount, isProUser } from "../lib/planAccess.js";
+import { getFreeBottleLimit, getPresentBottleCount, hasActiveProAccess } from "../lib/planAccess.js";
 import { generateWineTemplate, validateWineRow } from "../lib/wineTemplate.js";
 import ExcelJS from "exceljs";
 
@@ -185,7 +185,7 @@ router.post("/wines/import", async (req: any, res: any) => {
         results.errors.push(...validation.errors);
       } else if (validation.data) {
         // Check plan limits
-        if (!isProUser(user)) {
+        if (!(await hasActiveProAccess(user))) {
           const limit = getFreeBottleLimit();
           const currentBottles = await getPresentBottleCount(userId);
           const nextBottles = currentBottles + (validation.data.quantity || 1);
@@ -331,7 +331,7 @@ router.post("/wines", async (req: any, res: any) => {
   }
 
   const { pricePaid, ...rest } = parsed.data;
-  if (!isProUser(user)) {
+  if (!(await hasActiveProAccess(user))) {
     const limit = getFreeBottleLimit();
     const currentBottles = await getPresentBottleCount(userId);
     const nextBottles = currentBottles + parsed.data.quantity;
@@ -457,7 +457,7 @@ router.patch("/wines/:id", async (req: any, res: any) => {
     updateData.pricePaid = pricePaid != null ? String(pricePaid) : null;
   }
 
-  if (!isProUser(user) && parsed.data.quantity !== undefined) {
+  if (!(await hasActiveProAccess(user)) && parsed.data.quantity !== undefined) {
     const [currentWine] = await db
       .select({ quantity: winesTable.quantity })
       .from(winesTable)

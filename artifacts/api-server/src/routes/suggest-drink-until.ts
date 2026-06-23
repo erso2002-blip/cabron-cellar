@@ -17,7 +17,7 @@ router.post("/wines/suggest-drink-until", rateLimit({ keyPrefix: "drink-ai", win
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const proGate = requireProFeature(user, "drink_until_suggestion");
+  const proGate = await requireProFeature(user, "drink_until_suggestion");
   if (proGate) return res.status(proGate.status).json(proGate.body);
 
   const { name, producer, grape, vintage, country, region } = req.body as {
