@@ -4,6 +4,7 @@ import {
   useGetWine,
   getGetWineQueryKey,
   useDeleteWine,
+  useUpdateWine,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -21,6 +22,8 @@ import {
   Tag,
   Clock,
   ExternalLink,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -35,6 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ConsumeModal } from "@/components/ConsumeModal";
 import { WineInsights } from "@/components/WineInsights";
+import { authFetch } from "@/lib/auth";
 import { normalizeWebsiteUrl, websiteHostname } from "@/lib/url";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 
@@ -63,11 +67,25 @@ function confidenceLabel(value: string | null | undefined) {
     : null;
 }
 
+interface DrinkUntilSuggestion {
+  suggestedDate: string;
+  reason: string;
+  sourceUrl: string | null;
+  sourceTitle: string | null;
+  sourceType:
+    | "official_winery"
+    | "producer_pdf"
+    | "reputable_reference"
+    | "profile_estimate";
+  confidence: "low" | "medium" | "high";
+}
+
 export default function WineDetail() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const wineId = parseInt(params.id || "0");
+  const [isSuggestingDrinkUntil, setIsSuggestingDrinkUntil] = useState(false);
 
   const { data: wine, isLoading } = useGetWine(wineId, {
     query: {
@@ -77,6 +95,7 @@ export default function WineDetail() {
   });
 
   const deleteMutation = useDeleteWine();
+  const updateMutation = useUpdateWine();
 
   const handleDelete = () => {
     deleteMutation.mutate(
@@ -94,6 +113,68 @@ export default function WineDetail() {
       },
     );
   };
+
+  async function handleSuggestDrinkUntil() {
+    if (!wine) return;
+    if (!wine.name && !wine.grape && !wine.country) {
+      toast.warning("Faltam dados do vinho para sugerir a melhor data.");
+      return;
+    }
+
+    setIsSuggestingDrinkUntil(true);
+    try {
+      const resp = await authFetch("/api/wines/suggest-drink-until", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: wine.name || undefined,
+          producer: wine.producer || undefined,
+          grape: wine.grape || undefined,
+          vintage: wine.vintage || undefined,
+          country: wine.country || undefined,
+          region: wine.region || undefined,
+        }),
+      });
+
+      if (resp.status === 402) {
+        throw new Error(
+          "Sugestão de data ideal de consumo está disponível no plano Pro.",
+        );
+      }
+      if (!resp.ok) throw new Error("Falha na sugestão");
+
+      const suggestion = (await resp.json()) as DrinkUntilSuggestion;
+      await updateMutation.mutateAsync({
+        id: wine.id,
+        data: {
+          drinkUntil: suggestion.suggestedDate,
+          drinkUntilSourceUrl: suggestion.sourceUrl || undefined,
+          drinkUntilSourceTitle: suggestion.sourceTitle || undefined,
+          drinkUntilSourceType: suggestion.sourceType,
+          drinkUntilConfidence: suggestion.confidence,
+          drinkUntilReason: suggestion.reason || undefined,
+        },
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: getGetWineQueryKey(wine.id),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/dashboard/stats"],
+      });
+      toast.success("Melhor data aplicada à ficha.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível buscar a melhor data agora",
+      );
+    } finally {
+      setIsSuggestingDrinkUntil(false);
+    }
+  }
 
   if (isLoading) return <PageSkeleton />;
   if (!wine) return <div>Vinho não encontrado</div>;
@@ -279,26 +360,27 @@ export default function WineDetail() {
                   <Clock className="w-3.5 h-3.5" /> Beber até
                 </div>
                 <div className="font-medium">{formatDate(wine.drinkUntil)}</div>
-                {(wine.drinkUntilSourceType !== "profile_estimate" ||
-                  wine.drinkUntilSourceUrl) &&
-                  (drinkUntilSourceLabel ||
-                    drinkUntilConfidenceLabel ||
-                    wine.drinkUntilSourceUrl) && (
-                    <div className="text-xs text-muted-foreground leading-snug space-y-1">
-                      {wine.drinkUntilSourceType !== "profile_estimate" &&
-                        (drinkUntilSourceLabel ||
-                          drinkUntilConfidenceLabel) && (
-                          <div>
-                            {[
-                              drinkUntilSourceLabel,
-                              drinkUntilConfidenceLabel
-                                ? `confiança ${drinkUntilConfidenceLabel}`
-                                : null,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </div>
-                        )}
+                {(wine.drinkUntilReason ||
+                  drinkUntilSourceLabel ||
+                  drinkUntilConfidenceLabel ||
+                  wine.drinkUntilSourceUrl) && (
+                  <div className="text-xs text-muted-foreground leading-snug space-y-1">
+                    {wine.drinkUntilReason && (
+                      <div>{wine.drinkUntilReason}</div>
+                    )}
+                    {wine.drinkUntilSourceType !== "profile_estimate" &&
+                      (drinkUntilSourceLabel || drinkUntilConfidenceLabel) && (
+                        <div>
+                          {[
+                            drinkUntilSourceLabel,
+                            drinkUntilConfidenceLabel
+                              ? `confiança ${drinkUntilConfidenceLabel}`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </div>
+                      )}
                       {wine.drinkUntilSourceUrl && (
                         <a
                           href={wine.drinkUntilSourceUrl}
@@ -311,8 +393,33 @@ export default function WineDetail() {
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
-                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!wine.drinkUntil && (
+              <div className="space-y-2">
+                <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
+                  <Clock className="w-3.5 h-3.5" /> Melhor data
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSuggestDrinkUntil}
+                  disabled={isSuggestingDrinkUntil}
+                  className="h-9"
+                >
+                  {isSuggestingDrinkUntil ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
                   )}
+                  {isSuggestingDrinkUntil
+                    ? "Consultando..."
+                    : "Buscar melhor data"}
+                </Button>
               </div>
             )}
           </div>
