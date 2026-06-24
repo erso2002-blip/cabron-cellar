@@ -172,7 +172,7 @@ function stableProfileSuggestion(input: {
   return {
     suggestedDate: `${suggestedYear}-12-31`,
     reason:
-      "Sem fonte oficial encontrada. Data calculada por regra estável de perfil do vinho para evitar variações entre novas pesquisas.",
+      "Sem fonte confiável encontrada. Data estimada pelo perfil do vinho, considerando uva, região, safra e estilo.",
     sourceUrl: null,
     sourceTitle: PROFILE_SOURCE_TITLE,
     sourceType: "profile_estimate",

@@ -5,11 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { 
-  useGetWine, 
-  useCreateWine, 
-  useUpdateWine, 
-  getGetWineQueryKey 
+import {
+  useGetWine,
+  useCreateWine,
+  useUpdateWine,
+  getGetWineQueryKey,
 } from "@workspace/api-client-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageSkeleton } from "@/components/ui/loading";
-import { ArrowLeft, Save, Sparkles, Loader2, X, Camera, Upload, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  Sparkles,
+  Loader2,
+  X,
+  Camera,
+  Upload,
+  ExternalLink,
+} from "lucide-react";
 import LabelScanner from "@/components/LabelScanner";
 import { authFetch } from "@/lib/auth";
-import { MAX_LABEL_PHOTO_FILE_SIZE, compactImage, uploadPhotoToStorage } from "@/lib/labelPhoto";
-import { isLikelyWebsiteUrl, normalizeWebsiteUrl, websiteHostname } from "@/lib/url";
+import {
+  MAX_LABEL_PHOTO_FILE_SIZE,
+  compactImage,
+  uploadPhotoToStorage,
+} from "@/lib/labelPhoto";
+import {
+  isLikelyWebsiteUrl,
+  normalizeWebsiteUrl,
+  websiteHostname,
+} from "@/lib/url";
 
 const MAX_ADDITIONAL_PHOTOS_PER_WINE = 1;
 
@@ -59,7 +76,12 @@ const formSchema = z.object({
   drinkUntilSourceUrl: z.string().max(300).optional().nullable(),
   drinkUntilSourceTitle: z.string().max(180).optional().nullable(),
   drinkUntilSourceType: z
-    .enum(["official_winery", "producer_pdf", "reputable_reference", "profile_estimate"])
+    .enum([
+      "official_winery",
+      "producer_pdf",
+      "reputable_reference",
+      "profile_estimate",
+    ])
     .optional()
     .nullable(),
   drinkUntilConfidence: z.enum(["low", "medium", "high"]).optional().nullable(),
@@ -87,7 +109,11 @@ interface DrinkUntilSuggestion {
   reason: string;
   sourceUrl: string | null;
   sourceTitle: string | null;
-  sourceType: "official_winery" | "producer_pdf" | "reputable_reference" | "profile_estimate";
+  sourceType:
+    | "official_winery"
+    | "producer_pdf"
+    | "reputable_reference"
+    | "profile_estimate";
   confidence: "low" | "medium" | "high";
 }
 
@@ -117,7 +143,9 @@ function userFacingSaveError(error: unknown) {
   return null;
 }
 
-function isDrinkUntilSourceType(value: unknown): value is DrinkUntilSuggestion["sourceType"] {
+function isDrinkUntilSourceType(
+  value: unknown,
+): value is DrinkUntilSuggestion["sourceType"] {
   return (
     value === "official_winery" ||
     value === "producer_pdf" ||
@@ -126,7 +154,9 @@ function isDrinkUntilSourceType(value: unknown): value is DrinkUntilSuggestion["
   );
 }
 
-function isDrinkUntilConfidence(value: unknown): value is DrinkUntilSuggestion["confidence"] {
+function isDrinkUntilConfidence(
+  value: unknown,
+): value is DrinkUntilSuggestion["confidence"] {
   return value === "low" || value === "medium" || value === "high";
 }
 
@@ -134,15 +164,15 @@ export default function WineForm() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  
+
   const isEditing = !!params.id && params.id !== "new";
   const wineId = parseInt(params.id || "0");
 
   const { data: wine, isLoading } = useGetWine(wineId, {
     query: {
       enabled: isEditing,
-      queryKey: getGetWineQueryKey(wineId)
-    }
+      queryKey: getGetWineQueryKey(wineId),
+    },
   });
 
   const createMutation = useCreateWine();
@@ -152,10 +182,15 @@ export default function WineForm() {
 
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isUploadingLabelPhoto, setIsUploadingLabelPhoto] = useState(false);
-  const [drinkUntilHint, setDrinkUntilHint] = useState<DrinkUntilSuggestion | null>(null);
+  const [drinkUntilHint, setDrinkUntilHint] =
+    useState<DrinkUntilSuggestion | null>(null);
 
   function buildFallbackWineName(data: LabelData) {
-    const parts = [data.producer, data.grape, data.vintage ? String(data.vintage) : null]
+    const parts = [
+      data.producer,
+      data.grape,
+      data.vintage ? String(data.vintage) : null,
+    ]
       .map((part) => part?.trim())
       .filter(Boolean);
     return parts.length >= 2 ? parts.join(" ") : null;
@@ -164,11 +199,17 @@ export default function WineForm() {
   function handleLabelExtracted(data: LabelData) {
     const name = data.name?.trim() || buildFallbackWineName(data);
     if (name) form.setValue("name", name, { shouldValidate: true });
-    if (data.producer) form.setValue("producer", data.producer, { shouldValidate: true });
+    if (data.producer)
+      form.setValue("producer", data.producer, { shouldValidate: true });
     if (data.wineryWebsiteUrl) {
-      form.setValue("wineryWebsiteUrl", normalizeWebsiteUrl(data.wineryWebsiteUrl), { shouldValidate: true });
+      form.setValue(
+        "wineryWebsiteUrl",
+        normalizeWebsiteUrl(data.wineryWebsiteUrl),
+        { shouldValidate: true },
+      );
     }
-    if (data.vintage) form.setValue("vintage", data.vintage, { shouldValidate: true });
+    if (data.vintage)
+      form.setValue("vintage", data.vintage, { shouldValidate: true });
     if (data.grape) form.setValue("grape", data.grape);
     if (data.country) form.setValue("country", data.country);
     if (data.region) form.setValue("region", data.region);
@@ -194,8 +235,13 @@ export default function WineForm() {
     try {
       const { dataUrl } = await compactImage(file);
       const uploadedUrl = await uploadPhotoToStorage(file);
-      form.setValue("additionalPhotoUrl", uploadedUrl || dataUrl, { shouldDirty: true, shouldValidate: true });
-      toast.success("Foto adicional carregada. Salve as alterações para gravar no vinho.");
+      form.setValue("additionalPhotoUrl", uploadedUrl || dataUrl, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      toast.success(
+        "Foto adicional carregada. Salve as alterações para gravar no vinho.",
+      );
     } catch {
       toast.error("Não foi possível carregar a foto selecionada");
     } finally {
@@ -212,7 +258,9 @@ export default function WineForm() {
   async function handleSuggestDrinkUntil() {
     const values = form.getValues();
     if (!values.name && !values.grape && !values.country) {
-      toast.warning("Preencha ao menos nome, uva ou país para receber uma sugestão");
+      toast.warning(
+        "Preencha ao menos nome, uva ou país para receber uma sugestão",
+      );
       return;
     }
     setIsSuggesting(true);
@@ -232,7 +280,9 @@ export default function WineForm() {
         }),
       });
       if (resp.status === 402) {
-        throw new Error("Sugestão de data ideal de consumo está disponível no plano Pro.");
+        throw new Error(
+          "Sugestão de data ideal de consumo está disponível no plano Pro.",
+        );
       }
       if (!resp.ok) throw new Error("Falha na sugestão");
       const data = (await resp.json()) as DrinkUntilSuggestion;
@@ -245,7 +295,11 @@ export default function WineForm() {
       setDrinkUntilHint(data);
       toast.success("Sugestão aplicada!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Não foi possível gerar uma sugestão agora");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gerar uma sugestão agora",
+      );
     } finally {
       setIsSuggesting(false);
     }
@@ -298,8 +352,12 @@ export default function WineForm() {
         drinkUntil: wine.drinkUntil || null,
         drinkUntilSourceUrl: wine.drinkUntilSourceUrl || null,
         drinkUntilSourceTitle: wine.drinkUntilSourceTitle || null,
-        drinkUntilSourceType: isDrinkUntilSourceType(wine.drinkUntilSourceType) ? wine.drinkUntilSourceType : null,
-        drinkUntilConfidence: isDrinkUntilConfidence(wine.drinkUntilConfidence) ? wine.drinkUntilConfidence : null,
+        drinkUntilSourceType: isDrinkUntilSourceType(wine.drinkUntilSourceType)
+          ? wine.drinkUntilSourceType
+          : null,
+        drinkUntilConfidence: isDrinkUntilConfidence(wine.drinkUntilConfidence)
+          ? wine.drinkUntilConfidence
+          : null,
         drinkUntilReason: wine.drinkUntilReason || null,
         labelPhotoUrl: wine.labelPhotoUrl || "",
         additionalPhotoUrl: wine.additionalPhotoUrl || "",
@@ -332,11 +390,21 @@ export default function WineForm() {
       pricePaid: data.pricePaid || undefined,
       wineryWebsiteUrl: normalizeWebsiteUrl(data.wineryWebsiteUrl) || undefined,
       drinkUntil: data.drinkUntil || undefined,
-      drinkUntilSourceUrl: data.drinkUntil ? data.drinkUntilSourceUrl || undefined : undefined,
-      drinkUntilSourceTitle: data.drinkUntil ? data.drinkUntilSourceTitle || undefined : undefined,
-      drinkUntilSourceType: data.drinkUntil ? data.drinkUntilSourceType || undefined : undefined,
-      drinkUntilConfidence: data.drinkUntil ? data.drinkUntilConfidence || undefined : undefined,
-      drinkUntilReason: data.drinkUntil ? data.drinkUntilReason || undefined : undefined,
+      drinkUntilSourceUrl: data.drinkUntil
+        ? data.drinkUntilSourceUrl || undefined
+        : undefined,
+      drinkUntilSourceTitle: data.drinkUntil
+        ? data.drinkUntilSourceTitle || undefined
+        : undefined,
+      drinkUntilSourceType: data.drinkUntil
+        ? data.drinkUntilSourceType || undefined
+        : undefined,
+      drinkUntilConfidence: data.drinkUntil
+        ? data.drinkUntilConfidence || undefined
+        : undefined,
+      drinkUntilReason: data.drinkUntil
+        ? data.drinkUntilReason || undefined
+        : undefined,
       labelPhotoUrl: data.labelPhotoUrl || undefined,
       additionalPhotoUrl: data.additionalPhotoUrl || undefined,
     };
@@ -347,12 +415,17 @@ export default function WineForm() {
         {
           onSuccess: (updatedWine) => {
             toast.success("Vinho atualizado com sucesso");
-            queryClient.invalidateQueries({ queryKey: getGetWineQueryKey(wineId) });
+            queryClient.invalidateQueries({
+              queryKey: getGetWineQueryKey(wineId),
+            });
             queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
             setLocation(`/wines/${updatedWine.id}`);
           },
-          onError: (error) => toast.error(userFacingSaveError(error) ?? "Erro ao atualizar vinho")
-        }
+          onError: (error) =>
+            toast.error(
+              userFacingSaveError(error) ?? "Erro ao atualizar vinho",
+            ),
+        },
       );
     } else {
       createMutation.mutate(
@@ -361,11 +434,16 @@ export default function WineForm() {
           onSuccess: (newWine) => {
             toast.success("Vinho adicionado à adega");
             queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
-            queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+            queryClient.invalidateQueries({
+              queryKey: ["/api/dashboard/stats"],
+            });
             setLocation(`/wines/${newWine.id}`);
           },
-          onError: (error) => toast.error(userFacingSaveError(error) ?? "Erro ao adicionar vinho")
-        }
+          onError: (error) =>
+            toast.error(
+              userFacingSaveError(error) ?? "Erro ao adicionar vinho",
+            ),
+        },
       );
     }
   };
@@ -375,9 +453,9 @@ export default function WineForm() {
   return (
     <div className="max-w-3xl mx-auto pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="pl-0 mr-4 text-muted-foreground hover:text-foreground"
           onClick={() => setLocation(isEditing ? `/wines/${wineId}` : "/wines")}
         >
@@ -404,7 +482,9 @@ export default function WineForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-6">
-              <h3 className="font-serif text-lg font-bold border-b pb-2">Informações Principais</h3>
+              <h3 className="font-serif text-lg font-bold border-b pb-2">
+                Informações Principais
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -413,7 +493,10 @@ export default function WineForm() {
                     <FormItem className="md:col-span-2">
                       <FormLabel>Nome do Vinho *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Catena Zapata Malbec Argentino" {...field} />
+                        <Input
+                          placeholder="Ex: Catena Zapata Malbec Argentino"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -439,9 +522,15 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Site da vitícola</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://www.viticola.com" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="https://www.viticola.com"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
-                      <FormDescription>Aceita com ou sem https://. Ex: vinicola.com.br</FormDescription>
+                      <FormDescription>
+                        Aceita com ou sem https://. Ex: vinicola.com.br
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -453,7 +542,12 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Safra (Ano)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="Ex: 2019" {...field} value={field.value || ""} />
+                        <Input
+                          type="number"
+                          placeholder="Ex: 2019"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -466,7 +560,10 @@ export default function WineForm() {
                     <FormItem className="md:col-span-2">
                       <FormLabel>Uva(s)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Malbec, Cabernet Sauvignon" {...field} />
+                        <Input
+                          placeholder="Ex: Malbec, Cabernet Sauvignon"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -476,7 +573,9 @@ export default function WineForm() {
             </div>
 
             <div className="space-y-6 pt-2">
-              <h3 className="font-serif text-lg font-bold border-b pb-2">Origem</h3>
+              <h3 className="font-serif text-lg font-bold border-b pb-2">
+                Origem
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
@@ -508,7 +607,9 @@ export default function WineForm() {
             </div>
 
             <div className="space-y-6 pt-2">
-              <h3 className="font-serif text-lg font-bold border-b pb-2">Estoque e Aquisição</h3>
+              <h3 className="font-serif text-lg font-bold border-b pb-2">
+                Estoque e Aquisição
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
@@ -530,7 +631,13 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Preço Pago (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" placeholder="0.00" {...field} value={field.value || ""} />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -554,11 +661,17 @@ export default function WineForm() {
                           ) : (
                             <Sparkles className="h-3 w-3" />
                           )}
-                          {isSuggesting ? "Consultando sommelier…" : "Sugerir com IA"}
+                          {isSuggesting
+                            ? "Consultando sommelier…"
+                            : "Sugerir com IA"}
                         </button>
                       </div>
                       <FormControl>
-                        <Input type="date" {...field} value={field.value || ""} />
+                        <Input
+                          type="date"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       {drinkUntilHint ? (
                         <div className="space-y-1 text-xs text-primary/80">
@@ -566,25 +679,36 @@ export default function WineForm() {
                             <Sparkles className="h-3 w-3 mt-0.5 shrink-0" />
                             {drinkUntilHint.reason}
                           </p>
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
-                            <span>
-                              {sourceTypeLabels[drinkUntilHint.sourceType]} · confiança {confidenceLabels[drinkUntilHint.confidence]}
-                            </span>
-                            {drinkUntilHint.sourceUrl && (
-                              <a
-                                href={drinkUntilHint.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
-                              >
-                                {websiteHostname(drinkUntilHint.sourceUrl) || "Ver fonte"}
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                          </div>
+                          {(drinkUntilHint.sourceType !== "profile_estimate" ||
+                            drinkUntilHint.sourceUrl) && (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+                              {drinkUntilHint.sourceType !==
+                                "profile_estimate" && (
+                                <span>
+                                  {sourceTypeLabels[drinkUntilHint.sourceType]}{" "}
+                                  · confiança{" "}
+                                  {confidenceLabels[drinkUntilHint.confidence]}
+                                </span>
+                              )}
+                              {drinkUntilHint.sourceUrl && (
+                                <a
+                                  href={drinkUntilHint.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
+                                >
+                                  {websiteHostname(drinkUntilHint.sourceUrl) ||
+                                    "Ver fonte"}
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <FormDescription>Quando este vinho começará a perder qualidade?</FormDescription>
+                        <FormDescription>
+                          Quando este vinho começará a perder qualidade?
+                        </FormDescription>
                       )}
                       <FormMessage />
                     </FormItem>
@@ -594,7 +718,9 @@ export default function WineForm() {
             </div>
 
             <div className="space-y-6 pt-2">
-              <h3 className="font-serif text-lg font-bold border-b pb-2">Localização</h3>
+              <h3 className="font-serif text-lg font-bold border-b pb-2">
+                Localização
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
@@ -603,7 +729,11 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Local</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Casa, Escritório" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Casa, Escritório"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -616,7 +746,11 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Adega</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Adega Principal" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Adega Principal"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -629,7 +763,11 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Prateleira</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Prateleira 2A" {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="Ex: Prateleira 2A"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -639,7 +777,9 @@ export default function WineForm() {
             </div>
 
             <div className="space-y-6 pt-2">
-              <h3 className="font-serif text-lg font-bold border-b pb-2">Detalhes Adicionais</h3>
+              <h3 className="font-serif text-lg font-bold border-b pb-2">
+                Detalhes Adicionais
+              </h3>
               <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={form.control}
@@ -671,7 +811,9 @@ export default function WineForm() {
                               variant="outline"
                               size="sm"
                               className="w-full sm:w-auto"
-                              onClick={() => labelPhotoCameraRef.current?.click()}
+                              onClick={() =>
+                                labelPhotoCameraRef.current?.click()
+                              }
                               disabled={isUploadingLabelPhoto}
                             >
                               {isUploadingLabelPhoto ? (
@@ -720,7 +862,10 @@ export default function WineForm() {
                             />
                           </FormControl>
                           <FormDescription className="mt-1">
-                            Use para foto da taça, contra-rótulo ou outro detalhe. Limite: {MAX_ADDITIONAL_PHOTOS_PER_WINE} foto por vinho; ao carregar outra, ela substitui a anterior.
+                            Use para foto da taça, contra-rótulo ou outro
+                            detalhe. Limite: {MAX_ADDITIONAL_PHOTOS_PER_WINE}{" "}
+                            foto por vinho; ao carregar outra, ela substitui a
+                            anterior.
                           </FormDescription>
                         </div>
                       </div>
@@ -735,10 +880,10 @@ export default function WineForm() {
                     <FormItem>
                       <FormLabel>Notas Pessoais</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Onde comprou? De quem ganhou? Espectativas..." 
+                        <Textarea
+                          placeholder="Onde comprou? De quem ganhou? Espectativas..."
                           className="min-h-[120px]"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -749,10 +894,19 @@ export default function WineForm() {
             </div>
 
             <div className="flex justify-end gap-4 pt-6 border-t">
-              <Button type="button" variant="outline" onClick={() => setLocation(isEditing ? `/wines/${wineId}` : "/wines")}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  setLocation(isEditing ? `/wines/${wineId}` : "/wines")
+                }
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
                 <Save className="mr-2 h-4 w-4" />
                 {isEditing ? "Salvar Alterações" : "Adicionar à Adega"}
               </Button>

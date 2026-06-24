@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { useParams, Link, useLocation } from "wouter";
-import { 
-  useGetWine, 
+import {
+  useGetWine,
   getGetWineQueryKey,
-  useDeleteWine 
+  useDeleteWine,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PageSkeleton } from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
-  Wine, 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  Thermometer, 
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Wine,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Thermometer,
   Tag,
   Clock,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -68,28 +68,31 @@ export default function WineDetail() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const wineId = parseInt(params.id || "0");
-  
+
   const { data: wine, isLoading } = useGetWine(wineId, {
     query: {
       enabled: !!wineId,
-      queryKey: getGetWineQueryKey(wineId)
-    }
+      queryKey: getGetWineQueryKey(wineId),
+    },
   });
 
   const deleteMutation = useDeleteWine();
 
   const handleDelete = () => {
-    deleteMutation.mutate({ id: wineId }, {
-      onSuccess: () => {
-        toast.success("Vinho removido da adega.");
-        queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-        setLocation("/wines");
+    deleteMutation.mutate(
+      { id: wineId },
+      {
+        onSuccess: () => {
+          toast.success("Vinho removido da adega.");
+          queryClient.invalidateQueries({ queryKey: ["/api/wines"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+          setLocation("/wines");
+        },
+        onError: () => {
+          toast.error("Erro ao remover o vinho.");
+        },
       },
-      onError: () => {
-        toast.error("Erro ao remover o vinho.");
-      }
-    });
+    );
   };
 
   if (isLoading) return <PageSkeleton />;
@@ -103,7 +106,11 @@ export default function WineDetail() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex items-center justify-between">
         <Link href="/wines">
-          <Button variant="ghost" size="sm" className="pl-0 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="pl-0 text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para Adega
           </Button>
@@ -117,7 +124,11 @@ export default function WineDetail() {
           </Link>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10"
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
@@ -125,13 +136,17 @@ export default function WineDetail() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Remover vinho?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. O vinho será removido do seu acervo.
-                  Se você consumiu esta garrafa, use a opção "Consumir" em vez disso.
+                  Esta ação não pode ser desfeita. O vinho será removido do seu
+                  acervo. Se você consumiu esta garrafa, use a opção "Consumir"
+                  em vez disso.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
                   Remover
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -144,15 +159,21 @@ export default function WineDetail() {
         <div className="md:col-span-4 lg:col-span-3 space-y-4">
           <div className="bg-secondary rounded-xl aspect-[3/4] flex items-center justify-center overflow-hidden border border-border shadow-md relative">
             {wine.labelPhotoUrl ? (
-              <img src={wine.labelPhotoUrl} alt={wine.name} className="w-full h-full object-cover" />
+              <img
+                src={wine.labelPhotoUrl}
+                alt={wine.name}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="text-center p-6 flex flex-col items-center opacity-50">
                 <Wine className="w-16 h-16 mb-4 text-muted-foreground" />
-                <span className="text-sm font-serif italic text-muted-foreground">Sem foto do rótulo</span>
+                <span className="text-sm font-serif italic text-muted-foreground">
+                  Sem foto do rótulo
+                </span>
               </div>
             )}
           </div>
-          
+
           <ConsumeModal wine={wine} />
 
           {wine.additionalPhotoUrl && (
@@ -177,7 +198,11 @@ export default function WineDetail() {
               <span className="font-mono bg-primary/10 text-primary px-3 py-1 rounded text-sm font-bold border border-primary/20">
                 {wine.quantity} GARRAFAS
               </span>
-              {wine.vintage && <span className="font-mono bg-secondary px-3 py-1 rounded text-sm">{wine.vintage}</span>}
+              {wine.vintage && (
+                <span className="font-mono bg-secondary px-3 py-1 rounded text-sm">
+                  {wine.vintage}
+                </span>
+              )}
             </div>
             <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground leading-tight mb-2">
               {wine.name}
@@ -204,10 +229,13 @@ export default function WineDetail() {
                 <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
                   <MapPin className="w-3.5 h-3.5" /> Origem
                 </div>
-                <div className="font-medium">{wine.region ? `${wine.region}, ` : ''}{wine.country}</div>
+                <div className="font-medium">
+                  {wine.region ? `${wine.region}, ` : ""}
+                  {wine.country}
+                </div>
               </div>
             )}
-            
+
             {wine.grape && (
               <div className="space-y-1">
                 <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
@@ -222,7 +250,9 @@ export default function WineDetail() {
                 <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
                   <DollarSign className="w-3.5 h-3.5" /> Preço Pago
                 </div>
-                <div className="font-medium">{formatCurrency(wine.pricePaid)}</div>
+                <div className="font-medium">
+                  {formatCurrency(wine.pricePaid)}
+                </div>
               </div>
             )}
 
@@ -236,7 +266,9 @@ export default function WineDetail() {
                   <div className="flex items-center text-muted-foreground text-sm gap-1.5 mb-1 uppercase tracking-wider">
                     <Thermometer className="w-3.5 h-3.5" /> Localização
                   </div>
-                  <div className="font-medium font-mono bg-secondary/50 px-2 py-0.5 rounded inline-block">{location}</div>
+                  <div className="font-medium font-mono bg-secondary/50 px-2 py-0.5 rounded inline-block">
+                    {location}
+                  </div>
                 </div>
               ) : null;
             })()}
@@ -247,28 +279,40 @@ export default function WineDetail() {
                   <Clock className="w-3.5 h-3.5" /> Beber até
                 </div>
                 <div className="font-medium">{formatDate(wine.drinkUntil)}</div>
-                {(drinkUntilSourceLabel || drinkUntilConfidenceLabel || wine.drinkUntilSourceUrl) && (
-                  <div className="text-xs text-muted-foreground leading-snug space-y-1">
-                    {(drinkUntilSourceLabel || drinkUntilConfidenceLabel) && (
-                      <div>
-                        {[drinkUntilSourceLabel, drinkUntilConfidenceLabel ? `confiança ${drinkUntilConfidenceLabel}` : null]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </div>
-                    )}
-                    {wine.drinkUntilSourceUrl && (
-                      <a
-                        href={wine.drinkUntilSourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
-                      >
-                        {websiteHostname(wine.drinkUntilSourceUrl) || "Ver fonte"}
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                )}
+                {(wine.drinkUntilSourceType !== "profile_estimate" ||
+                  wine.drinkUntilSourceUrl) &&
+                  (drinkUntilSourceLabel ||
+                    drinkUntilConfidenceLabel ||
+                    wine.drinkUntilSourceUrl) && (
+                    <div className="text-xs text-muted-foreground leading-snug space-y-1">
+                      {wine.drinkUntilSourceType !== "profile_estimate" &&
+                        (drinkUntilSourceLabel ||
+                          drinkUntilConfidenceLabel) && (
+                          <div>
+                            {[
+                              drinkUntilSourceLabel,
+                              drinkUntilConfidenceLabel
+                                ? `confiança ${drinkUntilConfidenceLabel}`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </div>
+                        )}
+                      {wine.drinkUntilSourceUrl && (
+                        <a
+                          href={wine.drinkUntilSourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
+                        >
+                          {websiteHostname(wine.drinkUntilSourceUrl) ||
+                            "Ver fonte"}
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  )}
               </div>
             )}
           </div>
