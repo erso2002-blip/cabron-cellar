@@ -443,6 +443,18 @@ components:
         drinkUntil:
           type: ["string", "null"]
           description: Date string YYYY-MM-DD
+        drinkUntilSourceUrl:
+          type: ["string", "null"]
+        drinkUntilSourceTitle:
+          type: ["string", "null"]
+        drinkUntilSourceType:
+          type: ["string", "null"]
+          enum: [official_winery, producer_pdf, reputable_reference, profile_estimate, null]
+        drinkUntilConfidence:
+          type: ["string", "null"]
+          enum: [low, medium, high, null]
+        drinkUntilReason:
+          type: ["string", "null"]
         labelPhotoUrl:
           type: ["string", "null"]
           description: URL for label photo — AI integration point for automatic field extraction
@@ -496,6 +508,18 @@ components:
         drinkUntil:
           type: string
           description: Date string YYYY-MM-DD
+        drinkUntilSourceUrl:
+          type: string
+        drinkUntilSourceTitle:
+          type: string
+        drinkUntilSourceType:
+          type: string
+          enum: [official_winery, producer_pdf, reputable_reference, profile_estimate]
+        drinkUntilConfidence:
+          type: string
+          enum: [low, medium, high]
+        drinkUntilReason:
+          type: string
         labelPhotoUrl:
           type: string
         additionalPhotoUrl:
@@ -538,6 +562,18 @@ components:
         shelf:
           type: string
         drinkUntil:
+          type: string
+        drinkUntilSourceUrl:
+          type: string
+        drinkUntilSourceTitle:
+          type: string
+        drinkUntilSourceType:
+          type: string
+          enum: [official_winery, producer_pdf, reputable_reference, profile_estimate]
+        drinkUntilConfidence:
+          type: string
+          enum: [low, medium, high]
+        drinkUntilReason:
           type: string
         labelPhotoUrl:
           type: string

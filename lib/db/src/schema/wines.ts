@@ -27,6 +27,11 @@ export const winesTable = pgTable("wines", {
   cellarName: text("cellar_name"),
   shelf: text("shelf"),
   drinkUntil: date("drink_until", { mode: "string" }),
+  drinkUntilSourceUrl: text("drink_until_source_url"),
+  drinkUntilSourceTitle: text("drink_until_source_title"),
+  drinkUntilSourceType: text("drink_until_source_type"),
+  drinkUntilConfidence: text("drink_until_confidence"),
+  drinkUntilReason: text("drink_until_reason"),
   // AI-ready field: will be the source for automatic label reading in future integration
   labelPhotoUrl: text("label_photo_url"),
   additionalPhotoUrl: text("additional_photo_url"),

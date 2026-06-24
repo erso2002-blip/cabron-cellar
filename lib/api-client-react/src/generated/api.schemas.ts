@@ -64,6 +64,16 @@ export interface Wine {
      * @nullable
      */
   drinkUntil?: string | null;
+  /** @nullable */
+  drinkUntilSourceUrl?: string | null;
+  /** @nullable */
+  drinkUntilSourceTitle?: string | null;
+  /** @nullable */
+  drinkUntilSourceType?: 'official_winery' | 'producer_pdf' | 'reputable_reference' | 'profile_estimate' | null;
+  /** @nullable */
+  drinkUntilConfidence?: 'low' | 'medium' | 'high' | null;
+  /** @nullable */
+  drinkUntilReason?: string | null;
   /**
      * URL for label photo — AI integration point for automatic field extraction
      * @nullable
@@ -101,6 +111,11 @@ export interface WineInput {
   shelf?: string;
   /** Date string YYYY-MM-DD */
   drinkUntil?: string;
+  drinkUntilSourceUrl?: string;
+  drinkUntilSourceTitle?: string;
+  drinkUntilSourceType?: 'official_winery' | 'producer_pdf' | 'reputable_reference' | 'profile_estimate';
+  drinkUntilConfidence?: 'low' | 'medium' | 'high';
+  drinkUntilReason?: string;
   labelPhotoUrl?: string;
   /** Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo. */
   additionalPhotoUrl?: string;
@@ -125,6 +140,11 @@ export interface WineUpdate {
   cellarName?: string;
   shelf?: string;
   drinkUntil?: string;
+  drinkUntilSourceUrl?: string;
+  drinkUntilSourceTitle?: string;
+  drinkUntilSourceType?: 'official_winery' | 'producer_pdf' | 'reputable_reference' | 'profile_estimate';
+  drinkUntilConfidence?: 'low' | 'medium' | 'high';
+  drinkUntilReason?: string;
   labelPhotoUrl?: string;
   /** Optional extra photo for glass, back label, or wine detail. Does not replace the main label photo. */
   additionalPhotoUrl?: string;
@@ -288,4 +308,3 @@ export type ListConsumptionParams = {
 limit?: number;
 offset?: number;
 };
-

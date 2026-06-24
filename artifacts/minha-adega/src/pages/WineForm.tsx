@@ -56,6 +56,14 @@ const formSchema = z.object({
   cellarName: z.string().max(120).optional(),
   shelf: z.string().max(80).optional(),
   drinkUntil: z.string().optional().nullable(),
+  drinkUntilSourceUrl: z.string().max(300).optional().nullable(),
+  drinkUntilSourceTitle: z.string().max(180).optional().nullable(),
+  drinkUntilSourceType: z
+    .enum(["official_winery", "producer_pdf", "reputable_reference", "profile_estimate"])
+    .optional()
+    .nullable(),
+  drinkUntilConfidence: z.enum(["low", "medium", "high"]).optional().nullable(),
+  drinkUntilReason: z.string().max(500).optional().nullable(),
   labelPhotoUrl: z.string().max(6_800_000).optional().nullable(),
   additionalPhotoUrl: z.string().max(6_800_000).optional().nullable(),
   notes: z.string().max(2_000).optional(),
@@ -107,6 +115,19 @@ function userFacingSaveError(error: unknown) {
   }
 
   return null;
+}
+
+function isDrinkUntilSourceType(value: unknown): value is DrinkUntilSuggestion["sourceType"] {
+  return (
+    value === "official_winery" ||
+    value === "producer_pdf" ||
+    value === "reputable_reference" ||
+    value === "profile_estimate"
+  );
+}
+
+function isDrinkUntilConfidence(value: unknown): value is DrinkUntilSuggestion["confidence"] {
+  return value === "low" || value === "medium" || value === "high";
 }
 
 export default function WineForm() {
@@ -216,6 +237,11 @@ export default function WineForm() {
       if (!resp.ok) throw new Error("Falha na sugestão");
       const data = (await resp.json()) as DrinkUntilSuggestion;
       form.setValue("drinkUntil", data.suggestedDate);
+      form.setValue("drinkUntilSourceUrl", data.sourceUrl || null);
+      form.setValue("drinkUntilSourceTitle", data.sourceTitle || null);
+      form.setValue("drinkUntilSourceType", data.sourceType);
+      form.setValue("drinkUntilConfidence", data.confidence);
+      form.setValue("drinkUntilReason", data.reason || null);
       setDrinkUntilHint(data);
       toast.success("Sugestão aplicada!");
     } catch (error) {
@@ -242,6 +268,11 @@ export default function WineForm() {
       cellarName: "",
       shelf: "",
       drinkUntil: null,
+      drinkUntilSourceUrl: null,
+      drinkUntilSourceTitle: null,
+      drinkUntilSourceType: null,
+      drinkUntilConfidence: null,
+      drinkUntilReason: null,
       labelPhotoUrl: "",
       additionalPhotoUrl: "",
       notes: "",
@@ -265,10 +296,31 @@ export default function WineForm() {
         cellarName: wine.cellarName || "",
         shelf: wine.shelf || "",
         drinkUntil: wine.drinkUntil || null,
+        drinkUntilSourceUrl: wine.drinkUntilSourceUrl || null,
+        drinkUntilSourceTitle: wine.drinkUntilSourceTitle || null,
+        drinkUntilSourceType: isDrinkUntilSourceType(wine.drinkUntilSourceType) ? wine.drinkUntilSourceType : null,
+        drinkUntilConfidence: isDrinkUntilConfidence(wine.drinkUntilConfidence) ? wine.drinkUntilConfidence : null,
+        drinkUntilReason: wine.drinkUntilReason || null,
         labelPhotoUrl: wine.labelPhotoUrl || "",
         additionalPhotoUrl: wine.additionalPhotoUrl || "",
         notes: wine.notes || "",
       });
+      if (
+        wine.drinkUntil &&
+        isDrinkUntilSourceType(wine.drinkUntilSourceType) &&
+        isDrinkUntilConfidence(wine.drinkUntilConfidence)
+      ) {
+        setDrinkUntilHint({
+          suggestedDate: wine.drinkUntil,
+          reason: wine.drinkUntilReason || "",
+          sourceUrl: wine.drinkUntilSourceUrl || null,
+          sourceTitle: wine.drinkUntilSourceTitle || null,
+          sourceType: wine.drinkUntilSourceType,
+          confidence: wine.drinkUntilConfidence,
+        });
+      } else {
+        setDrinkUntilHint(null);
+      }
     }
   }, [wine, isEditing, form]);
 
@@ -280,6 +332,11 @@ export default function WineForm() {
       pricePaid: data.pricePaid || undefined,
       wineryWebsiteUrl: normalizeWebsiteUrl(data.wineryWebsiteUrl) || undefined,
       drinkUntil: data.drinkUntil || undefined,
+      drinkUntilSourceUrl: data.drinkUntil ? data.drinkUntilSourceUrl || undefined : undefined,
+      drinkUntilSourceTitle: data.drinkUntil ? data.drinkUntilSourceTitle || undefined : undefined,
+      drinkUntilSourceType: data.drinkUntil ? data.drinkUntilSourceType || undefined : undefined,
+      drinkUntilConfidence: data.drinkUntil ? data.drinkUntilConfidence || undefined : undefined,
+      drinkUntilReason: data.drinkUntil ? data.drinkUntilReason || undefined : undefined,
       labelPhotoUrl: data.labelPhotoUrl || undefined,
       additionalPhotoUrl: data.additionalPhotoUrl || undefined,
     };

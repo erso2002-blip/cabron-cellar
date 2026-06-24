@@ -9,6 +9,7 @@ import {
 import { getAuthenticatedUser } from "../lib/auth.js";
 import { getFreeBottleLimit, getPresentBottleCount, hasActiveProAccess } from "../lib/planAccess.js";
 import { generateWineTemplate, validateWineRow } from "../lib/wineTemplate.js";
+import { ensureWineSchema } from "../lib/wineSchema.js";
 import ExcelJS from "exceljs";
 
 const router = Router();
@@ -25,6 +26,11 @@ const STRING_LIMITS: Record<string, number> = {
   locationPlace: 120,
   cellarName: 120,
   shelf: 80,
+  drinkUntilSourceUrl: 300,
+  drinkUntilSourceTitle: 180,
+  drinkUntilSourceType: 40,
+  drinkUntilConfidence: 20,
+  drinkUntilReason: 500,
   notes: 2_000,
   labelPhotoUrl: MAX_LABEL_PHOTO_URL_LENGTH,
   additionalPhotoUrl: MAX_LABEL_PHOTO_URL_LENGTH,
@@ -260,6 +266,7 @@ router.post("/wines/import", async (req: any, res: any) => {
 
 // GET /wines
 router.get("/wines", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -316,6 +323,7 @@ router.get("/wines", async (req: any, res: any) => {
 
 // POST /wines
 router.post("/wines", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -357,6 +365,7 @@ router.post("/wines", async (req: any, res: any) => {
 
 // GET /wines/drink-soon — must be before /wines/:id
 router.get("/wines/drink-soon", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -412,6 +421,7 @@ router.get("/wines/drink-soon", async (req: any, res: any) => {
 
 // GET /wines/:id
 router.get("/wines/:id", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -435,6 +445,7 @@ router.get("/wines/:id", async (req: any, res: any) => {
 
 // PATCH /wines/:id
 router.patch("/wines/:id", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -509,6 +520,7 @@ router.delete("/wines/:id", async (req: any, res: any) => {
 
 // POST /wines/:id/consume
 router.post("/wines/:id/consume", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -590,6 +602,7 @@ router.post("/wines/:id/consume", async (req: any, res: any) => {
 
 // POST /wines/:id/label
 router.post("/wines/:id/label", async (req: any, res: any) => {
+  await ensureWineSchema();
   const user = getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: "Unauthorized" });

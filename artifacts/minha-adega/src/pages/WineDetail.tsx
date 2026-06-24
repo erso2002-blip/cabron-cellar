@@ -35,8 +35,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ConsumeModal } from "@/components/ConsumeModal";
 import { WineInsights } from "@/components/WineInsights";
-import { normalizeWebsiteUrl } from "@/lib/url";
+import { normalizeWebsiteUrl, websiteHostname } from "@/lib/url";
 import { formatCurrency, formatDate } from "@/lib/formatters";
+
+const sourceTypeLabels = {
+  official_winery: "Fonte oficial",
+  producer_pdf: "Ficha técnica",
+  reputable_reference: "Referência externa",
+  profile_estimate: "Sem fonte oficial encontrada · estimativa aproximada",
+} as const;
+
+const confidenceLabels = {
+  low: "baixa",
+  medium: "média",
+  high: "alta",
+} as const;
+
+function sourceTypeLabel(value: string | null | undefined) {
+  return value && value in sourceTypeLabels
+    ? sourceTypeLabels[value as keyof typeof sourceTypeLabels]
+    : null;
+}
+
+function confidenceLabel(value: string | null | undefined) {
+  return value && value in confidenceLabels
+    ? confidenceLabels[value as keyof typeof confidenceLabels]
+    : null;
+}
 
 export default function WineDetail() {
   const params = useParams();
@@ -71,6 +96,8 @@ export default function WineDetail() {
   if (!wine) return <div>Vinho não encontrado</div>;
 
   const wineryWebsiteUrl = normalizeWebsiteUrl(wine.wineryWebsiteUrl);
+  const drinkUntilSourceLabel = sourceTypeLabel(wine.drinkUntilSourceType);
+  const drinkUntilConfidenceLabel = confidenceLabel(wine.drinkUntilConfidence);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -220,6 +247,28 @@ export default function WineDetail() {
                   <Clock className="w-3.5 h-3.5" /> Beber até
                 </div>
                 <div className="font-medium">{formatDate(wine.drinkUntil)}</div>
+                {(drinkUntilSourceLabel || drinkUntilConfidenceLabel || wine.drinkUntilSourceUrl) && (
+                  <div className="text-xs text-muted-foreground leading-snug space-y-1">
+                    {(drinkUntilSourceLabel || drinkUntilConfidenceLabel) && (
+                      <div>
+                        {[drinkUntilSourceLabel, drinkUntilConfidenceLabel ? `confiança ${drinkUntilConfidenceLabel}` : null]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </div>
+                    )}
+                    {wine.drinkUntilSourceUrl && (
+                      <a
+                        href={wine.drinkUntilSourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline"
+                      >
+                        {websiteHostname(wine.drinkUntilSourceUrl) || "Ver fonte"}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
