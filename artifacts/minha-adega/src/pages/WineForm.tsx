@@ -87,7 +87,7 @@ const sourceTypeLabels: Record<DrinkUntilSuggestion["sourceType"], string> = {
   official_winery: "Fonte oficial",
   producer_pdf: "Ficha técnica",
   reputable_reference: "Referência externa",
-  profile_estimate: "Estimativa por perfil",
+  profile_estimate: "Sem fonte oficial encontrada · estimativa aproximada",
 };
 
 const confidenceLabels: Record<DrinkUntilSuggestion["confidence"], string> = {
