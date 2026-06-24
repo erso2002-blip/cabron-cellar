@@ -7,6 +7,7 @@ import { rateLimit } from "../middlewares/rateLimit.js";
 const router = Router();
 const MAX_INPUT_LENGTH = 180;
 const PROFILE_SOURCE_TITLE = "Estimativa estável por perfil do vinho";
+const CURRENT_YEAR = new Date().getFullYear();
 
 interface DrinkUntilSuggestion {
   suggestedDate: string;
@@ -218,6 +219,47 @@ function sanitizeSuggestion(
   };
 }
 
+function hasReliableSource(suggestion: DrinkUntilSuggestion) {
+  return (
+    suggestion.sourceType !== "profile_estimate" &&
+    suggestion.confidence !== "low" &&
+    Boolean(suggestion.sourceUrl)
+  );
+}
+
+function buildDrinkUntilPrompt(input: {
+  wineDescription: string;
+  retry?: boolean;
+}) {
+  const retryInstructions = input.retry
+    ? `
+This is a second-pass verification because the first pass did not find a strong source.
+Before using profile_estimate, broaden the search with variants:
+- producer + wine name + vintage + drinking window
+- producer + wine name + vintage + aging potential
+- producer + wine name + vintage + fiche technique / technical sheet / PDF
+- wine name + vintage + drink window / maturity / cellartracker / decanter / wine enthusiast / wine advocate
+- Portuguese, English, Italian, French or Spanish equivalents when relevant: guarda, potencial de guarda, consumo ideal, apogee, drink from/to, à boire, boire jusqu'à, finestra di consumo.
+Only return profile_estimate if this broader search still does not find a credible direct source.`
+    : "";
+
+  return `Research the best "drink by" date for this wine and return a conservative suggestion in Portuguese.
+
+Wine: ${input.wineDescription}
+Current year: ${CURRENT_YEAR}
+${retryInstructions}
+
+Rules:
+- Search the web deeply for this exact wine, producer and vintage before estimating.
+- Prioritize the official winery/producer page, technical sheet, PDF, or vintage note.
+- If the producer has an official suggested drinking window, maturity window, aging potential, guarda, potencial de guarda, or consumo ideal, use that as the primary basis.
+- If no producer source is available, use a reputable wine reference and clearly mark sourceType as "reputable_reference".
+- If no reliable source gives a window after the full search, estimate from wine style, grape, vintage, country and region and mark sourceType as "profile_estimate" with confidence "low".
+- suggestedDate must be the last day of the ideal drinking window.
+- sourceUrl must be the direct source URL used. Do not use search result pages, retailers, marketplaces, Vivino, Wine-Searcher, shops, or social networks as the official winery source.
+- reason must mention whether the date came from producer research, reputable reference, or profile estimate. Max 2 short sentences.`;
+}
+
 // POST /wines/suggest-drink-until
 router.post(
   "/wines/suggest-drink-until",
@@ -266,79 +308,61 @@ router.post(
         return res.status(503).json({ error: "AI service is not configured" });
       }
 
-      const response = await openai.responses.create({
-        model: "gpt-4o-mini",
-        max_output_tokens: 900,
-        store: false,
-        tools: [
-          {
-            type: "web_search_preview",
-            search_context_size: "medium",
+      const requestSuggestion = async (retry = false) => {
+        const response = await openai.responses.create({
+          model: "gpt-4o-mini",
+          max_output_tokens: 900,
+          store: false,
+          tools: [
+            {
+              type: "web_search_preview",
+              search_context_size: "high",
+            },
+          ],
+          text: {
+            format: {
+              type: "json_schema",
+              name: "drink_until_suggestion",
+              strict: true,
+              schema: drinkUntilSuggestionSchema,
+            },
           },
-        ],
-        text: {
-          format: {
-            type: "json_schema",
-            name: "drink_until_suggestion",
-            strict: true,
-            schema: drinkUntilSuggestionSchema,
-          },
-        },
-        input: [
-          {
-            role: "user",
-            content: `Research the best "drink by" date for this wine and return a conservative suggestion in Portuguese.
+          input: [
+            {
+              role: "user",
+              content: buildDrinkUntilPrompt({ wineDescription, retry }),
+            },
+          ],
+        });
 
-Wine: ${wineDescription}
-Current year: ${new Date().getFullYear()}
+        try {
+          return sanitizeSuggestion(
+            JSON.parse(response.output_text.trim()) as DrinkUntilSuggestion,
+          );
+        } catch {
+          req.log.warn(
+            { content: response.output_text, retry },
+            "Failed to parse drink-until suggestion",
+          );
+          return null;
+        }
+      };
 
-Rules:
-- Search the web for this exact wine, producer and vintage.
-- Prioritize the official winery/producer page, technical sheet, PDF, or vintage note.
-- If the producer has an official suggested drinking window, maturity window, aging potential, guarda, potencial de guarda, or consumo ideal, use that as the primary basis.
-- If no producer source is available, use a reputable wine reference and clearly mark sourceType as "reputable_reference".
-- If no reliable source gives a window, estimate from wine style, grape, vintage, country and region and mark sourceType as "profile_estimate" with confidence "low".
-- suggestedDate must be the last day of the ideal drinking window.
-- sourceUrl must be the direct source URL used. Do not use search result pages, retailers, marketplaces, Vivino, Wine-Searcher, shops, or social networks as the official winery source.
-- reason must mention whether the date came from producer research, reputable reference, or profile estimate. Max 2 short sentences.`,
-          },
-        ],
-      });
+      const firstSuggestion = await requestSuggestion(false);
+      const suggestion = hasReliableSource(
+        firstSuggestion ?? stableProfileSuggestion({}),
+      )
+        ? firstSuggestion
+        : await requestSuggestion(true);
 
-      let parsed: DrinkUntilSuggestion;
-      try {
-        parsed = JSON.parse(
-          response.output_text.trim(),
-        ) as DrinkUntilSuggestion;
-      } catch {
-        req.log.warn(
-          { content: response.output_text },
-          "Failed to parse drink-until suggestion",
-        );
+      if (!suggestion) {
         return res.status(422).json({ error: "Could not generate suggestion" });
       }
 
-      const suggestion = sanitizeSuggestion(parsed);
-      if (!suggestion) {
-        return res.status(422).json({ error: "Invalid date in suggestion" });
-      }
-
-      const shouldUseProfileEstimate =
-        suggestion.sourceType === "profile_estimate" ||
-        suggestion.confidence === "low" ||
-        !suggestion.sourceUrl;
-
       return res.json(
-        shouldUseProfileEstimate
-          ? stableProfileSuggestion({
-              name,
-              producer,
-              grape,
-              vintage,
-              country,
-              region,
-            })
-          : suggestion,
+        hasReliableSource(suggestion)
+          ? suggestion
+          : stableProfileSuggestion({ name, producer, grape, vintage, country, region }),
       );
     } catch (err) {
       req.log.error({ err }, "OpenAI drink-until suggestion error");
