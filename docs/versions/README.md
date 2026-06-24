@@ -14,7 +14,9 @@ This folder tracks release versions, production status, rollback references, and
 ## Current Versions
 
 - `v0.1.0`: last stable production version before waitlist and email login.
-- `v0.2.56`: current production version with researched drink-date suggestions and Mercado Pago payment-webhook reconciliation.
+- `v0.2.58`: current production version with stable profile-based drink-date fallback when no strong source is found.
+- `v0.2.57`: production version with clearer low-confidence drink-date source copy.
+- `v0.2.56`: production version with researched drink-date suggestions and Mercado Pago payment-webhook reconciliation.
 - `v0.2.55`: production version with billing status prioritizing active Mercado Pago subscriptions over newer pending attempts.
 - `v0.2.54`: production version with Mercado Pago status reconciliation fallback and real billing status on `/billing`.
 - `v0.2.53`: production version prepared for Mercado Pago webhook/persistence validation.

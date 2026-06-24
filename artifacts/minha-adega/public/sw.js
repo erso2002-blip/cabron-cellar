@@ -1,4 +1,4 @@
-const CACHE_NAME = "minha-adega-v52";
+const CACHE_NAME = "minha-adega-v53";
 
 const PRECACHE_URLS = [
   "/manifest.json",
@@ -12,7 +12,7 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -24,8 +24,8 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
+            .map((key) => caches.delete(key)),
+        ),
       )
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: "window" }))
@@ -34,12 +34,13 @@ self.addEventListener("activate", (event) => {
           clients.map((client) => {
             const url = new URL(client.url);
             if (url.origin !== self.location.origin) return undefined;
-            if (url.searchParams.get("sw-refresh") === CACHE_NAME) return undefined;
+            if (url.searchParams.get("sw-refresh") === CACHE_NAME)
+              return undefined;
             url.searchParams.set("sw-refresh", CACHE_NAME);
             return client.navigate(url.href);
-          })
-        )
-      )
+          }),
+        ),
+      ),
   );
 });
 
@@ -67,7 +68,7 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => caches.match("/"))
+        .catch(() => caches.match("/")),
     );
     return;
   }
@@ -88,7 +89,7 @@ self.addEventListener("fetch", (event) => {
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }
           return response;
-        })
-    )
+        }),
+    ),
   );
 });
